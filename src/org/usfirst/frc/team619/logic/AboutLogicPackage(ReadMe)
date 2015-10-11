@@ -1,0 +1,7 @@
+The org.usfirst.frc.team619.logic package contains classes that interact with the joysticks
+
+Every manipulator used on the bot, that is not entirely autonomous, needs to somehow
+interact with a mapping thread from this package
+
+When making a new object/manipulator, you need to make a corresponding mapping thread
+class

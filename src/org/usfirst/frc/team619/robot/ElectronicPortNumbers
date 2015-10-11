@@ -1,0 +1,17 @@
+This file is used to keep track of what motor or other thing on the robot is plugged into which port on Athena or one of her modules
+
+//ultrasonic sensors
+armSonic = 5
+leftSonic = 
+rightSonic = 
+frontLeftSonic = 
+frontRightSonic = 
+
+//drive
+driveFrontLeft = 
+driveFrontRight = 
+driveBackLeft = 
+driveBackRight = 
+
+//lift
+lift = 

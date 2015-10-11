@@ -1,0 +1,3 @@
+This is a sub-package of the logic package because all of the classes in here deal with the autonomous movement of the robot.
+
+If the robot is moving in autonomous it better be using a thread from this package other wise you're not doing it right.

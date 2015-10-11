@@ -1,0 +1,3 @@
+This package contains all of the hardware objects that should not be edited if you don't know what you're doing
+
+For the most part you should only be looking at code in this package if you need to know how to instantiate it elsewhere
