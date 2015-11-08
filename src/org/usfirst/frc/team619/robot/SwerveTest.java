@@ -14,6 +14,7 @@ import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.logic.mapping.SwerveDriveMappingThread;
 import org.usfirst.frc.team619.subsystems.DriverStation;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
+import org.usfirst.frc.team619.subsystems.drive.SwerveWheel;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -39,16 +40,14 @@ public class SwerveTest extends IterativeRobot {
 	//Subsystems
 	SwerveDriveBase driveBase;
 	
-	//Hardware	
-	CANTalon turnLeft;
-	CANTalon turnRight;
-	CANTalon turnLeft2;
-	CANTalon turnRight2;
+	//Hardware
+	SwerveWheel left1;
+	SwerveWheel left2;
+	SwerveWheel right1;
+	SwerveWheel right2;
 	
-	Talon driveLeft;
-	Talon driveRight;
-	Talon driveLeft2;
-	Talon driveRight2;
+	int autonomous_angle = 0;
+	int autonomous_count = 0;
 	
 	/**
      * This function is run when the robot is first started up and should be
@@ -70,21 +69,13 @@ public class SwerveTest extends IterativeRobot {
         //driver station
         driverStation = new DriverStation(1, 2);
         
-        //TalonCan        
-        turnLeft = new CANTalon(1);
-        turnRight = new CANTalon(2);
-        turnLeft2 = new CANTalon(3);
-        turnRight2 = new CANTalon(4);
-        
-        //Talon
-        driveLeft = new Talon(0);
-        driveRight = new Talon(1);
-        driveLeft2 = new Talon(2);
-        driveRight2 = new Talon(3);
-        
+        left1 = new SwerveWheel(new Talon(0),new CANTalon(1),0.0,0);
+        left2 = new SwerveWheel(new Talon(2),new CANTalon(3),0.0,0);
+        right1 = new SwerveWheel(new Talon(1),new CANTalon(2),0.0,0);
+        right2 = new SwerveWheel(new Talon(3),new CANTalon(4),0.0,0);
+                
         //subsystems
-        driveBase = new SwerveDriveBase( driveLeft, driveRight, driveLeft2, driveRight2,
-                                         turnLeft, turnRight, turnLeft2, turnRight2 );
+        driveBase = new SwerveDriveBase( left1, right1, left2, right2, 32.0,32.0 );
     }
 
     /**
@@ -92,15 +83,29 @@ public class SwerveTest extends IterativeRobot {
      */
     public void autonomousInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-        turnLeft.set(0.25);
-        turnRight.set(0.25);
-        turnLeft2.set(0.25);
-        turnRight2.set(0.25);
+    	
+    	// this is the right thing to do, but not until
+    	// we have a sensor to detect "home"...
+    	//left1.goToZero();
+    	//left2.goToZero();
+    	//right1.goToZero();
+    	//right2.goToZero();
+    	autonomous_angle = 0;
+    	left1.setTargetAngle(autonomous_angle);
+    	left2.setTargetAngle(autonomous_angle);
+    	right1.setTargetAngle(autonomous_angle);
+    	right2.setTargetAngle(autonomous_angle);
+
+    	autonomous_angle = left1.getCurrentAngle();
+    	SmartDashboard.putNumber("autonomous angle: ", autonomous_angle);
+
+        left1.driveMotor.set(0.25);
+        right1.driveMotor.set(-0.10);
+        left2.driveMotor.set(0.25);
+        right2.driveMotor.set(-0.10);
         
-        driveLeft.set(0.25);
-        driveRight.set(0.25);
-        driveLeft2.set(0.25);
-        driveRight2.set(0.25);
+        SmartDashboard.putNumber("autonomous from: ", 0);
+        SmartDashboard.putNumber("  autonomous to: ", 0);
     }
 
     /**
@@ -116,7 +121,27 @@ public class SwerveTest extends IterativeRobot {
      * This function is called periodically (about every 20 ms) during autonomous
      */
     public void autonomousPeriodic(){
-
+    	if ( (autonomous_count % 100) == 0) {
+    		// do this once every 100 times through
+    		if ( autonomous_count == 1000 ) {
+    			SmartDashboard.putNumber("autonomous from: ", autonomous_angle);
+    			left1.setTargetAngle(autonomous_angle + 20);
+    			left1.goToAngle( );
+    			SmartDashboard.putNumber("  autonomous to: ", autonomous_angle+20);
+    		}
+    		autonomous_angle = (autonomous_angle + 2) % 360;
+        	
+//    		left1.setTargetAngle((double) autonomous_angle / 100.0);
+//    		left1.goToAngle();
+//    		left2.setTargetAngle(autonomous_angle);
+//    		left2.goToAngle();
+//    		right1.setTargetAngle(autonomous_angle);
+//    		right1.goToAngle();
+//    		right2.setTargetAngle(autonomous_angle);
+//    		right2.goToAngle();
+    	}
+    	autonomous_count += 1;
+    	SmartDashboard.putNumber("autonomous count: ", autonomous_count);
     }
     /**
      * This function is called periodically during operator control

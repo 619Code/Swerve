@@ -1,6 +1,5 @@
 package org.usfirst.frc.team619.hardware;
 
-
 /**
  * 
  * The CANTalon object is only to be used with the Talon SRX (the small rectangular one)
