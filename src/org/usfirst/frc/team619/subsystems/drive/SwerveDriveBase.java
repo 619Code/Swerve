@@ -36,12 +36,6 @@ public class SwerveDriveBase  {
 	
 	int encoderUnitsPerRotation = 1660;//was 1665
 	
-    double p = 10; //100 is very close
-    double i = 0;
-    double d = 0;
-    //double f = 0;
-    //int izone = 100;
-
     double orientationOffset;
     
     //Used to switch between control modes
@@ -108,6 +102,12 @@ public class SwerveDriveBase  {
 		backLeft = backLeft_;
 		backRight = backRight_;
 		
+	    double p = 0.01; //100 is very close
+	    double i = 0;
+	    double d = 0;
+	    //double f = 0;
+	    //int izone = 100;
+
 		frontLeft.setPID(p, i, d);
 		frontRight.setPID(p, i, d);
 		backLeft.setPID(p, i, d);

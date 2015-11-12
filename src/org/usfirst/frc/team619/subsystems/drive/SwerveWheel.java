@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SwerveWheel {
 
 	public Talon driveMotor; //private Talon driveMotor;
-	private CANTalon rotateMotor;
+	public CANTalon rotateMotor;
 	
 	private double rAngle;
 	private double rSpeed;
@@ -109,6 +109,9 @@ public class SwerveWheel {
 	
 	
 	public void goToAngle(){
+		SmartDashboard.putNumber("             goToAngle.getDeltaTheta: ", getDeltaTheta());
+		SmartDashboard.putNumber("           goToAngle.getEncoderValue: ", getEncoderValue());
+		SmartDashboard.putNumber(" goToAngle.angleToEncoderUnit(delta): ", angleToEncoderUnit(getDeltaTheta()));
 		rotateMotor.set(getEncoderValue() + angleToEncoderUnit(getDeltaTheta()));
 		//rotateMotor.set(rotateMotor.getEncPosition() + angleToEncoderUnit(getDeltaTheta()));
 	}
@@ -122,11 +125,6 @@ public class SwerveWheel {
 	public int getEncoderValue(){
 		return rotateMotor.getEncPosition();// - homeToZero;
 	}
-
-	
-	
-	
-	
 	
     public int encoderUnitToAngle(int encoderValue){
     	double angle = 0;

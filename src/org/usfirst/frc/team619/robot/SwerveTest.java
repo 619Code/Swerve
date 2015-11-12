@@ -46,8 +46,15 @@ public class SwerveTest extends IterativeRobot {
 	SwerveWheel right1;
 	SwerveWheel right2;
 	
+	//Control
+	
+	
 	int autonomous_angle = 0;
 	int autonomous_count = 0;
+	double autonomous_position = 0;
+	int been_there_count = 0;
+	boolean autonomous_initalized = false;
+	long autonomous_start;
 	
 	/**
      * This function is run when the robot is first started up and should be
@@ -70,12 +77,13 @@ public class SwerveTest extends IterativeRobot {
         driverStation = new DriverStation(1, 2);
         
         left1 = new SwerveWheel(new Talon(0),new CANTalon(1),0.0,0);
+        System.out.println(">>>----> pos=" + left1.rotateMotor.getPosition() + " / enc=" + left1.rotateMotor.getEncPosition( ));
         left2 = new SwerveWheel(new Talon(2),new CANTalon(3),0.0,0);
         right1 = new SwerveWheel(new Talon(1),new CANTalon(2),0.0,0);
         right2 = new SwerveWheel(new Talon(3),new CANTalon(4),0.0,0);
                 
         //subsystems
-        driveBase = new SwerveDriveBase( left1, right1, left2, right2, 32.0,32.0 );
+        driveBase = new SwerveDriveBase( left1, right1, left2, right2, 21.0,32.0 );
     }
 
     /**
@@ -83,6 +91,27 @@ public class SwerveTest extends IterativeRobot {
      */
     public void autonomousInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
+    	SmartDashboard.putNumber("sensor:", left1.getEncoderValue());
+    	autonomous_position = left1.rotateMotor.getPosition( );
+    	been_there_count = 0;
+    	autonomous_initalized = false;
+		left1.rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
+		left1.rotateMotor.reverseSensor(true);
+		
+//		left1.rotateMotor.setPID(120.0, 0.5,0);
+//		left1.rotateMotor.setPID(15.0, 0, 0);
+//		left1.rotateMotor.setPID(75,3.0252,200);
+
+//		left1.rotateMotor.setPID(800,0,0);
+//		left1.rotateMotor.setPID(480, 24, 2400);
+		
+		left1.rotateMotor.setPID(10,0,0);
+		
+		left1.rotateMotor.enableBrakeMode(false);
+		left1.rotateMotor.set(left1.rotateMotor.getPosition( )+300);
+		autonomous_start = System.currentTimeMillis();
+
+
     	
     	// this is the right thing to do, but not until
     	// we have a sensor to detect "home"...
@@ -91,21 +120,24 @@ public class SwerveTest extends IterativeRobot {
     	//right1.goToZero();
     	//right2.goToZero();
     	autonomous_angle = 0;
-    	left1.setTargetAngle(autonomous_angle);
-    	left2.setTargetAngle(autonomous_angle);
-    	right1.setTargetAngle(autonomous_angle);
-    	right2.setTargetAngle(autonomous_angle);
-
+//    	left1.setPID(0,0,0);
+//    	left1.setTargetAngle(autonomous_angle);
+    	//left2.setTargetAngle(autonomous_angle);
+    	//right1.setTargetAngle(autonomous_angle);
+    	//right2.setTargetAngle(autonomous_angle);
+    	
+/*
+    	SmartDashboard.putNumber("encoder value: ", left1.getEncoderValue( ));
+    	SmartDashboard.putNumber("current angle: ", left1.getCurrentAngle( ));
     	autonomous_angle = left1.getCurrentAngle();
-    	SmartDashboard.putNumber("autonomous angle: ", autonomous_angle);
 
         left1.driveMotor.set(0.25);
-        right1.driveMotor.set(-0.10);
+        right1.driveMotor.set(-0.25);
         left2.driveMotor.set(0.25);
-        right2.driveMotor.set(-0.10);
+        right2.driveMotor.set(-0.25);
         
         SmartDashboard.putNumber("autonomous from: ", 0);
-        SmartDashboard.putNumber("  autonomous to: ", 0);
+        SmartDashboard.putNumber("  autonomous to: ", 0);*/
     }
 
     /**
@@ -121,16 +153,45 @@ public class SwerveTest extends IterativeRobot {
      * This function is called periodically (about every 20 ms) during autonomous
      */
     public void autonomousPeriodic(){
-    	if ( (autonomous_count % 100) == 0) {
-    		// do this once every 100 times through
-    		if ( autonomous_count == 1000 ) {
-    			SmartDashboard.putNumber("autonomous from: ", autonomous_angle);
-    			left1.setTargetAngle(autonomous_angle + 20);
-    			left1.goToAngle( );
-    			SmartDashboard.putNumber("  autonomous to: ", autonomous_angle+20);
+    	try {
+    		
+    		SmartDashboard.putNumber("sensor value: ", left1.rotateMotor.getPosition( ));
+    		if ( autonomous_position == left1.rotateMotor.getPosition( ) ) {
+    			//System.out.println(">>>--been-there--> " + left1.rotateMotor.getEncPosition( ) + "     " + (System.currentTimeMillis() - autonomous_start));
+    			been_there_count += 1;
+    		} else {
+    			autonomous_position = left1.rotateMotor.getPosition( );
+    			/*if ( autonomous_initalized )*/ System.out.println(">>>--moving------> " + (System.currentTimeMillis() - autonomous_start) + "," + left1.rotateMotor.getPosition( ) );
     		}
-    		autonomous_angle = (autonomous_angle + 2) % 360;
-        	
+    		if ( been_there_count > 200 ) {
+    			autonomous_initalized = true;
+    			been_there_count = 0;
+    			autonomous_position = left1.rotateMotor.getPosition( );
+    			double to_position = left1.rotateMotor.getPosition( ) + 1000.0;
+    			left1.rotateMotor.set(to_position);
+    			System.out.println(">>>--too-long----> " + left1.rotateMotor.getPosition( ) + " to " + to_position + "     " + (System.currentTimeMillis() - autonomous_start));
+    		}
+
+//    			left1.rotateMotor.set(600);
+//    			Thread.sleep(400);
+//    			left1.rotateMotor.set(900);
+//    			Thread.sleep(400);
+//    			left1.rotateMotor.set(1200);
+//    			Thread.sleep(400);
+    		
+    	} catch(Exception e) { }
+/***
+    	//if ( autonomous_count == 500 ) {
+        	SmartDashboard.putNumber("encoder value before: ", left1.getEncoderValue( ));
+        	SmartDashboard.putNumber("current angle before: ", left1.getCurrentAngle( ));
+        	left1.rotateMotor.set(autonomous_count % 500);
+    		//left1.setTargetAngle(left1.getCurrentAngle( ) + 20);
+    		//left1.goToAngle( );
+        	SmartDashboard.putNumber(" encoder value after: ", left1.getEncoderValue( ));
+        	SmartDashboard.putNumber(" current angle after: ", left1.getCurrentAngle( ));
+    	//}
+    	//autonomous_angle = (autonomous_angle + 2) % 360;
+***/        	
 //    		left1.setTargetAngle((double) autonomous_angle / 100.0);
 //    		left1.goToAngle();
 //    		left2.setTargetAngle(autonomous_angle);
@@ -139,7 +200,7 @@ public class SwerveTest extends IterativeRobot {
 //    		right1.goToAngle();
 //    		right2.setTargetAngle(autonomous_angle);
 //    		right2.goToAngle();
-    	}
+
     	autonomous_count += 1;
     	SmartDashboard.putNumber("autonomous count: ", autonomous_count);
     }
