@@ -11,14 +11,6 @@ import edu.wpi.first.wpilibj.CANTalon.ControlMode;
  */
 
 public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
-	public CANTalon(int canID){super(canID);}
-/****
- ****   this commented out code implements the missing CANTalon.setPosition( )
- ****   by using an internal offset, but setPosition(...) is not be needed...
- ****   encoder uses integer values, while setPosition( )/getPosition( )
- ****   functions take a double. It is probably best to deal in the encoder
- ****   values...
- ****	
 	private static boolean initalized = false;
 	private static boolean setPositionBroken = false;
 	
@@ -74,5 +66,5 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 		
 		super.changeControlMode(controlMode);
 	}
-******/
+
 }

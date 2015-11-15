@@ -93,6 +93,9 @@ public class SwerveTest extends IterativeRobot {
     public void autonomousInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	left1.zero( );
+    	left2.zero( );
+    	right1.zero( );
+    	right2.zero( );
 //    	System.out.println("starting zero of left1 >>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
 //    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getEncPosition( ));
 //    	left1.zero( );

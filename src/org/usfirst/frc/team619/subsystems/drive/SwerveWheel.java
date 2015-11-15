@@ -45,7 +45,7 @@ public class SwerveWheel {
         rotateMotor.reverseSensor(true);
 		rotateMotor.setPID(p,i,d);
 
-        targetAngle = encoderUnitToAngle(rotateMotor.getEncPosition());
+        targetAngle = 0;
 		rAngle = rotateAngle;
 		limitToZero = limitToZero_;
 
@@ -60,9 +60,10 @@ public class SwerveWheel {
 				rotateMotor.set(.15);
 			}
 		}
+		encoderAtLimit = rotateMotor.getEncPosition( );
 		rotateMotor.enableLimitSwitch(false, false);
 		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
-		//rotateMotor.setPosition(0);
+		rotateMotor.setPosition(0);
         // initially supported rotating all wheels to an offset from the
 		// limit position (i.e. where the limit switch trips), but I don't
 		// think it matters as long as all wheels are zeroed at the same location
@@ -86,7 +87,6 @@ public class SwerveWheel {
 //		
 //		rotateMotor.setPosition(0);
 
-		encoderAtLimit = rotateMotor.getEncPosition();
 		zeroed = true;
 		System.out.println( "EXIT    zerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozero" );
 	}
@@ -148,11 +148,14 @@ public class SwerveWheel {
 	
 	public void goToAngle(){
 		System.out.println(label + "           goToAngle.getCurrentAngle: " + getCurrentAngle( ));
+		System.out.println(label + "          goToAngle.getTargetAngle(): " + getTargetAngle( ));
 		System.out.println(label + "             goToAngle.getDeltaTheta: " + getDeltaTheta());
 		System.out.println(label + "           goToAngle.getEncoderValue: " + getEncoderValue());
 		System.out.println(label + " goToAngle.angleToEncoderUnit(delta): " + angleToEncoderUnit(getDeltaTheta()));
 		System.out.println(label + "                     goToAngle.speed: " + speed );
-		rotateMotor.set(getEncoderValue() + angleToEncoderUnit(getDeltaTheta()));
+//		rotateMotor.set(getEncoderValue() + angleToEncoderUnit(getDeltaTheta()));
+//		rotateMotor.set(getEncoderValue() + encoderAtLimit + angleToEncoderUnit(getDeltaTheta()));
+		rotateMotor.set(rotateMotor.getPosition( ) + angleToEncoderUnit(getDeltaTheta()));
 	}
 	
 	public void setSpeed(double magnitude){
@@ -161,17 +164,17 @@ public class SwerveWheel {
 	public double getSpeed(){
 		return speed;
 	}
-	public int getEncoderValue(){
-		return rotateMotor.getEncPosition();
+	public double getEncoderValue(){
+		return rotateMotor.getPosition( );
 	}
 	
-    private int encoderUnitToAngle(int encoderValue){
+    private int encoderUnitToAngle(double e){
     	double angle = 0;
-    	if (encoderValue >= 0){
-    		angle = (encoderValue * (360.0/encoderUnitsPerRotation));
+    	if (e >= 0){
+    		angle = (e * (360.0/encoderUnitsPerRotation));
     		angle = angle % 360;
-    	} else if (encoderValue < 0){
-    		angle = (encoderValue * (360.0/encoderUnitsPerRotation));
+    	} else if (e < 0){
+    		angle = (e * (360.0/encoderUnitsPerRotation));
     		angle = angle % 360 + 360;
     	}
     	return (int)angle;
