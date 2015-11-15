@@ -31,12 +31,12 @@ public class SwerveDriveMappingThread extends RobotThread {
         
         double xAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_X);
         double yAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_Y);
-        double xRightAxis = driverStation.getRightJoystick().getAxis(Joystick.Axis.AXIS_X);
+        double zTwist = driverStation.getRightJoystick().getAxis(Joystick.Axis.AXIS_TWIST);
         
         //gets percentages (numbers from -1 to 1) from the joystick's axes used for driving
         double LY = yAxis * scalePercent;
         double LX = xAxis * scalePercent;
-        double RX = xRightAxis * scalePercent;
+        double RX = zTwist * scalePercent;
         
         driveBase.move(LY, LX, RX);
         
