@@ -10,20 +10,14 @@ public class SwerveWheel {
 	public Talon driveMotor; //private Talon driveMotor;
 	public CANTalon rotateMotor;
 	private String label;
-	
-	private boolean zeroed = false;
-	
+		
 	private double rAngle;
 	private double rSpeed;
 	private double speed;
 	private int targetAngle;
 	private int encoderUnitsPerRotation = 1660;//was 1665
 	private double speedModifier = 0.3;//This sets robot default speed to 75%, sniper and turbo mode changes these numbers
-	private int encoderAtLimit = 0;
-	private int limitToZero = 0;
-	
-	private double output = 0.3;
-	
+		
 	public static final double p=10, i=0, d=0;
 
 	// limitToZero - position (encoder) increments (positive or negative) from limit (forward limit switch) position
@@ -32,7 +26,7 @@ public class SwerveWheel {
 	//                         o  we then drive the wheel limitToZero (i.e. rotateMotor.getPosition( ) + limitToZero)
 	//                         o  finally, we call rotateMotor.setPosition(0) to set the zero position to zero; now
 	//                            all angles (and positions) will be relative to "zero"
-	public SwerveWheel(String label_, Talon driveMotor_, CANTalon rotateMotor_, double rotateAngle, int limitToZero_){
+	public SwerveWheel(String label_, Talon driveMotor_, CANTalon rotateMotor_, double rotateAngle){
 		
 		label = label_;
 		driveMotor = driveMotor_;
@@ -47,20 +41,17 @@ public class SwerveWheel {
 
         targetAngle = 0;
 		rAngle = rotateAngle;
-		limitToZero = limitToZero_;
 
 	}
 	
 	
 	public void zero( ) {
-		System.out.println( "ENTER   zerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozero" );
 		rotateMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
 		if ( false ) {                // enable when limit switch is available
 			while( ! rotateMotor.isFwdLimitSwitchClosed( ) ) {
 				rotateMotor.set(.15);
 			}
 		}
-		encoderAtLimit = rotateMotor.getEncPosition( );
 		rotateMotor.enableLimitSwitch(false, false);
 		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
 		rotateMotor.setPosition(0);
@@ -87,13 +78,6 @@ public class SwerveWheel {
 //		
 //		rotateMotor.setPosition(0);
 
-		zeroed = true;
-		System.out.println( "EXIT    zerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozerozero" );
-	}
-
-	private void initalizePosition( double rotateAngle, int distanceFromZero ) {
-		rAngle = rotateAngle;
-		limitToZero = distanceFromZero;
 	}
 	
 	public double getDeltaTheta(){
@@ -139,13 +123,7 @@ public class SwerveWheel {
 	public void setRAngle(double ra){
 		rAngle = ra;
 	}
-	
-	public void setRSpeed(double rs){
-		rSpeed = rs;
-	}
-	
-	
-	
+		
 	public void goToAngle(){
 		System.out.println(label + "           goToAngle.getCurrentAngle: " + getCurrentAngle( ));
 		System.out.println(label + "          goToAngle.getTargetAngle(): " + getTargetAngle( ));
@@ -153,8 +131,6 @@ public class SwerveWheel {
 		System.out.println(label + "           goToAngle.getEncoderValue: " + getEncoderValue());
 		System.out.println(label + " goToAngle.angleToEncoderUnit(delta): " + angleToEncoderUnit(getDeltaTheta()));
 		System.out.println(label + "                     goToAngle.speed: " + speed );
-//		rotateMotor.set(getEncoderValue() + angleToEncoderUnit(getDeltaTheta()));
-//		rotateMotor.set(getEncoderValue() + encoderAtLimit + angleToEncoderUnit(getDeltaTheta()));
 		rotateMotor.set(rotateMotor.getPosition( ) + angleToEncoderUnit(getDeltaTheta()));
 	}
 	
@@ -193,52 +169,11 @@ public class SwerveWheel {
     	driveMotor.set(speed*speedModifier);
     }
     
-	public void goToHome(){
-		SmartDashboard.putNumber("Encoder At Home: ", encoderAtLimit);
-		rotateMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
-		while(!rotateMotor.isFwdLimitSwitchClosed()){
-			rotateMotor.set(.15);
-		}
-		encoderAtLimit = rotateMotor.getEncPosition();
-		SmartDashboard.putNumber("Encoder At Home: ", encoderAtLimit);
-		rotateMotor.set(0);
-		rotateMotor.enableLimitSwitch(false, false);
-		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
-	}
-	
-	private void goToZero(){
-		goToHome();
-		rotateMotor.setP(5);
-		rotateMotor.setD(8);
-		rotateMotor.set(encoderAtLimit - limitToZero);
-	}
 	
 	public void setSpeedModifier(double speed){
 		speedModifier = speed;
 	}
     
-    public void test(){
-    	double current = rotateMotor.getOutputCurrent();
-    	rotateMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
-    	
-    	if(current > 0.95){
-    		output -= 0.05;
-    	} else if(current < 0.7){
-    		output += 0.05;
-    	}
-    	
-    	if(output > 0.3){
-    		output = 0.3;
-    	}
-    	
-    	if(output < 0){
-    		output = 0;
-    	}
-    	
-    	rotateMotor.set(output);
-    	SmartDashboard.putNumber("Output to Motor", output);
-    	SmartDashboard.putNumber("Current", rotateMotor.getOutputCurrent());
-    }
     
     public void disable(){
     	rotateMotor.set(0);

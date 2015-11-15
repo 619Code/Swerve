@@ -675,11 +675,11 @@ public class SwerveDriveBase  {
      * Moves all four swerve wheels to home position(the limit switch)
      */
     
-    public void wheelsToHomePos(){
+    private void wheelsToHomePos(){
     	/*for (SwerveWheel wheel : wheelArray){
     		wheel.goToHome();
     	}*/
-    	frontRight.goToHome();
+    	//frontRight.goToHome();
     	//FRWheel.goToHome();
     	//BRWheel.goToHome();
     	//BLWheel.goToHome();
@@ -696,8 +696,8 @@ public class SwerveDriveBase  {
     	//frontLeft.goToZero();
     }
     
-    public void test(){
-    	frontRight.test();
+    private void test(){
+    	//frontRight.test();
     	//FLWheel.test();
     	//BLWheel.test();
     	//BRWheel.test();
