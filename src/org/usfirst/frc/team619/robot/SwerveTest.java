@@ -129,7 +129,7 @@ public class SwerveTest extends IterativeRobot {
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
 	
-        driveThread = new SwerveDriveMappingThread(driverStation, 15, threadManager);
+        driveThread = new SwerveDriveMappingThread(driveBase, driverStation, 15, threadManager);
         driveThread.start(); 
     }
     /**
