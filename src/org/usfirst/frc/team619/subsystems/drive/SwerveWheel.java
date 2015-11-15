@@ -9,6 +9,7 @@ public class SwerveWheel {
 
 	public Talon driveMotor; //private Talon driveMotor;
 	public CANTalon rotateMotor;
+	private String label;
 	
 	private boolean zeroed = false;
 	
@@ -31,8 +32,9 @@ public class SwerveWheel {
 	//                         o  we then drive the wheel limitToZero (i.e. rotateMotor.getPosition( ) + limitToZero)
 	//                         o  finally, we call rotateMotor.setPosition(0) to set the zero position to zero; now
 	//                            all angles (and positions) will be relative to "zero"
-	public SwerveWheel(Talon driveMotor_, CANTalon rotateMotor_, double rotateAngle, int limitToZero_){
+	public SwerveWheel(String label_, Talon driveMotor_, CANTalon rotateMotor_, double rotateAngle, int limitToZero_){
 		
+		label = label_;
 		driveMotor = driveMotor_;
 		rotateMotor = rotateMotor_;
 
@@ -145,11 +147,11 @@ public class SwerveWheel {
 	
 	
 	public void goToAngle(){
-		System.out.println("           goToAngle.getCurrentAngle: " + getCurrentAngle( ));
-		System.out.println("             goToAngle.getDeltaTheta: " + getDeltaTheta());
-		System.out.println("           goToAngle.getEncoderValue: " + getEncoderValue());
-		System.out.println(" goToAngle.angleToEncoderUnit(delta): " + angleToEncoderUnit(getDeltaTheta()));
-		System.out.println("                     goToAngle.speed: " + speed );
+		System.out.println(label + "           goToAngle.getCurrentAngle: " + getCurrentAngle( ));
+		System.out.println(label + "             goToAngle.getDeltaTheta: " + getDeltaTheta());
+		System.out.println(label + "           goToAngle.getEncoderValue: " + getEncoderValue());
+		System.out.println(label + " goToAngle.angleToEncoderUnit(delta): " + angleToEncoderUnit(getDeltaTheta()));
+		System.out.println(label + "                     goToAngle.speed: " + speed );
 		rotateMotor.set(getEncoderValue() + angleToEncoderUnit(getDeltaTheta()));
 	}
 	

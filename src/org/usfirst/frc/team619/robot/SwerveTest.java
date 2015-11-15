@@ -77,11 +77,11 @@ public class SwerveTest extends IterativeRobot {
         //driver station
         driverStation = new DriverStation(1, 2);
         
-        left1 = new SwerveWheel(new Talon(0),new CANTalon(1),0.0,0);
+        left1 = new SwerveWheel( "left1", new Talon(0),new CANTalon(1),0.0,0);
         System.out.println(">>>----> pos=" + left1.rotateMotor.getPosition() + " / enc=" + left1.rotateMotor.getEncPosition( ));
-        left2 = new SwerveWheel(new Talon(2),new CANTalon(3),0.0,0);
-        right1 = new SwerveWheel(new Talon(1),new CANTalon(2),0.0,0);
-        right2 = new SwerveWheel(new Talon(3),new CANTalon(4),0.0,0);
+        left2 = new SwerveWheel( "left2", new Talon(2),new CANTalon(3),0.0,0);
+        right1 = new SwerveWheel( "right1", new Talon(1),new CANTalon(2),0.0,0);
+        right2 = new SwerveWheel( "right2", new Talon(3),new CANTalon(4),0.0,0);
                 
         //subsystems
         driveBase = new SwerveDriveBase( left1, right1, left2, right2, 21.0,32.0 );
@@ -108,10 +108,12 @@ public class SwerveTest extends IterativeRobot {
     	left1.goToAngle( );
     	left2.goToAngle( );
     	right1.goToAngle( );
-    	left1.setSpeed(0.25);
-    	left2.setSpeed(0.25);
-    	right1.setSpeed(0.25);
-    	right2.setSpeed(0.25);
+    	left1.setSpeed(0.5);
+    	left2.setSpeed(0.5);
+    	right1.setSpeed(0);
+    	right2.setSpeed(0);
+    	left1.drive( );
+    	left2.drive( );
 
     	autonomous_count = 0;
 		autonomous_start = System.currentTimeMillis();
