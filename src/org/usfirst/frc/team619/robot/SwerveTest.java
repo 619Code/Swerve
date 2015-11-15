@@ -99,8 +99,19 @@ public class SwerveTest extends IterativeRobot {
 //    	System.out.println("finished zero of left1 >>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
 //    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getEncPosition( ));
 //    	left1.rotateMotor.setPosition(0);
+    	
+    	
     	left1.setTargetAngle(45);
+    	left2.setTargetAngle(45);
+    	right1.setTargetAngle(45);
+    	right2.setTargetAngle(45);
     	left1.goToAngle( );
+    	left2.goToAngle( );
+    	right1.goToAngle( );
+    	left1.setSpeed(0.25);
+    	left2.setSpeed(0.25);
+    	right1.setSpeed(0.25);
+    	right2.setSpeed(0.25);
 
     	autonomous_count = 0;
 		autonomous_start = System.currentTimeMillis();
@@ -122,43 +133,79 @@ public class SwerveTest extends IterativeRobot {
     public void autonomousPeriodic(){ 
     	autonomous_count += 1;
     	if ( last_autonomous_pos != left1.rotateMotor.getPosition() ) {
-    		System.out.println("position>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
+//    		System.out.println("position>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
     		last_autonomous_pos = left1.rotateMotor.getPosition( );
     	}
-    	if ( autonomous_count == 200 ) {
+    	if ( autonomous_count == 300 ) {
 //    		System.out.println("*******   going to -400   *******");
 //    		left1.rotateMotor.set(-400);
     		System.out.println("=======>>>> going to 180deg");
     		left1.setTargetAngle(180);
+    		left2.setTargetAngle(180);
+    		right1.setTargetAngle(180);
+    		right2.setTargetAngle(180);
+
     		left1.goToAngle( );
+    		left2.goToAngle( );
+    		right1.goToAngle( );
+    		right2.goToAngle( );
+
     	}
-    	if ( autonomous_count == 400 ) {
+    	if ( autonomous_count == 600 ) {
 //    		System.out.println("*******   going to 400   *******");
 //    		left1.rotateMotor.set(400);
     		System.out.println("=======>>>> going to 270deg");
     		left1.setTargetAngle(270);
+    		left2.setTargetAngle(270);
+    		right1.setTargetAngle(270);
+    		right2.setTargetAngle(270);
+
     		left1.goToAngle( );
+    		left2.goToAngle( );
+    		right1.goToAngle( );
+    		right2.goToAngle( );
     	}
-    	if ( autonomous_count == 600 ) {
+    	if ( autonomous_count == 900 ) {
 //    		System.out.println("*******   going to -400   *******");
 //    		left1.rotateMotor.set(-400);
     		System.out.println("=======>>>> going to 0deg");
     		left1.setTargetAngle(0);
+    		left2.setTargetAngle(0);
+    		right1.setTargetAngle(0);
+    		right2.setTargetAngle(0);
+
     		left1.goToAngle( );
+    		left2.goToAngle( );
+    		right1.goToAngle( );
+    		right2.goToAngle( );
     	}
-    	if ( autonomous_count == 800 ) {
+    	if ( autonomous_count == 1200 ) {
 //    		System.out.println("*******   going to 800   *******");
 //    		left1.rotateMotor.set(800);
     		System.out.println("=======>>>> going to 60deg");
     		left1.setTargetAngle(60);
+    		left2.setTargetAngle(60);
+    		right1.setTargetAngle(60);
+    		right2.setTargetAngle(60);
+
     		left1.goToAngle( );
+    		left2.goToAngle( );
+    		right1.goToAngle( );
+    		right2.goToAngle( );
     	}
-    	if ( autonomous_count == 1000 ) {
+    	if ( autonomous_count == 1500 ) {
 //    		System.out.println("*******   going to -400   *******");
 //    		left1.rotateMotor.set(-400);
     		System.out.println("=======>>>> going to 0deg");
     		left1.setTargetAngle(0);
+    		left2.setTargetAngle(0);
+    		right1.setTargetAngle(0);
+    		right2.setTargetAngle(0);
+
     		left1.goToAngle( );
+    		left2.goToAngle( );
+    		right1.goToAngle( );
+    		right2.goToAngle( );
     	}
     }
 

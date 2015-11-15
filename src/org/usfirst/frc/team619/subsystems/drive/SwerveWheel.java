@@ -60,7 +60,7 @@ public class SwerveWheel {
 		}
 		rotateMotor.enableLimitSwitch(false, false);
 		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
-		rotateMotor.setPosition(0);
+		//rotateMotor.setPosition(0);
         // initially supported rotating all wheels to an offset from the
 		// limit position (i.e. where the limit switch trips), but I don't
 		// think it matters as long as all wheels are zeroed at the same location
@@ -149,6 +149,7 @@ public class SwerveWheel {
 		System.out.println("             goToAngle.getDeltaTheta: " + getDeltaTheta());
 		System.out.println("           goToAngle.getEncoderValue: " + getEncoderValue());
 		System.out.println(" goToAngle.angleToEncoderUnit(delta): " + angleToEncoderUnit(getDeltaTheta()));
+		System.out.println("                     goToAngle.speed: " + speed );
 		rotateMotor.set(getEncoderValue() + angleToEncoderUnit(getDeltaTheta()));
 	}
 	
