@@ -102,21 +102,10 @@ public class SwerveDriveBase  {
 		backLeft = backLeft_;
 		backRight = backRight_;
 		
-	    double p = 0.01; //100 is very close
-	    double i = 0;
-	    double d = 0;
-	    //double f = 0;
-	    //int izone = 100;
-
-		frontLeft.setPID(p, i, d);
-		frontRight.setPID(p, i, d);
-		backLeft.setPID(p, i, d);
-		backRight.setPID(p, i, d);
-		
-		frontLeft.initalizePosition((270 - angleToDiagonal), 205);
-		frontRight.initalizePosition((angleToDiagonal + 90), 205);
-		backLeft.initalizePosition((angleToDiagonal + 270), 0);
-		backRight.initalizePosition((90 - angleToDiagonal), 0);
+//		frontLeft.initalizePosition((270 - angleToDiagonal), 205);
+//		frontRight.initalizePosition((angleToDiagonal + 90), 205);
+//		backLeft.initalizePosition((angleToDiagonal + 270), 0);
+//		backRight.initalizePosition((90 - angleToDiagonal), 0);
 		
 		
 		/*
@@ -702,8 +691,9 @@ public class SwerveDriveBase  {
      */
     
     public void wheelsToZero(){
-    	frontRight.goToZero();
-    	frontLeft.goToZero();
+    	// <DRS> uncomment these later...
+    	//frontRight.goToZero();
+    	//frontLeft.goToZero();
     }
     
     public void test(){
