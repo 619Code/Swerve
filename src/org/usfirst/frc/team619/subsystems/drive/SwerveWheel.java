@@ -44,11 +44,29 @@ public class SwerveWheel {
 
 	}
 	
-	
 	public void zero( ) {
+		System.out.println("new zero routine");
 		rotateMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
 		if ( false ) {                // enable when limit switch is available
-			while( ! rotateMotor.isFwdLimitSwitchClosed( ) ) {
+			while( rotateMotor.isFwdLimitSwitchClosed( ) ) {
+				rotateMotor.set(.15);
+			}
+		}
+		rotateMotor.enableLimitSwitch(false, false);
+		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
+		rotateMotor.setPosition(0);
+		for ( int count=0; count < 75 && rotateMotor.getPosition( ) != 0; ++count ) { 
+			try { Thread.sleep(3); }
+			catch (Exception e) { continue; }
+		}
+		if ( rotateMotor.getPosition( ) != 0.0 )
+			System.err.println( "wheel " + label + " failed to store zero position" );
+	}
+
+	public void zero_old( ) {
+		rotateMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
+		if ( false ) {                // enable when limit switch is available
+			while( rotateMotor.isFwdLimitSwitchClosed( ) ) {
 				rotateMotor.set(.15);
 			}
 		}

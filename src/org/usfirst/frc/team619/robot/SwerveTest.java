@@ -77,9 +77,8 @@ public class SwerveTest extends IterativeRobot {
         //driver station
         driverStation = new DriverStation(1, 2);
         
-        left1 = new SwerveWheel( "left1", new Talon(0),new CANTalon(1),0.0);
-        System.out.println(">>>----> pos=" + left1.rotateMotor.getPosition() + " / enc=" + left1.rotateMotor.getEncPosition( ));
-        left2 = new SwerveWheel( "left2", new Talon(2),new CANTalon(3),0.0);
+        left1 = new SwerveWheel( "left1", new Talon(0),new CANTalon(1,true),0.0);
+        left2 = new SwerveWheel( "left2", new Talon(2),new CANTalon(3,true),0.0);
         right1 = new SwerveWheel( "right1", new Talon(1),new CANTalon(2),0.0);
         right2 = new SwerveWheel( "right2", new Talon(3),new CANTalon(4),0.0);
                 
@@ -111,6 +110,7 @@ public class SwerveTest extends IterativeRobot {
     	left1.goToAngle( );
     	left2.goToAngle( );
     	right1.goToAngle( );
+    	right2.goToAngle( );
     	left1.setSpeed(0.5);
     	left2.setSpeed(0.5);
     	right1.setSpeed(0);
@@ -120,7 +120,6 @@ public class SwerveTest extends IterativeRobot {
 
     	autonomous_count = 0;
 		autonomous_start = System.currentTimeMillis();
-    	//left1.rotateMotor.set(left1.rotateMotor.getPosition( )+300);
     }
 
     /**
@@ -137,13 +136,11 @@ public class SwerveTest extends IterativeRobot {
      */
     public void autonomousPeriodic(){ 
     	autonomous_count += 1;
-    	if ( last_autonomous_pos != left1.rotateMotor.getPosition() ) {
-//    		System.out.println("position>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
-    		last_autonomous_pos = left1.rotateMotor.getPosition( );
-    	}
+//    	if ( last_autonomous_pos != left1.rotateMotor.getPosition() ) {
+////    		System.out.println("position>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
+//    		last_autonomous_pos = left1.rotateMotor.getPosition( );
+//    	}
     	if ( autonomous_count == 300 ) {
-//    		System.out.println("*******   going to -400   *******");
-//    		left1.rotateMotor.set(-400);
     		System.out.println("=======>>>> going to 180deg");
     		left1.setTargetAngle(180);
     		left2.setTargetAngle(180);
@@ -157,8 +154,6 @@ public class SwerveTest extends IterativeRobot {
 
     	}
     	if ( autonomous_count == 600 ) {
-//    		System.out.println("*******   going to 400   *******");
-//    		left1.rotateMotor.set(400);
     		System.out.println("=======>>>> going to 270deg");
     		left1.setTargetAngle(270);
     		left2.setTargetAngle(270);
@@ -171,8 +166,6 @@ public class SwerveTest extends IterativeRobot {
     		right2.goToAngle( );
     	}
     	if ( autonomous_count == 900 ) {
-//    		System.out.println("*******   going to -400   *******");
-//    		left1.rotateMotor.set(-400);
     		System.out.println("=======>>>> going to 0deg");
     		left1.setTargetAngle(0);
     		left2.setTargetAngle(0);
@@ -185,8 +178,6 @@ public class SwerveTest extends IterativeRobot {
     		right2.goToAngle( );
     	}
     	if ( autonomous_count == 1200 ) {
-//    		System.out.println("*******   going to 800   *******");
-//    		left1.rotateMotor.set(800);
     		System.out.println("=======>>>> going to 60deg");
     		left1.setTargetAngle(60);
     		left2.setTargetAngle(60);
@@ -199,8 +190,6 @@ public class SwerveTest extends IterativeRobot {
     		right2.goToAngle( );
     	}
     	if ( autonomous_count == 1500 ) {
-//    		System.out.println("*******   going to -400   *******");
-//    		left1.rotateMotor.set(-400);
     		System.out.println("=======>>>> going to 0deg");
     		left1.setTargetAngle(0);
     		left2.setTargetAngle(0);
@@ -214,60 +203,6 @@ public class SwerveTest extends IterativeRobot {
     	}
     }
 
-    public void autonomousPeriodic_DEBUG(){
-    	try {
-    		
-    		SmartDashboard.putNumber("sensor value: ", left1.rotateMotor.getPosition( ));
-    		if ( autonomous_position == left1.rotateMotor.getPosition( ) ) {
-    			//System.out.println(">>>--been-there--> " + left1.rotateMotor.getEncPosition( ) + "     " + (System.currentTimeMillis() - autonomous_start));
-    			been_there_count += 1;
-    		} else {
-    			autonomous_position = left1.rotateMotor.getPosition( );
-    			/*if ( autonomous_initalized )*/ System.out.println(">>>--moving------> " + (System.currentTimeMillis() - autonomous_start) + "," + left1.rotateMotor.getPosition( ) );
-    		}
-    		if ( been_there_count > 200 ) {
-    			autonomous_initalized = true;
-    			been_there_count = 0;
-    			autonomous_position = left1.rotateMotor.getPosition( );
-    			double to_position = left1.rotateMotor.getPosition( ) + 1000.0;
-    			left1.rotateMotor.set(to_position);
-    			System.out.println(">>>--too-long----> " + left1.rotateMotor.getPosition( ) + " to " + to_position + "     " + (System.currentTimeMillis() - autonomous_start));
-    		}
-
-//    			left1.rotateMotor.set(600);
-//    			Thread.sleep(400);
-//    			left1.rotateMotor.set(900);
-//    			Thread.sleep(400);
-//    			left1.rotateMotor.set(1200);
-//    			Thread.sleep(400);
-    		
-    	} catch(Exception e) { }
-
-/***
-    	//if ( autonomous_count == 500 ) {
-        	SmartDashboard.putNumber("encoder value before: ", left1.getEncoderValue( ));
-        	SmartDashboard.putNumber("current angle before: ", left1.getCurrentAngle( ));
-        	left1.rotateMotor.set(autonomous_count % 500);
-    		//left1.setTargetAngle(left1.getCurrentAngle( ) + 20);
-    		//left1.goToAngle( );
-        	SmartDashboard.putNumber(" encoder value after: ", left1.getEncoderValue( ));
-        	SmartDashboard.putNumber(" current angle after: ", left1.getCurrentAngle( ));
-    	//}
-    	//autonomous_angle = (autonomous_angle + 2) % 360;
-***/        	
-//    		left1.setTargetAngle((double) autonomous_angle / 100.0);
-//    		left1.goToAngle();
-//    		left2.setTargetAngle(autonomous_angle);
-//    		left2.goToAngle();
-//    		right1.setTargetAngle(autonomous_angle);
-//    		right1.goToAngle();
-//    		right2.setTargetAngle(autonomous_angle);
-//    		right2.goToAngle();
-
-    	autonomous_count += 1;
-    	SmartDashboard.putNumber("autonomous count: ", autonomous_count);
-
-    }
     /**
      * This function is called periodically during operator control
      */

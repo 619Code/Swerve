@@ -11,7 +11,12 @@ import edu.wpi.first.wpilibj.CANTalon.ControlMode;
  */
 
 public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
-	private static boolean initalized = false;
+	// left1 wheel goes like mad... perhaps the initialization of
+	// our setPosition(...) state is the problem...
+	// so, for now, let's assume that
+	//    (1) we've already checked whether setPosition(...) works
+	//    (2) and it does not work...
+	private static boolean initalized = true;
 	private static boolean setPositionBroken = false;
 	
 	// do_translation is true when Talon mode is position
@@ -19,9 +24,19 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 	// keep track of the offset between what getPosition( ) returns
 	// and what has been set with setPosition( ) (when setPositionBroken)
 	private double offset = 0;
+	private boolean debug = false;
 	
 	public CANTalon(int canID){
 		super(canID);
+		initialize( );
+	}
+	public CANTalon(int canID, boolean debug_){
+		super(canID);
+		debug = debug_;
+		initialize( );
+	}
+	
+	private void initialize( ) {
 		if ( initalized == false ) {
 			initalized = true;
 			ControlMode orig_mode = super.getControlMode( );
@@ -39,9 +54,6 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 		}
 	}
 	
-	public double getRawPosition( ) { return super.getPosition( ); }
-	// if setPosition(...) from wpilibj CANTalon works, use it...
-	// otherwise use an offset to manage broken wpilibj setPosition(...)
 	public void setPosition( double pos ) {
 		if ( setPositionBroken ) offset = pos - super.getPosition( );
 		else super.setPosition(pos);
@@ -54,8 +66,9 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 	
 	public void set( double outputValue ) {
 		if ( setPositionBroken && do_translation ) {
+			if ( debug ) { System.out.println("set(" + outputValue + ") -> super.set(" + (outputValue-offset) + ")"); }
 			super.set(outputValue - offset);
-		}
+		} else { super.set(outputValue); }
 	}
 	
 	public void changeControlMode(ControlMode controlMode) {
