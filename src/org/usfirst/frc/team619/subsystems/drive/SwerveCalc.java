@@ -26,15 +26,13 @@ public class SwerveCalc {
 		R = Math.sqrt( L*L + W*W );
 	}
 	
-	//  imu.getYaw( ) returns angle between -180 and 180
-	void update( double FWD, double STR, double RCW ) { }
-	
 	// get robot centric
-	SwerveCalcValue getRobotCentric( ) {
+	SwerveCalcValue getRobotCentric( double FWD, double STR, double RCW ) {
 		return new SwerveCalcValue( new double[]{0,0,0,0}, new double[] {0,0,0,0} );
 	}
 	// get field centric
-	SwerveCalcValue getFieldCentric( ) {
+	SwerveCalcValue getFieldCentric( double FWD, double STR, double RCW ) {
+		//  imu.getYaw( ) returns angle between -180 and 180
 		double theta = imu.getYaw( );
 		return new SwerveCalcValue( new double[] {0,0,0,0}, new double[] {0,0,0,0} );
 	}
