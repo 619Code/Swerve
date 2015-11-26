@@ -4,6 +4,7 @@ import com.kauailabs.nav6.frc.IMU;
 import com.kauailabs.nav6.frc.IMUAdvanced;
 
 import edu.wpi.first.wpilibj.SerialPort;
+import static java.lang.Math.*;
 
 public class SwerveCalc {
 	double L;       //   wheelbase (distance from center of front wheel to center of rear wheel)
@@ -34,6 +35,10 @@ public class SwerveCalc {
 	SwerveCalcValue getFieldCentric( double FWD, double STR, double RCW ) {
 		//  imu.getYaw( ) returns angle between -180 and 180
 		double theta = imu.getYaw( );
+		theta = toRadians(theta < 0 ? theta+360 : theta);
+		double temp = FWD*cos(theta) + STR*sin(theta);
+		STR = -FWD*sin(theta) + STR*cos(theta);
+		FWD = temp;
 		return new SwerveCalcValue( new double[] {0,0,0,0}, new double[] {0,0,0,0} );
 	}
 
