@@ -1,6 +1,8 @@
 package org.usfirst.frc.team619.subsystems.drive;
 
 public class SwerveCalcValue {
+	// order of wheels is:
+	//     { front_right, front_left, rear_left, rear_right }
 	private double[] speeds;
 	private double[] angles;
 
