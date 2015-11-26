@@ -12,11 +12,11 @@ public class SwerveWheel {
 	private String label;
 		
 	private double rAngle;
-	private double rSpeed;
 	private double speed;
 	private int targetAngle;
 	private int encoderUnitsPerRotation = 1660;//was 1665
 	private double speedModifier = 0.3;//This sets robot default speed to 75%, sniper and turbo mode changes these numbers
+	private boolean rolling = false;
 		
 	public static final double p=10, i=0, d=0;
 
@@ -135,9 +135,6 @@ public class SwerveWheel {
 		return (int)rAngle;
 	}
 	
-	public double getRSpeed(){
-		return rSpeed;
-	}
 	public void setRAngle(double ra){
 		rAngle = ra;
 	}
@@ -150,10 +147,12 @@ public class SwerveWheel {
 		System.out.println(label + " goToAngle.angleToEncoderUnit(delta): " + angleToEncoderUnit(getDeltaTheta()));
 		System.out.println(label + "                     goToAngle.speed: " + speed );
 		rotateMotor.set(rotateMotor.getPosition( ) + angleToEncoderUnit(getDeltaTheta()));
+		if ( rolling ) driveMotor.set(speed*speedModifier);
 	}
 	
 	public void setSpeed(double magnitude){
 		speed = magnitude;
+		if ( rolling ) driveMotor.set(speed*speedModifier);
 	}
 	public double getSpeed(){
 		return speed;
@@ -182,20 +181,19 @@ public class SwerveWheel {
     	return (int)deltaEncoder;
     }
     
-    public void drive(){
+    public void drive( ) {
     	SmartDashboard.putNumber("Speed: " + this.toString(), speed*speedModifier);
     	driveMotor.set(speed*speedModifier);
+    	rolling = true;
     }
     
+    public void stop( ) {
+    	driveMotor.set(0);
+    	rolling = false;
+    }
 	
 	public void setSpeedModifier(double speed){
 		speedModifier = speed;
 	}
-    
-    
-    public void disable(){
-    	rotateMotor.set(0);
-    }
 
-	
 }

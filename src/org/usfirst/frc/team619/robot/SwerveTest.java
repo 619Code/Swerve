@@ -41,10 +41,10 @@ public class SwerveTest extends IterativeRobot {
 	SwerveDriveBase driveBase;
 	
 	//Hardware
-	SwerveWheel left1;
-	SwerveWheel left2;
-	SwerveWheel right1;
-	SwerveWheel right2;
+	SwerveWheel leftFront;
+	SwerveWheel leftRear;
+	SwerveWheel rightFront;
+	SwerveWheel rightRear;
 	
 	//Control
 	
@@ -77,13 +77,13 @@ public class SwerveTest extends IterativeRobot {
         //driver station
         driverStation = new DriverStation(1, 2);
         
-        left1 = new SwerveWheel( "left1", new Talon(0),new CANTalon(1,true),0.0);
-        left2 = new SwerveWheel( "left2", new Talon(2),new CANTalon(3,true),0.0);
-        right1 = new SwerveWheel( "right1", new Talon(1),new CANTalon(2),0.0);
-        right2 = new SwerveWheel( "right2", new Talon(3),new CANTalon(4),0.0);
+        leftFront = new SwerveWheel( "leftFront", new Talon(3), new CANTalon(2,true), 0.0 );
+        leftRear = new SwerveWheel( "leftRear", new Talon(0), new CANTalon(3,true), 0.0 );
+        rightFront = new SwerveWheel( "rightFront", new Talon(2), new CANTalon(1), 0.0 );
+        rightRear = new SwerveWheel( "rightRear", new Talon(1), new CANTalon(4), 0.0 );
                 
         //subsystems
-        driveBase = new SwerveDriveBase( left1, right1, left2, right2, 21.0,32.0 );
+        driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 21.0,32.0 );
     }
 
     /**
@@ -91,10 +91,10 @@ public class SwerveTest extends IterativeRobot {
      */
     public void autonomousInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-    	left1.zero( );
-    	left2.zero( );
-    	right1.zero( );
-    	right2.zero( );
+    	leftFront.zero( );
+    	leftRear.zero( );
+    	rightFront.zero( );
+    	rightRear.zero( );
 //    	System.out.println("starting zero of left1 >>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
 //    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getEncPosition( ));
 //    	left1.zero( );
@@ -103,20 +103,24 @@ public class SwerveTest extends IterativeRobot {
 //    	left1.rotateMotor.setPosition(0);
     	
     	
-    	left1.setTargetAngle(45);
-    	left2.setTargetAngle(45);
-    	right1.setTargetAngle(45);
-    	right2.setTargetAngle(45);
-    	left1.goToAngle( );
-    	left2.goToAngle( );
-    	right1.goToAngle( );
-    	right2.goToAngle( );
-    	left1.setSpeed(0.5);
-    	left2.setSpeed(0.5);
-    	right1.setSpeed(0);
-    	right2.setSpeed(0);
-    	left1.drive( );
-    	left2.drive( );
+    	leftFront.setTargetAngle(45);
+    	leftRear.setTargetAngle(45);
+    	rightFront.setTargetAngle(45);
+    	rightRear.setTargetAngle(45);
+    	leftFront.goToAngle( );
+    	leftRear.goToAngle( );
+    	rightFront.goToAngle( );
+    	rightRear.goToAngle( );
+    	
+    	leftFront.setSpeed(0.5);
+    	leftRear.setSpeed(0.5);
+    	rightFront.setSpeed(0.5);
+    	rightRear.setSpeed(0.5);
+    	
+    	leftFront.drive( );
+    	leftRear.drive( );
+    	rightFront.drive( );
+    	rightRear.drive( );
 
     	autonomous_count = 0;
 		autonomous_start = System.currentTimeMillis();
@@ -134,6 +138,7 @@ public class SwerveTest extends IterativeRobot {
     /**
      * This function is called periodically (about every 20 ms) during autonomous
      */
+    public void DUMMYautonomousPeriodic(){ } 
     public void autonomousPeriodic(){ 
     	autonomous_count += 1;
 //    	if ( last_autonomous_pos != left1.rotateMotor.getPosition() ) {
@@ -142,64 +147,64 @@ public class SwerveTest extends IterativeRobot {
 //    	}
     	if ( autonomous_count == 300 ) {
     		System.out.println("=======>>>> going to 180deg");
-    		left1.setTargetAngle(180);
-    		left2.setTargetAngle(180);
-    		right1.setTargetAngle(180);
-    		right2.setTargetAngle(180);
+    		leftFront.setTargetAngle(180);
+    		leftRear.setTargetAngle(180);
+    		rightFront.setTargetAngle(180);
+    		rightRear.setTargetAngle(180);
 
-    		left1.goToAngle( );
-    		left2.goToAngle( );
-    		right1.goToAngle( );
-    		right2.goToAngle( );
+    		leftFront.goToAngle( );
+    		leftRear.goToAngle( );
+    		rightFront.goToAngle( );
+    		rightRear.goToAngle( );
 
     	}
     	if ( autonomous_count == 600 ) {
     		System.out.println("=======>>>> going to 270deg");
-    		left1.setTargetAngle(270);
-    		left2.setTargetAngle(270);
-    		right1.setTargetAngle(270);
-    		right2.setTargetAngle(270);
+    		leftFront.setTargetAngle(270);
+    		leftRear.setTargetAngle(270);
+    		rightFront.setTargetAngle(270);
+    		rightRear.setTargetAngle(270);
 
-    		left1.goToAngle( );
-    		left2.goToAngle( );
-    		right1.goToAngle( );
-    		right2.goToAngle( );
+    		leftFront.goToAngle( );
+    		leftRear.goToAngle( );
+    		rightFront.goToAngle( );
+    		rightRear.goToAngle( );
     	}
     	if ( autonomous_count == 900 ) {
     		System.out.println("=======>>>> going to 0deg");
-    		left1.setTargetAngle(0);
-    		left2.setTargetAngle(0);
-    		right1.setTargetAngle(0);
-    		right2.setTargetAngle(0);
+    		leftFront.setTargetAngle(0);
+    		leftRear.setTargetAngle(0);
+    		rightFront.setTargetAngle(0);
+    		rightRear.setTargetAngle(0);
 
-    		left1.goToAngle( );
-    		left2.goToAngle( );
-    		right1.goToAngle( );
-    		right2.goToAngle( );
+    		leftFront.goToAngle( );
+    		leftRear.goToAngle( );
+    		rightFront.goToAngle( );
+    		rightRear.goToAngle( );
     	}
     	if ( autonomous_count == 1200 ) {
     		System.out.println("=======>>>> going to 60deg");
-    		left1.setTargetAngle(60);
-    		left2.setTargetAngle(60);
-    		right1.setTargetAngle(60);
-    		right2.setTargetAngle(60);
+    		leftFront.setTargetAngle(60);
+    		leftRear.setTargetAngle(60);
+    		rightFront.setTargetAngle(60);
+    		rightRear.setTargetAngle(60);
 
-    		left1.goToAngle( );
-    		left2.goToAngle( );
-    		right1.goToAngle( );
-    		right2.goToAngle( );
+    		leftFront.goToAngle( );
+    		leftRear.goToAngle( );
+    		rightFront.goToAngle( );
+    		rightRear.goToAngle( );
     	}
     	if ( autonomous_count == 1500 ) {
     		System.out.println("=======>>>> going to 0deg");
-    		left1.setTargetAngle(0);
-    		left2.setTargetAngle(0);
-    		right1.setTargetAngle(0);
-    		right2.setTargetAngle(0);
+    		leftFront.setTargetAngle(0);
+    		leftRear.setTargetAngle(0);
+    		rightFront.setTargetAngle(0);
+    		rightRear.setTargetAngle(0);
 
-    		left1.goToAngle( );
-    		left2.goToAngle( );
-    		right1.goToAngle( );
-    		right2.goToAngle( );
+    		leftFront.goToAngle( );
+    		leftRear.goToAngle( );
+    		rightFront.goToAngle( );
+    		rightRear.goToAngle( );
     	}
     }
 

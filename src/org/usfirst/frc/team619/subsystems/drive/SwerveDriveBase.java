@@ -524,8 +524,8 @@ public class SwerveDriveBase  {
     	double fastestSpeed = 0.0;
     	for (SwerveWheel wheel : wheelArray){
     		
-    		double rotateXComponent = Math.cos(Math.toRadians(wheel.getRAngle())) * wheel.getRSpeed(); //calculates x component of rotation vector
-    		double rotateYComponent = Math.sin(Math.toRadians(wheel.getRAngle())) * wheel.getRSpeed(); //calculates y component of rotation vector
+    		double rotateXComponent = Math.cos(Math.toRadians(wheel.getRAngle())); //calculates x component of rotation vector
+    		double rotateYComponent = Math.sin(Math.toRadians(wheel.getRAngle())); //calculates y component of rotation vector
     		
     		if(rAxis > 0){//Why do we do this?
     			rotateXComponent = -rotateXComponent;
@@ -698,12 +698,6 @@ public class SwerveDriveBase  {
     
     private void test(){
     	//frontRight.test();
-    	//FLWheel.test();
-    	//BLWheel.test();
-    	//BRWheel.test();
-    }
-    public void disable(){
-    	frontRight.disable();
     	//FLWheel.test();
     	//BLWheel.test();
     	//BRWheel.test();

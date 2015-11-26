@@ -23,11 +23,11 @@ public class Talon extends edu.wpi.first.wpilibj.Talon {
     }
 
     public void reverseOutput(boolean rev){
-        if(rev){
-            factor = -1.0;
-        }else{
-            factor = 1.0;
-        }
+//        if(rev){
+//            factor = -1.0;
+//        }else{
+//            factor = 1.0;
+//        }
     }
     
 }
