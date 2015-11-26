@@ -39,7 +39,7 @@ public class SwerveCalc {
 		double temp = FWD*cos(theta) + STR*sin(theta);
 		STR = -FWD*sin(theta) + STR*cos(theta);
 		FWD = temp;
-		return new SwerveCalcValue( new double[] {0,0,0,0}, new double[] {0,0,0,0} );
+		return getRobotCentric(FWD,STR,RCW);
 	}
 
 }
