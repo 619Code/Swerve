@@ -146,15 +146,16 @@ public class SwerveTest extends IterativeRobot {
      * This function is called periodically (about every 20 ms) during autonomous
      */
     public void DUMMYautonomousPeriodic(){ }
-    public void CALCautonomousPeriodic( ) {
+    public void autonomousPeriodic( ) {
     	autonomous_count += 1;
     	if ( autonomous_count % 100 == 0 ) {
     		strafe += 5;
     		strafe = strafe % 360;
-    		SwerveCalcValue info = wheelCalculator.getRobotCentric( 0, sin(strafe), 0);
+    		SwerveCalcValue info = wheelCalculator.getRobotCentric( 0, sin(toRadians(strafe)), 0);
+    		System.out.println("angle>>> " + info.FRAngle());
     	}
     }
-    public void autonomousPeriodic(){ 
+    public void FIXEDANGLEautonomousPeriodic(){ 
     	autonomous_count += 1;
 //    	if ( last_autonomous_pos != left1.rotateMotor.getPosition() ) {
 ////    		System.out.println("position>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));

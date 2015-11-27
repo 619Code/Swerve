@@ -13,5 +13,12 @@ public class SwerveCalcValue {
 	}
 	// retrieve speed and angle values
 	// or perhaps allow for direct access to speeds and angles members
-	double speed1() { return 0; }
+	public double FRAngle( ) { return angles[0]; } // front right angle
+	public double FRSpeed( ) { return speeds[0]; } // front right speed
+	public double FLAngle( ) { return angles[1]; } // front left angle
+	public double FLSpeed( ) { return speeds[1]; } // front left speed
+	public double BLAngle( ) { return angles[2]; } // back left angle
+	public double BLSpeed( ) { return speeds[2]; } // back left speed
+	public double BRAngle( ) { return angles[3]; } // back right angle
+	public double BRSpeed( ) { return speeds[3]; } // back right speed
 }
