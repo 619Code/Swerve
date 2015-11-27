@@ -146,7 +146,7 @@ public class SwerveWheel {
 		
 	public void goToAngle(){
 		rotateMotor.set(rotateMotor.getPosition( ) + angleToEncoderUnit(getDeltaTheta()));
-		if ( rolling ) driveMotor.set(speed*speedModifier);
+//		if ( rolling ) driveMotor.set(speed*speedModifier);
 		if ( label.equals("leftFront") ) {
 			System.out.println(label + "                             rolling: " + rolling );
 			System.out.println(label + "           goToAngle.getCurrentAngle: " + getCurrentAngle( ));
@@ -160,7 +160,7 @@ public class SwerveWheel {
 	
 	public void setSpeed(double magnitude){
 		speed = magnitude;
-		if ( rolling ) driveMotor.set(speed*speedModifier);
+//		if ( rolling ) driveMotor.set(speed*speedModifier);
 	}
 	public double getSpeed(){
 		return speed;
