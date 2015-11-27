@@ -15,6 +15,8 @@ import org.usfirst.frc.team619.logic.mapping.SwerveDriveMappingThread;
 import org.usfirst.frc.team619.subsystems.DriverStation;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
 import org.usfirst.frc.team619.subsystems.drive.SwerveWheel;
+import org.usfirst.frc.team619.subsystems.drive.SwerveCalc;
+import org.usfirst.frc.team619.subsystems.drive.SwerveCalcValue;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -47,6 +49,7 @@ public class SwerveTest extends IterativeRobot {
 	SwerveWheel rightRear;
 	
 	//Control
+	private SwerveCalc wheelCalculator;
 	
 	
 	int autonomous_angle = 0;
@@ -84,6 +87,7 @@ public class SwerveTest extends IterativeRobot {
                 
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 21.0,32.0 );
+        //wheelCalculator = new SwerveCalc(21,32);
     }
 
     /**

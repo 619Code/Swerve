@@ -17,7 +17,7 @@ public class SwerveWheel {
 	private int encoderUnitsPerRotation = 1660;//was 1665
 	private double speedModifier = 0.3;//This sets robot default speed to 75%, sniper and turbo mode changes these numbers
 	private boolean rolling = false;
-		
+	
 	public static final double p=10, i=0, d=0;
 
 	// limitToZero - position (encoder) increments (positive or negative) from limit (forward limit switch) position
@@ -59,6 +59,7 @@ public class SwerveWheel {
 			try { Thread.sleep(3); }
 			catch (Exception e) { continue; }
 		}
+		System.out.println(label + " position " + rotateMotor.getPosition( ));
 		if ( rotateMotor.getPosition( ) != 0.0 )
 			System.err.println( "wheel " + label + " failed to store zero position" );
 	}
@@ -102,6 +103,8 @@ public class SwerveWheel {
 		double deltaTheta = getTargetAngle() - getCurrentAngle();
 		
 		while ((deltaTheta < -90) || (deltaTheta > 90)){
+			if ( label.equals("leftFront") )
+				System.out.println( "                          --> " + deltaTheta + "/" + speed );
 			if(deltaTheta > 90){
 				deltaTheta -= 180;
 				speed *= -1;
@@ -110,6 +113,8 @@ public class SwerveWheel {
 				speed *= -1;
 			}
 		}
+		if ( label.equals("leftFront") )
+			System.out.println( "                          --> " + deltaTheta + "/" + speed );
 		
 		return deltaTheta;		
 	}
@@ -140,14 +145,17 @@ public class SwerveWheel {
 	}
 		
 	public void goToAngle(){
-		System.out.println(label + "           goToAngle.getCurrentAngle: " + getCurrentAngle( ));
-		System.out.println(label + "          goToAngle.getTargetAngle(): " + getTargetAngle( ));
-		System.out.println(label + "             goToAngle.getDeltaTheta: " + getDeltaTheta());
-		System.out.println(label + "           goToAngle.getEncoderValue: " + getEncoderValue());
-		System.out.println(label + " goToAngle.angleToEncoderUnit(delta): " + angleToEncoderUnit(getDeltaTheta()));
-		System.out.println(label + "                     goToAngle.speed: " + speed );
 		rotateMotor.set(rotateMotor.getPosition( ) + angleToEncoderUnit(getDeltaTheta()));
 		if ( rolling ) driveMotor.set(speed*speedModifier);
+		if ( label.equals("leftFront") ) {
+			System.out.println(label + "                             rolling: " + rolling );
+			System.out.println(label + "           goToAngle.getCurrentAngle: " + getCurrentAngle( ));
+			System.out.println(label + "          goToAngle.getTargetAngle(): " + getTargetAngle( ));
+			System.out.println(label + "             goToAngle.getDeltaTheta: " + getDeltaTheta());
+			System.out.println(label + "           goToAngle.getEncoderValue: " + getEncoderValue());
+			System.out.println(label + " goToAngle.angleToEncoderUnit(delta): " + angleToEncoderUnit(getDeltaTheta()));
+			System.out.println(label + "                     goToAngle.speed: " + speed );
+		}
 	}
 	
 	public void setSpeed(double magnitude){
