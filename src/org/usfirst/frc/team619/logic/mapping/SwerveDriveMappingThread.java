@@ -7,6 +7,7 @@ import org.usfirst.frc.team619.logic.RobotThread;
 import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.subsystems.DriverStation;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
+import org.usfirst.frc.team619.subsystems.drive.SwerveWheel;
 
 /**
  * Map joystick values to motor values
@@ -17,7 +18,7 @@ public class SwerveDriveMappingThread extends RobotThread {
     protected DriverStation driverStation;
     private final static boolean DEBUG = true;
 
-    public SwerveDriveMappingThread(DriverStation driverStation, int period, ThreadManager threadManager) {
+    public SwerveDriveMappingThread(SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
         this.driveBase = driveBase;
         this.driverStation = driverStation;
@@ -32,20 +33,23 @@ public class SwerveDriveMappingThread extends RobotThread {
         
         double xAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_X);
         double yAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_Y);
-        double zTwist = driverStation.getRightJoystick().getAxis(Joystick.Axis.AXIS_TWIST);
+        double zTwist = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_TWIST);
         
         //gets percentages (numbers from -1 to 1) from the joystick's axes used for driving
         double LY = yAxis * scalePercent;
         double LX = xAxis * scalePercent;
         double RX = zTwist * scalePercent;
         
-        driveBase.move(LY, LX, RX);
-        
-        
-        if(DEBUG){
-        //Write debug code    
+        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON2)) {
+        	driveBase.switchToFieldCentric();
+        	System.out.println("FieldCentric");
+        }if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON1)) {
+        	driveBase.switchToRobotCentric();
+        	System.out.println("RobotCentric");
         }
-            
+       
+        driveBase.move(LX, LY, RX);
+        
     }
 
 }
