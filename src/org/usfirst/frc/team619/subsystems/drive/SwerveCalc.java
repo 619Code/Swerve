@@ -16,7 +16,7 @@ public class SwerveCalc {
 	
 	// wheelbase = 
 	//     track = distance from left wheel to right wheel
-	SwerveCalc( double wheelbase, double trackwidth ) {
+	public SwerveCalc( double wheelbase, double trackwidth ) {
 		try {
 			serial_port = new SerialPort(57600,SerialPort.Port.kMXP);
             imu = new IMU(serial_port);
@@ -28,7 +28,7 @@ public class SwerveCalc {
 	}
 	
 	// get robot centric
-	SwerveCalcValue getRobotCentric( double FWD, double STR, double RCW ) {
+	public SwerveCalcValue getRobotCentric( double FWD, double STR, double RCW ) {
 		double A = STR - RCW*(L/R);
 		double B = STR + RCW*(L/R);
 		double C = FWD - RCW*(W/R);
@@ -59,7 +59,7 @@ public class SwerveCalc {
 		return new SwerveCalcValue( angles, speeds );
 	}
 	// get field centric
-	SwerveCalcValue getFieldCentric( double FWD, double STR, double RCW ) {
+	public SwerveCalcValue getFieldCentric( double FWD, double STR, double RCW ) {
 		//  imu.getYaw( ) returns angle between -180 and 180
 		double theta = imu.getYaw( );
 		theta = toRadians(theta < 0 ? theta+360 : theta);

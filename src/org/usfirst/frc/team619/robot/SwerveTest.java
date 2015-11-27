@@ -18,6 +18,8 @@ import org.usfirst.frc.team619.subsystems.drive.SwerveWheel;
 import org.usfirst.frc.team619.subsystems.drive.SwerveCalc;
 import org.usfirst.frc.team619.subsystems.drive.SwerveCalcValue;
 
+import static java.lang.Math.*;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -50,6 +52,7 @@ public class SwerveTest extends IterativeRobot {
 	
 	//Control
 	private SwerveCalc wheelCalculator;
+	double strafe = 0;
 	
 	
 	int autonomous_angle = 0;
@@ -87,7 +90,7 @@ public class SwerveTest extends IterativeRobot {
                 
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 21.0,32.0 );
-        //wheelCalculator = new SwerveCalc(21,32);
+        wheelCalculator = new SwerveCalc(21,32);
     }
 
     /**
@@ -142,7 +145,15 @@ public class SwerveTest extends IterativeRobot {
     /**
      * This function is called periodically (about every 20 ms) during autonomous
      */
-    public void DUMMYautonomousPeriodic(){ } 
+    public void DUMMYautonomousPeriodic(){ }
+    public void CALCautonomousPeriodic( ) {
+    	autonomous_count += 1;
+    	if ( autonomous_count % 100 == 0 ) {
+    		strafe += 5;
+    		strafe = strafe % 360;
+    		SwerveCalcValue info = wheelCalculator.getRobotCentric( 0, sin(strafe), 0);
+    	}
+    }
     public void autonomousPeriodic(){ 
     	autonomous_count += 1;
 //    	if ( last_autonomous_pos != left1.rotateMotor.getPosition() ) {
