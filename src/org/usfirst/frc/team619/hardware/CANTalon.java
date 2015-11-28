@@ -3,10 +3,10 @@ package org.usfirst.frc.team619.hardware;
 import edu.wpi.first.wpilibj.CANTalon.ControlMode;
 
 /**
- * 
+ *
  * The CANTalon object is only to be used with the Talon SRX (the small rectangular one)
  * as it is the only talon that uses CAN
- * 
+ *
  * @author Student
  */
 
@@ -18,14 +18,14 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 	//    (2) and it does not work...
 	private static boolean initalized = true;
 	private static boolean setPositionBroken = false;
-	
+
 	// do_translation is true when Talon mode is position
 	private boolean do_translation = false;
 	// keep track of the offset between what getPosition( ) returns
 	// and what has been set with setPosition( ) (when setPositionBroken)
 	private double offset = 0;
 	private boolean debug = false;
-	
+
 	public CANTalon(int canID){
 		super(canID);
 		initialize( );
@@ -35,7 +35,7 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 		debug = debug_;
 		initialize( );
 	}
-	
+
 	private void initialize( ) {
 		if ( initalized == false ) {
 			initalized = true;
@@ -53,30 +53,30 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 			super.changeControlMode(orig_mode);
 		}
 	}
-	
+
 	public void setPosition( double pos ) {
 		if ( setPositionBroken ) offset = pos - super.getPosition( );
 		else super.setPosition(pos);
 	}
-	
+
 	public double getPosition( ) {
 		if ( setPositionBroken ) return super.getPosition( ) + offset;
 		else return super.getPosition( );
 	}
-	
+
 	public void set( double outputValue ) {
 		if ( setPositionBroken && do_translation ) {
 			if ( debug ) { System.out.println("set(" + outputValue + ") -> super.set(" + (outputValue-offset) + ")"); }
 			super.set(outputValue - offset);
 		} else { super.set(outputValue); }
 	}
-	
+
 	public void changeControlMode(ControlMode controlMode) {
 		if ( controlMode == ControlMode.Position)
 			do_translation = true;
 		else
 			do_translation = false;
-		
+
 		super.changeControlMode(controlMode);
 	}
 

@@ -1,8 +1,8 @@
 package org.usfirst.frc.team619.hardware;
 
 /**
- * 
- * 
+ *
+ *
  * @author CaRobotics
  */
 
@@ -10,11 +10,11 @@ package org.usfirst.frc.team619.hardware;
 public class Talon extends edu.wpi.first.wpilibj.Talon {
 
     protected double factor = 1.0;
-    
+
     public Talon(int channel) {
-    	super(channel);
+        super(channel);
     }
-    
+
     /**
      * @param value Range from -1 to 1
      */
@@ -23,11 +23,11 @@ public class Talon extends edu.wpi.first.wpilibj.Talon {
     }
 
     public void reverseOutput(boolean rev){
-//        if(rev){
-//            factor = -1.0;
-//        }else{
-//            factor = 1.0;
-//        }
+        if(rev){
+            factor = -1.0;
+        }else{
+            factor = 1.0;
+        }
     }
-    
+
 }

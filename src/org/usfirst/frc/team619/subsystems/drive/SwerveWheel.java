@@ -55,6 +55,7 @@ public class SwerveWheel {
 		rotateMotor.enableLimitSwitch(false, false);
 		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
 		rotateMotor.setPosition(0);
+		speed = 1;
 		for ( int count=0; count < 75 && rotateMotor.getPosition( ) != 0; ++count ) { 
 			try { Thread.sleep(3); }
 			catch (Exception e) { continue; }
@@ -146,7 +147,7 @@ public class SwerveWheel {
 		
 	public void goToAngle(){
 		rotateMotor.set(rotateMotor.getPosition( ) + angleToEncoderUnit(getDeltaTheta()));
-		if ( rolling ) driveMotor.set(speed*speedModifier);
+//		if ( rolling ) driveMotor.set(speed*speedModifier);
 		if ( label.equals("leftFront") ) {
 			System.out.println(label + "                             rolling: " + rolling );
 			System.out.println(label + "           goToAngle.getCurrentAngle: " + getCurrentAngle( ));
@@ -160,7 +161,7 @@ public class SwerveWheel {
 	
 	public void setSpeed(double magnitude){
 		speed = magnitude;
-		if ( rolling ) driveMotor.set(speed*speedModifier);
+//		if ( rolling ) driveMotor.set(speed*speedModifier);
 	}
 	public double getSpeed(){
 		return speed;
@@ -192,7 +193,7 @@ public class SwerveWheel {
     public void drive( ) {
     	SmartDashboard.putNumber("Speed: " + this.toString(), speed*speedModifier);
     	driveMotor.set(speed*speedModifier);
-    	rolling = true;
+//    	rolling = true;
     }
     
     public void stop( ) {
