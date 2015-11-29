@@ -20,7 +20,7 @@ public class SwerveDriveMappingThread extends RobotThread {
     protected SwerveWheel leftRear;
     protected SwerveWheel rightFront;
     protected SwerveWheel rightRear;
-    private final static boolean DEBUG = false;
+    private final static boolean DEBUG = true;
 
     public SwerveDriveMappingThread(SwerveWheel leftFront, SwerveWheel leftRear, SwerveWheel rightFront, SwerveWheel rightRear, SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
@@ -34,29 +34,29 @@ public class SwerveDriveMappingThread extends RobotThread {
 
     protected void cycle() {
         double scalePercent = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_Z);
-
+        
         if(scalePercent < 0.2){
             scalePercent = 0.2;
         }
-
+        
         double xAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_X);
         double yAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_Y);
         double zTwist = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_TWIST);
-
+        
         //gets percentages (numbers from -1 to 1) from the joystick's axes used for driving
         double LY = yAxis * scalePercent;
         double LX = xAxis * scalePercent;
         double RX = zTwist * scalePercent;
-
-        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON2)) {
-            leftFront.zero( );
-            leftRear.zero( );
-            rightFront.zero( );
-            rightRear.zero( );
+        
+        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON1)) {
+        	leftFront.zero( );
+        	leftRear.zero( );
+        	rightFront.zero( );
+        	rightRear.zero( );
         }
-
-        driveBase.move(LX, LY, RX);
-
+       
+        driveBase.move(LY, LX, RX);
+        
     }
 
 }
