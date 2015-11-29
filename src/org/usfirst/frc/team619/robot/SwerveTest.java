@@ -1,9 +1,9 @@
 /*
- *
+ * 
  *This class is here for basic reference of the main class code layout and to be
- *able to just copy and paste the base code.
- *
- *
+ *able to just copy and paste the base code. 
+ * 
+ * 
  */
 
 package org.usfirst.frc.team619.robot;
@@ -31,30 +31,30 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * directory.
  */
 public class SwerveTest extends IterativeRobot {
-
+    
 	//declare all variables and objects here
-
+	
 	//Basics
 	ThreadManager threadManager;
 	DriverStation driverStation;
 
 	//Logic
 	SwerveDriveMappingThread driveThread;
-
+	
 	//Subsystems
 	SwerveDriveBase driveBase;
-
+	
 	//Hardware
 	SwerveWheel leftFront;
 	SwerveWheel leftRear;
 	SwerveWheel rightFront;
 	SwerveWheel rightRear;
-
+	
 	//Control
 	private SwerveCalc wheelCalculator;
 	double strafe = 0;
-
-
+	
+	
 	int autonomous_angle = 0;
 	int autonomous_count = 0;
 	double autonomous_position = 0;
@@ -62,7 +62,7 @@ public class SwerveTest extends IterativeRobot {
 	boolean autonomous_initalized = false;
 	long autonomous_start;
 	double last_autonomous_pos = 0;
-
+	
 	/**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -73,21 +73,21 @@ public class SwerveTest extends IterativeRobot {
         System.out.println("// Cavalier Robotics                     TEAM 619   //");
         System.out.println("// 2015 Jenga                                       //");
         System.out.println("//////////////////////////////////////////////////////\n");
-
+        
         //Create all robot subsystems (i.e. stuff from/for org.usfirst.frc.team619.subsystems)
         //If you are creating something not from/for org.usfirst.frc.team619.subsystems, YER DOING IT WRONG
-
+        
         //threadManager
         threadManager = new ThreadManager();
-
+        
         //driver station
         driverStation = new DriverStation(1, 2);
-
+        
         leftFront = new SwerveWheel( "leftFront", new Talon(3), new CANTalon(2,true), 0.0 );
         leftRear = new SwerveWheel( "leftRear", new Talon(0), new CANTalon(3,true), 0.0 );
         rightFront = new SwerveWheel( "rightFront", new Talon(2), new CANTalon(1), 0.0 );
         rightRear = new SwerveWheel( "rightRear", new Talon(1), new CANTalon(4), 0.0 );
-
+                
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 21.0,32.0 );
         wheelCalculator = new SwerveCalc(21,32);
@@ -97,19 +97,19 @@ public class SwerveTest extends IterativeRobot {
      *This function is called when autonomous is initialized
      */
     public void autonomousInit(){
-        threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-        leftFront.zero( );
-        leftRear.zero( );
-        rightFront.zero( );
-        rightRear.zero( );
+    	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
+    	leftFront.zero( );
+    	leftRear.zero( );
+    	rightFront.zero( );
+    	rightRear.zero( );
 //    	System.out.println("starting zero of left1 >>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
 //    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getEncPosition( ));
 //    	left1.zero( );
 //    	System.out.println("finished zero of left1 >>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
 //    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getEncPosition( ));
 //    	left1.rotateMotor.setPosition(0);
-
-
+    	
+    	
     	leftFront.setTargetAngle(45);
     	leftRear.setTargetAngle(45);
     	rightFront.setTargetAngle(45);
@@ -118,12 +118,12 @@ public class SwerveTest extends IterativeRobot {
     	leftRear.goToAngle( );
     	rightFront.goToAngle( );
     	rightRear.goToAngle( );
-
+    	
     	leftFront.setSpeed(0.5);
     	leftRear.setSpeed(0.5);
     	rightFront.setSpeed(0.5);
     	rightRear.setSpeed(0.5);
-
+    	
     	leftFront.drive( );
     	leftRear.drive( );
     	rightFront.drive( );
@@ -138,13 +138,9 @@ public class SwerveTest extends IterativeRobot {
      */
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-
-        leftFront.zero( );
-        leftRear.zero( );
-        rightFront.zero( );
-        rightRear.zero( );
+	
         driveThread = new SwerveDriveMappingThread(leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
-        driveThread.start();
+        driveThread.start(); 
     }
     /**
      * This function is called periodically (about every 20 ms) during autonomous
@@ -159,7 +155,7 @@ public class SwerveTest extends IterativeRobot {
     		System.out.println("angle>>> " + info.FRAngle());
     	}
     }
-    public void FIXEDANGLEautonomousPeriodic(){
+    public void FIXEDANGLEautonomousPeriodic(){ 
     	autonomous_count += 1;
 //    	if ( last_autonomous_pos != left1.rotateMotor.getPosition() ) {
 ////    		System.out.println("position>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
@@ -245,14 +241,14 @@ public class SwerveTest extends IterativeRobot {
      * This function is called periodically during test mode
      */
     public void testPeriodic() {
-
+    
     }
     public void disabledInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     }
-
+    
     public void disabledPeriodic(){}
-
+    
     public void disabledContinuous(){}
-
+    
 }
