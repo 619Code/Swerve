@@ -602,6 +602,10 @@ public class SwerveDriveBase  {
 		isHookCentric = false;
     }
     
+    public boolean getFieldCentric() {
+    	return isFieldCentric;
+    }
+    
     /**
      * Called to switch to object centric mode
      */
@@ -631,6 +635,10 @@ public class SwerveDriveBase  {
 		isFieldCentric = false;
 		isRobotCentric = true;
 		isHookCentric = false;
+    }
+    
+    public boolean getRobotCentric(){
+    	return isRobotCentric;
     }
     
     /*
