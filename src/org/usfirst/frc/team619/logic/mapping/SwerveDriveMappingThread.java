@@ -48,11 +48,22 @@ public class SwerveDriveMappingThread extends RobotThread {
         double LX = xAxis * scalePercent;
         double RX = zTwist * scalePercent;
         
-        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON1)) {
+        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON2)) {
         	leftFront.zero( );
         	leftRear.zero( );
         	rightFront.zero( );
         	rightRear.zero( );
+        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON5)) {
+        	driveBase.switchToRobotCentric();
+        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON6)) {
+        	driveBase.switchToFieldCentric();
+        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON1)) {
+        	
+        	if (driveBase.getFieldCentric()) {
+        		driveBase.switchToRobotCentric();
+        	}else {
+        		driveBase.switchToFieldCentric();
+        	}
         }
        
         driveBase.move(LY, LX, RX);
