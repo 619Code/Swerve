@@ -289,21 +289,21 @@ public class SwerveDriveBase  {
      * @param LX Left stick X Axis
      * @param RX Left stick Z (twist) Axis
      */
-    
+     
     public void calculateSwerveControl(double LY, double LX, double RX){    	
 
 
     	//math for rotation vector, different for every wheel so we calculate for each one seperately
-		double A = LX - RX*(L/R);
-		double B = LX + RX*(L/R);
-		double C = LY - RX*(W/R);
-		double D = LY + RX*(W/R);
+		double A = LY - RX*(L/R);
+		double B = LY + RX*(L/R);
+		double C = LX - RX*(W/R);
+		double D = LX + RX*(W/R);
 		// order of wheels is:
 		//     { front_right, front_left, rear_left, rear_right }
-		double[] angles = new double[]{ atan2(B,C)*180/PI,
-										atan2(B,D)*180/PI,
-										atan2(A,D)*180/PI,
-										atan2(A,C)*180/PI };
+		double[] angles = new double[]{ atan2(D,B)*(180/PI),
+										atan2(D,A)*(180/PI),
+										atan2(C,A)*(180/PI),
+										atan2(C,B)*(180/PI) };
 		
 		double[] speeds = new double[]{ sqrt(B*B+C*C),
 										sqrt(B*B+D*D),
@@ -328,7 +328,7 @@ public class SwerveDriveBase  {
     		backLeft.setSpeed(speeds[2]);
     		backRight.setSpeed(speeds[3]);
 
-    		if(LY == 0 && LX == 0 && RX == 0){//if our inputs are nothing, don't change the angle(use currentAngle as targetAngle)
+    		if(Math.abs(LY) < 0.05 && Math.abs(LX) < 0.05 && Math.abs(RX) < 0.05){//if our inputs are nothing, don't change the angle(use currentAngle as targetAngle)
     	    	for(SwerveWheel wheel : wheelArray){
     				wheel.setTargetAngle(wheel.getCurrentAngle());
     	    	}
@@ -341,16 +341,11 @@ public class SwerveDriveBase  {
         		backRight.setTargetAngle(angles[3]);
     		}
     		
-        	//Makes the wheels go to calculated target angle
-        	frontRight.goToAngle();
-        	frontLeft.goToAngle();
-        	backRight.goToAngle();
-        	backLeft.goToAngle();
-        	//Make the wheels drive at their calculated speed
-        	frontRight.drive();
-        	frontLeft.drive();
-        	backRight.drive();
-        	backLeft.drive();
+        	//Makes the wheels go to calculated target angle and speed
+    		for(SwerveWheel wheel : wheelArray){
+    			wheel.goToAngle();
+    			wheel.drive();
+    		}
     }
     
 	public void getFieldCentric( double LY, double LX, double RX ) {
