@@ -602,10 +602,6 @@ public class SwerveDriveBase  {
 		isHookCentric = false;
     }
     
-    public boolean getFieldCentric() {
-    	return isFieldCentric;
-    }
-    
     /**
      * Called to switch to object centric mode
      */
@@ -637,9 +633,18 @@ public class SwerveDriveBase  {
 		isHookCentric = false;
     }
     
-    public boolean getRobotCentric(){
+    public boolean getRobotCentric() {
     	return isRobotCentric;
     }
+    
+    public boolean getFieldCentric() {
+    	return isFieldCentric;
+    }
+    
+    public float getYaw() {
+    	return imu.getYaw();
+    }
+    
     
     /*
     public void switchDrivingMode(boolean LStick, boolean RStick){
