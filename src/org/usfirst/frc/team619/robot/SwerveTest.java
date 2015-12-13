@@ -236,7 +236,10 @@ public class SwerveTest extends IterativeRobot {
         SmartDashboard.putNumber("FR: ", driveBase.getRightTalon().getSpeed());
         SmartDashboard.putNumber("BL: ", driveBase.getLeftTalon2().getSpeed());
         SmartDashboard.putNumber("BR: ", driveBase.getRightTalon2().getSpeed());
-*/    }
+*/   
+    	SmartDashboard.putNumber("NavX Yaw: ", driveBase.getYaw());
+    	SmartDashboard.putBoolean("Field centric: ", driveBase.getFieldCentric());
+    }
     /**
      * This function is called periodically during test mode
      */
