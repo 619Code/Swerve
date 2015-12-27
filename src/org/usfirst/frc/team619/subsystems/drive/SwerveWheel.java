@@ -55,7 +55,6 @@ public class SwerveWheel {
 		rotateMotor.enableLimitSwitch(false, false);
 		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
 		rotateMotor.setPosition(0);
-		speed = 1;
 		for ( int count=0; count < 75 && rotateMotor.getPosition( ) != 0; ++count ) { 
 			try { Thread.sleep(3); }
 			catch (Exception e) { continue; }

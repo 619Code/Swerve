@@ -35,8 +35,8 @@ public class SwerveDriveMappingThread extends RobotThread {
     protected void cycle() {
         double scalePercent = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_Z);
         
-        if(scalePercent < 0.2){
-            scalePercent = 0.2;
+        if(scalePercent < 0.3){
+            scalePercent = 0.3;
         }
         
         double xAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_X);
@@ -48,22 +48,22 @@ public class SwerveDriveMappingThread extends RobotThread {
         double LX = xAxis * scalePercent;
         double RX = zTwist * scalePercent;
         
-        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON2)) {
-        	leftFront.zero( );
-        	leftRear.zero( );
-        	rightFront.zero( );
-        	rightRear.zero( );
-        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON5)) {
-        	driveBase.switchToRobotCentric();
-        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON6)) {
-        	driveBase.switchToFieldCentric();
-        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON1)) {
-        	
-        	if (driveBase.getFieldCentric()) {
-        		driveBase.switchToRobotCentric();
-        	}else {
-        		driveBase.switchToFieldCentric();
-        	}
+        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON1)) {
+            leftFront.zero( );
+            leftRear.zero( );
+            rightFront.zero( );
+            rightRear.zero( );
+
+        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON2)) {
+            if (driveBase.getFieldCentric()) {
+                driveBase.switchToRobotCentric();
+            }else {
+                driveBase.switchToFieldCentric();
+            }
+        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON3)) {
+            driveBase.switchToFieldCentric();
+        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON4)) {
+            driveBase.switchToRobotCentric();
         }
        
         driveBase.move(LY, LX, RX);
