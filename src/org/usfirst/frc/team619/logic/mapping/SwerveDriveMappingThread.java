@@ -34,40 +34,33 @@ public class SwerveDriveMappingThread extends RobotThread {
 
     protected void cycle() {
         double scalePercent = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_Z);
-        
+
         if(scalePercent < 0.3){
             scalePercent = 0.3;
         }
-        
+
         double xAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_X);
         double yAxis = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_Y);
         double zTwist = driverStation.getLeftJoystick().getAxis(Joystick.Axis.AXIS_TWIST);
-        
+
         //gets percentages (numbers from -1 to 1) from the joystick's axes used for driving
         double LY = yAxis * scalePercent;
         double LX = xAxis * scalePercent;
         double RX = zTwist * scalePercent;
-        
-        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON1)) {
+
+        if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON2)) {
             leftFront.zero( );
             leftRear.zero( );
             rightFront.zero( );
             rightRear.zero( );
-
-        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON2)) {
-            if (driveBase.getFieldCentric()) {
-                driveBase.switchToRobotCentric();
-            }else {
-                driveBase.switchToFieldCentric();
-            }
-        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON3)) {
-            driveBase.switchToFieldCentric();
-        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON4)) {
+        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON5)) {
             driveBase.switchToRobotCentric();
+        }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON6)) {
+            driveBase.switchToFieldCentric();
+//          driveBase.zeroIMU();
         }
-       
+
         driveBase.move(LY, LX, RX);
-        
     }
 
 }

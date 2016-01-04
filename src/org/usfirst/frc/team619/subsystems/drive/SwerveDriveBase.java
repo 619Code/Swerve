@@ -351,13 +351,13 @@ public class SwerveDriveBase  {
     public void getFieldCentric( double LY, double LX, double RX ) {
         //  imu.getYaw( ) returns angle between -180 and 180
         double theta = imu.getYaw( );
-        theta = toRadians(theta < 0 ? theta+360 : theta);
         //theta = toRadians(theta);
-        double temp = LY*cos(theta) + LX*sin(theta);
-        LX = -LY*sin(theta) + LX*cos(theta);
+        theta = toRadians(theta < 0 ? theta+360 : theta);
+        double temp = LY*sin(theta) + LX*cos(theta);
+        LX = -LY*cos(theta) + LX*sin(theta);
         LY = temp;
 
-        calculateSwerveControl(LX, LY, RX);
+        calculateSwerveControl(LY, LX, RX);
     }
 
 
@@ -646,8 +646,15 @@ public class SwerveDriveBase  {
         return imu.getYaw();
     }
 
-    public void calibrateIMU() {
-        imu.zeroYaw();
+//    public void zeroIMU() {
+//        imu.zeroYawOffset();
+//    }
+
+    public void zeroWheels() {
+        frontRight.zero();
+        frontLeft.zero();
+        backLeft.zero();
+        backRight.zero();
     }
 
     /*
