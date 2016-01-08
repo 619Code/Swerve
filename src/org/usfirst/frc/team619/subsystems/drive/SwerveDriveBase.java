@@ -7,7 +7,7 @@ import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
 
-import com.kauailabs.nav6.frc.IMUAdvanced;
+import com.kauailabs.navx.frc.AHRS;
 
 import org.usfirst.frc.team619.subsystems.drive.SwerveCalcValue;
 
@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -40,7 +41,7 @@ public class SwerveDriveBase  {
 
 
     //NavX
-    IMUAdvanced imu;
+    AHRS imu;
     SerialPort serial_port;
 
     int encoderUnitsPerRotation = 1660;//was 1665
@@ -133,25 +134,15 @@ public class SwerveDriveBase  {
 
         wheelArray = new SwerveWheel[]{frontLeft, frontRight, backLeft, backRight};
 
-
         try {
-            serial_port = new SerialPort(57600,SerialPort.Port.kMXP);
-
-            // You can add a second parameter to modify the
-            // update rate (in hz) from 4 to 100.  The default is 100.
-            // If you need to minimize CPU load, you can set it to a
-            // lower value, as shown here, depending upon your needs.
-
-            // You can also use the IMUAdvanced class for advanced
-            // features.
-
-            byte update_rate_hz = 100;
-            //imu = new IMU(serial_port,update_rate_hz);
-            imu = new IMUAdvanced(serial_port,update_rate_hz);
-            } catch( Exception ex ) {
-
-            }
-
+            /* Communicate w/navX-MXP via the MXP SPI Bus.                      
+               */
+            /* Alternatively:  I2C.Port.kMXP, SerialPort.Port.kMXP or SerialPort.Port.kUSB     */
+            /* See http://navx-mxp.kauailabs.com/guidance/selecting-an-interface/ for details. */
+            imu = new AHRS(SPI.Port.kMXP); 
+        } catch (RuntimeException ex ) {
+                System.out.println("Error instantiating navX-MXP:  " + ex.getMessage());
+        }
 
         initPIDControllers();
     }
