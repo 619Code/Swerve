@@ -8,6 +8,8 @@ import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.subsystems.DriverStation;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
 import org.usfirst.frc.team619.subsystems.drive.SwerveWheel;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * Map joystick values to motor values
@@ -45,8 +47,8 @@ public class SwerveDriveMappingThread extends RobotThread {
 
         //gets percentages (numbers from -1 to 1) from the joystick's axes used for driving
         double LY = yAxis * scalePercent;
-        double LX = xAxis * scalePercent;
-        double RX = zTwist * scalePercent;
+        double LX = -xAxis * scalePercent;
+        double RX = -zTwist * scalePercent;
 
         if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON2)) {
             leftFront.zero( );
@@ -57,10 +59,10 @@ public class SwerveDriveMappingThread extends RobotThread {
             driveBase.switchToRobotCentric();
         }else if (driverStation.getLeftJoystick().getButton(Joystick.Button.BUTTON6)) {
             driveBase.switchToFieldCentric();
-//          driveBase.zeroIMU();
+            driveBase.zeroIMU();
+        } else {
+            driveBase.move(LY, LX, RX);
         }
-
-        driveBase.move(LY, LX, RX);
     }
 
 }

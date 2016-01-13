@@ -36,7 +36,7 @@ public class SwerveWheel {
         rotateMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
         rotateMotor.enableLimitSwitch(false, false);
         rotateMotor.enableBrakeMode(false);
-        rotateMotor.reverseSensor(true);
+        rotateMotor.reverseOutput(true);
 		rotateMotor.setPID(p,i,d);
 
         targetAngle = 0;
