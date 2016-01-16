@@ -89,7 +89,7 @@ public class SwerveTest extends IterativeRobot {
         rightRear = new SwerveWheel( "rightRear", new Talon(1), new CANTalon(4), 0.0 );
 
         //subsystems
-        driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 21.0,32.0 );
+        driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 32.0, 21.0 );
         wheelCalculator = new SwerveCalc(21,32);
     }
 

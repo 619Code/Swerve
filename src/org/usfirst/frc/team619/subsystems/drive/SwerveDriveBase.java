@@ -1,6 +1,7 @@
 package org.usfirst.frc.team619.subsystems.drive;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.abs;
 import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -16,7 +17,6 @@ import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TalonSRX;
@@ -39,10 +39,8 @@ public class SwerveDriveBase  {
     CANTalon rotateRBMotor;
 
 
-
     //NavX
     AHRS imu;
-    SerialPort serial_port;
 
     int encoderUnitsPerRotation = 1660;//was 1665
 
@@ -131,17 +129,15 @@ public class SwerveDriveBase  {
         BRWheel = new SwerveWheel(backRightDriveChannel, backRightRotateID, p, i, d, (0 - angleToDiagonal), 0);
         */
 
-
-        wheelArray = new SwerveWheel[]{frontLeft, frontRight, backLeft, backRight};
+        wheelArray = new SwerveWheel[]{ frontRight, frontLeft, backLeft, backRight };
 
         try {
-            /* Communicate w/navX-MXP via the MXP SPI Bus.                      
-               */
+            /* Communicate w/navX-MXP via the MXP SPI Bus.                                     */
             /* Alternatively:  I2C.Port.kMXP, SerialPort.Port.kMXP or SerialPort.Port.kUSB     */
             /* See http://navx-mxp.kauailabs.com/guidance/selecting-an-interface/ for details. */
-            imu = new AHRS(SPI.Port.kMXP); 
+            imu = new AHRS(SPI.Port.kMXP);
         } catch (RuntimeException ex ) {
-                System.out.println("Error instantiating navX-MXP:  " + ex.getMessage());
+            System.out.println("Error instantiating navX-MXP:  " + ex.getMessage());
         }
 
         initPIDControllers();
@@ -283,69 +279,75 @@ public class SwerveDriveBase  {
 
     public void calculateSwerveControl(double LY, double LX, double RX){
 
+        // correspondence to paper http://www.chiefdelphi.com/media/papers/download/3028
+        //     LY  <=>   FWD
+        //     LX  <=>   STR
+        //     RX  <=>   RCW
 
         //math for rotation vector, different for every wheel so we calculate for each one seperately
-        double A = LY - RX*(L/R);
-        double B = LY + RX*(L/R);
-        double C = LX - RX*(W/R);
-        double D = LX + RX*(W/R);
+        double A = LX - RX*(L/R);
+        double B = LX + RX*(L/R);
+        double C = LY - RX*(W/R);
+        double D = LY + RX*(W/R);
         // order of wheels is:
         //     { front_right, front_left, rear_left, rear_right }
-        double[] angles = new double[]{ atan2(D,B)*(180/PI),
-                                        atan2(D,A)*(180/PI),
-                                        atan2(C,A)*(180/PI),
-                                        atan2(C,B)*(180/PI) };
+        double[] angles = new double[]{ atan2(B,C)*180/PI,
+                                        atan2(B,D)*180/PI,
+                                        atan2(A,D)*180/PI,
+                                        atan2(A,C)*180/PI };
 
         double[] speeds = new double[]{ sqrt(B*B+C*C),
                                         sqrt(B*B+D*D),
                                         sqrt(A*A+D*D),
                                         sqrt(A*A+C*C) };
 
-            double max = speeds[0];
-            if ( speeds[1] > max ) max = speeds[1];
-            if ( speeds[2] > max ) max = speeds[2];
-            if ( speeds[3] > max ) max = speeds[3];
+        double max = speeds[0];
+        if ( speeds[1] > max ) max = speeds[1];
+        if ( speeds[2] > max ) max = speeds[2];
+        if ( speeds[3] > max ) max = speeds[3];
 
-            if ( max > 1 ) {
-                speeds[0] /= max;
-                speeds[1] /= max;
-                speeds[2] /= max;
-                speeds[3] /= max;
-            }
+        if ( max > 1 ) {
+            speeds[0] /= max;
+            speeds[1] /= max;
+            speeds[2] /= max;
+            speeds[3] /= max;
+        }
 
-            //Set target speed
-            frontRight.setSpeed(speeds[0]);
-            frontLeft.setSpeed(speeds[1]);
-            backLeft.setSpeed(speeds[2]);
-            backRight.setSpeed(speeds[3]);
+        //Set target speed
+        for( int i=0; i < wheelArray.length; ++i )
+            wheelArray[i].setSpeed(speeds[i]);
 
-            if(Math.abs(LY) < 0.05 && Math.abs(LX) < 0.05 && Math.abs(RX) < 0.05){//if our inputs are nothing, don't change the angle(use currentAngle as targetAngle)
-                for(SwerveWheel wheel : wheelArray){
-                    wheel.setTargetAngle(wheel.getCurrentAngle());
-                }
+        if( abs(LY) < 0.05 && abs(LX) < 0.05 && abs(RX) < 0.05){
+            // if our inputs are nothing, don't change the angle(use currentAngle as targetAngle)
+            for( SwerveWheel wheel : wheelArray )
+                wheel.setTargetAngle(wheel.getCurrentAngle( ));
 
-            }else {
-                //Set target angle
-                frontRight.setTargetAngle(angles[0]);
-                frontLeft.setTargetAngle(angles[1]);
-                backLeft.setTargetAngle(angles[2]);
-                backRight.setTargetAngle(angles[3]);
-            }
+        } else {
+            //Set target angle
+            for( int i=0; i < wheelArray.length; ++i )
+                wheelArray[i].setTargetAngle(angles[i]);
+        }
 
-            //Makes the wheels go to calculated target angle and speed
-            for(SwerveWheel wheel : wheelArray){
-                wheel.goToAngle();
-                wheel.drive();
-            }
+        //Makes the wheels go to calculated target angle and speed
+        for(SwerveWheel wheel : wheelArray)
+            wheel.goToAngle();
+        for(SwerveWheel wheel : wheelArray)
+            wheel.drive();
+
     }
 
     public void getFieldCentric( double LY, double LX, double RX ) {
+        // correspondence to paper http://www.chiefdelphi.com/media/papers/download/3028
+        //     LY  <=>   FWD
+        //     LX  <=>   STR
+        //     RX  <=>   RCW
+
         //  imu.getYaw( ) returns angle between -180 and 180
         double theta = imu.getYaw( );
-        //theta = toRadians(theta);
-        theta = toRadians(theta < 0 ? theta+360 : theta);
-        double temp = LY*sin(theta) + LX*cos(theta);
-        LX = -LY*cos(theta) + LX*sin(theta);
+        while ( theta < 0 ) theta += 360;
+        theta = toRadians(theta);
+        double temp = LY*cos(theta) + LX*sin(theta);
+        LX = -LY*sin(theta) + LX*cos(theta);
         LY = temp;
 
         calculateSwerveControl(LY, LX, RX);
@@ -637,9 +639,9 @@ public class SwerveDriveBase  {
         return imu.getYaw();
     }
 
-//    public void zeroIMU() {
-//        imu.zeroYawOffset();
-//    }
+    public void zeroIMU() {
+        imu.zeroYaw();
+    }
 
     public void zeroWheels() {
         frontRight.zero();
