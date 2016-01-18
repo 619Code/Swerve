@@ -1,6 +1,7 @@
 package org.usfirst.frc.team619.hardware;
 
 import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.PIDSourceType;
 
 public class PIDInputObject implements PIDSource {
 	
@@ -12,5 +13,17 @@ public class PIDInputObject implements PIDSource {
 	
 	public double pidGet(){
 		return value;
+	}
+
+	@Override
+	public void setPIDSourceType(PIDSourceType pidSource) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public PIDSourceType getPIDSourceType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

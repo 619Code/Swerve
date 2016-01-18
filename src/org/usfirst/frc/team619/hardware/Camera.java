@@ -39,5 +39,5 @@ public class Camera {
 	public void setQuality(int quality){
 		camera.setQuality(quality);
 	}
-	
+		
 }

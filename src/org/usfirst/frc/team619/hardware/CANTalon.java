@@ -1,7 +1,5 @@
 package org.usfirst.frc.team619.hardware;
 
-import edu.wpi.first.wpilibj.CANTalon.ControlMode;
-
 /**
  *
  * The CANTalon object is only to be used with the Talon SRX (the small rectangular one)
@@ -39,8 +37,8 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 	private void initialize( ) {
 		if ( initalized == false ) {
 			initalized = true;
-			ControlMode orig_mode = super.getControlMode( );
-			super.changeControlMode(ControlMode.Position);
+			TalonControlMode orig_mode = super.getControlMode( );
+			super.changeControlMode(TalonControlMode.Position);
 			double pos = super.getPosition( );
 			super.setPosition( pos + 100 );
 			if ( super.getPosition( ) == pos ) {
@@ -71,8 +69,8 @@ public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
 		} else { super.set(outputValue); }
 	}
 
-	public void changeControlMode(ControlMode controlMode) {
-		if ( controlMode == ControlMode.Position)
+	public void changeControlMode(TalonControlMode controlMode) {
+		if ( controlMode == TalonControlMode.Position)
 			do_translation = true;
 		else
 			do_translation = false;

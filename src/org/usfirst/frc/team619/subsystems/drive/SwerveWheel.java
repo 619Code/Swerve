@@ -32,7 +32,7 @@ public class SwerveWheel {
 		driveMotor = driveMotor_;
 		rotateMotor = rotateMotor_;
 
-        rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
+        rotateMotor.changeControlMode(CANTalon.TalonControlMode.Position);
         rotateMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
         rotateMotor.enableLimitSwitch(false, false);
         rotateMotor.enableBrakeMode(false);
@@ -46,14 +46,14 @@ public class SwerveWheel {
 	
 	public void zero( ) {
 		System.out.println("new zero routine");
-		rotateMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
+		rotateMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
 		if ( false ) {                // enable when limit switch is available
 			while( rotateMotor.isFwdLimitSwitchClosed( ) ) {
 				rotateMotor.set(.15);
 			}
 		}
 		rotateMotor.enableLimitSwitch(false, false);
-		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
+		rotateMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		rotateMotor.setPosition(0);
 		for ( int count=0; count < 75 && rotateMotor.getPosition( ) != 0; ++count ) { 
 			try { Thread.sleep(3); }
@@ -65,14 +65,14 @@ public class SwerveWheel {
 	}
 
 	public void zero_old( ) {
-		rotateMotor.changeControlMode(CANTalon.ControlMode.PercentVbus);
+		rotateMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
 		if ( false ) {                // enable when limit switch is available
 			while( rotateMotor.isFwdLimitSwitchClosed( ) ) {
 				rotateMotor.set(.15);
 			}
 		}
 		rotateMotor.enableLimitSwitch(false, false);
-		rotateMotor.changeControlMode(CANTalon.ControlMode.Position);
+		rotateMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		rotateMotor.setPosition(0);
         // initially supported rotating all wheels to an offset from the
 		// limit position (i.e. where the limit switch trips), but I don't

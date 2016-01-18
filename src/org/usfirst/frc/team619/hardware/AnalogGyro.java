@@ -1,13 +1,11 @@
 package org.usfirst.frc.team619.hardware;
 
-import edu.wpi.first.wpilibj.Gyro;
-
-public class AnalogGyro {
+public class AnalogGyro extends edu.wpi.first.wpilibj.AnalogGyro {
 	
-	Gyro gyro;
+	AnalogGyro gyro;
 	
 	public AnalogGyro(int channel) {
-		gyro = new Gyro(channel);
+		super(channel);
 	}
 	
 	public double getAngle(){
