@@ -1,5 +1,7 @@
 package org.usfirst.frc.team619.hardware;
 
+import edu.wpi.first.wpilibj.GenericHID.Hand;
+
 /**
  * @author carobotics
  */
@@ -85,7 +87,7 @@ public class Joystick {
             case Button.BUTTON12:
                 return joystick.getRawButton(12);
             case Button.BUMPER:
-                return joystick.getBumper();
+                return joystick.getBumper(Hand.kLeft);
             case Button.TOP:
                 return joystick.getTop();
             default:

@@ -2,8 +2,9 @@ package org.usfirst.frc.team619.subsystems.drive;
 
 import com.kauailabs.nav6.frc.IMUAdvanced;
 
+import com.ctre.CANTalon;
+
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDSource;

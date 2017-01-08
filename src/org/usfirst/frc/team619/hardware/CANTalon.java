@@ -8,7 +8,7 @@ package org.usfirst.frc.team619.hardware;
  * @author Student
  */
 
-public class CANTalon extends edu.wpi.first.wpilibj.CANTalon {
+public class CANTalon extends com.ctre.CANTalon {
 	// left1 wheel goes like mad... perhaps the initialization of
 	// our setPosition(...) state is the problem...
 	// so, for now, let's assume that

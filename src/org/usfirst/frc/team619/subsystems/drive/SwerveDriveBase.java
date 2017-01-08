@@ -8,12 +8,13 @@ import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
 
+import com.ctre.CANTalon;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import org.usfirst.frc.team619.subsystems.drive.SwerveCalcValue;
 
 import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDSource;

@@ -6,7 +6,6 @@ import org.usfirst.frc.team619.hardware.AnalogAccelerometer;
 import org.usfirst.frc.team619.hardware.AnalogPotentiometer;
 import org.usfirst.frc.team619.hardware.AnalogUltrasonic;
 import org.usfirst.frc.team619.hardware.AthenaAccelerometer;
-import org.usfirst.frc.team619.hardware.Camera;
 import org.usfirst.frc.team619.hardware.DigitalEncoder;
 import org.usfirst.frc.team619.hardware.I2CAccelerometer;
 import org.usfirst.frc.team619.hardware.NetworkCamera;
@@ -14,7 +13,6 @@ import org.usfirst.frc.team619.hardware.NetworkCamera;
 public class SensorBase {	
 	
 	//no need for an ArrayList of Cameras because only a max of two can be put on the Athena
-	protected Camera camera;
 	protected NetworkCamera networkCamera;
 	
 	//there is only one I2C port on Athena so no need for ArrayList
@@ -57,19 +55,10 @@ public class SensorBase {
 		encoderList = new ArrayList<>();
 		
 	}
-	
-	public void startCamera(String cameraName){
-		camera = new Camera(cameraName);
-	}
 
 	public void startNetworkCamera(){
 		networkCamera = new NetworkCamera();
 	}
-	
-	public void turnOffCamera(){
-		camera = null;
-	}
-	
 	public void turnOffNetworkCamera(){
 		networkCamera = null;
 	}
@@ -96,10 +85,6 @@ public class SensorBase {
 	
 	public void addAthenaAccelerometer(AthenaAccelerometer athenaAccelerometer){
 		this.athenaAccelerometer = athenaAccelerometer;
-	}
-	
-	public Camera getCamera(){
-		return camera;
 	}
 	
 	public NetworkCamera getNetworkCamera(){
