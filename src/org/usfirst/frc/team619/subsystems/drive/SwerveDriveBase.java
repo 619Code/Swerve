@@ -12,31 +12,23 @@ import com.ctre.CANTalon;
 
 import com.kauailabs.navx.frc.AHRS;
 
-import org.usfirst.frc.team619.subsystems.drive.SwerveCalcValue;
-
-import edu.wpi.first.wpilibj.AnalogInput;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Talon;
-import edu.wpi.first.wpilibj.TalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SwerveDriveBase  {
 
     //must also use a wheel class
 
-    Talon driveLFMotor;
+    CANTalon driveLFMotor;
     CANTalon rotateLFMotor;
     //Front Right Wheel
-    Talon driveRFMotor;
+    CANTalon driveRFMotor;
     CANTalon rotateRFMotor;
     //Back Left Wheel
-    Talon driveLBMotor;
+    CANTalon driveLBMotor;
     CANTalon rotateLBMotor;
     //Back Right Wheel
-    Talon driveRBMotor;
+    CANTalon driveRBMotor;
     CANTalon rotateRBMotor;
 
 
@@ -48,8 +40,8 @@ public class SwerveDriveBase  {
     double orientationOffset;
 
     //Used to switch between control modes
-    boolean isRobotCentric = true;
-    boolean isFieldCentric = false;
+    boolean isRobotCentric = false;
+    boolean isFieldCentric = true;
     boolean isObjectCentric = false;
     boolean isHookCentric = false;
 
@@ -306,13 +298,29 @@ public class SwerveDriveBase  {
         if ( speeds[1] > max ) max = speeds[1];
         if ( speeds[2] > max ) max = speeds[2];
         if ( speeds[3] > max ) max = speeds[3];
-
+        
         if ( max > 1 ) {
             speeds[0] /= max;
             speeds[1] /= max;
             speeds[2] /= max;
             speeds[3] /= max;
         }
+        
+        if(RX == 0) {
+        	for(int i=0; i<4; i++)
+        		if(max < speeds[i])
+        			max = speeds[i];
+        	for(double speed : speeds)
+        		speed = max;
+        }
+        
+        //0 = frontRight
+        //1 = frontLeft
+        //2 = rearLeft
+        //3 = rearRight
+        
+        speeds[0] += 0.2;
+        speeds[3] += 0.2;
 
         //Set target speed
         for( int i=0; i < wheelArray.length; ++i )
@@ -320,13 +328,13 @@ public class SwerveDriveBase  {
 
         if( abs(LY) < 0.05 && abs(LX) < 0.05 && abs(RX) < 0.05){
             // if our inputs are nothing, don't change the angle(use currentAngle as targetAngle)
-            for( SwerveWheel wheel : wheelArray )
-                wheel.setTargetAngle(wheel.getCurrentAngle( ));
-
+//            for( SwerveWheel wheel : wheelArray )
+//                wheel.setTargetAngle(wheel.getCurrentAngle( ));
         } else {
             //Set target angle
             for( int i=0; i < wheelArray.length; ++i )
                 wheelArray[i].setTargetAngle(angles[i]);
+            SmartDashboard.putNumber("Angle", angles[0]);
         }
 
         //Makes the wheels go to calculated target angle and speed
@@ -345,6 +353,7 @@ public class SwerveDriveBase  {
 
         //  imu.getYaw( ) returns angle between -180 and 180
         double theta = imu.getYaw( );
+        System.out.println("Theta: " + theta);
         while ( theta < 0 ) theta += 360;
         theta = toRadians(theta);
         double temp = LY*cos(theta) + LX*sin(theta);

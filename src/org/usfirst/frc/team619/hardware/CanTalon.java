@@ -1,5 +1,7 @@
 package org.usfirst.frc.team619.hardware;
 
+import com.ctre.CANTalon;
+
 /**
  *
  * The CANTalon object is only to be used with the Talon SRX (the small rectangular one)
@@ -8,7 +10,7 @@ package org.usfirst.frc.team619.hardware;
  * @author Student
  */
 
-public class CANTalon extends com.ctre.CANTalon {
+public class CanTalon extends CANTalon {
 	// left1 wheel goes like mad... perhaps the initialization of
 	// our setPosition(...) state is the problem...
 	// so, for now, let's assume that
@@ -24,11 +26,11 @@ public class CANTalon extends com.ctre.CANTalon {
 	private double offset = 0;
 	private boolean debug = false;
 
-	public CANTalon(int canID){
+	public CanTalon(int canID){
 		super(canID);
 		initialize( );
 	}
-	public CANTalon(int canID, boolean debug_){
+	public CanTalon(int canID, boolean debug_){
 		super(canID);
 		debug = debug_;
 		initialize( );
@@ -63,10 +65,11 @@ public class CANTalon extends com.ctre.CANTalon {
 	}
 
 	public void set( double outputValue ) {
-		if ( setPositionBroken && do_translation ) {
-			if ( debug ) { System.out.println("set(" + outputValue + ") -> super.set(" + (outputValue-offset) + ")"); }
-			super.set(outputValue - offset);
-		} else { super.set(outputValue); }
+//		if ( setPositionBroken && do_translation ) {
+//			if ( debug ) { System.out.println("set(" + outputValue + ") -> super.set(" + (outputValue-offset) + ")"); }
+//			super.set(outputValue - offset);
+//		} else { super.set(outputValue); }
+		super.set(outputValue);
 	}
 
 	public void changeControlMode(TalonControlMode controlMode) {

@@ -21,7 +21,11 @@ public class Gamepad {
 	* @return The X axis value of the controller.
 	*/
 	public double getX(Hand hand) {
-		return controller.getX(hand);
+		if(hand == Hand.kLeft) {
+			return controller.getRawAxis(0);
+		}else {
+			return controller.getRawAxis(2);
+		}
 	}
 	
 	/**
@@ -31,7 +35,9 @@ public class Gamepad {
 	 * @return The Y axis value of the controller.
 	 */
 	public double getY(Hand hand) {
-		return controller.getY();
+		if(hand == Hand.kLeft)
+			return controller.getRawAxis(1);
+		return controller.getRawAxis(3);
 	}
 	
 	/**
@@ -41,7 +47,9 @@ public class Gamepad {
 	 * @return The state of the button.
 	 */
 	public boolean getBumper(Hand hand) {
-		return controller.getBumper(hand);
+		if(hand == Hand.kLeft)
+			return controller.getRawButton(4);
+		return controller.getRawButton(5);
 	}
 	
 	/**
@@ -60,7 +68,7 @@ public class Gamepad {
 	 * @return The state of the button.
 	 */
 	public boolean getAButton() {
-		return controller.getAButton();
+		return controller.getRawButton(1);
 	}
 	
 	/**
@@ -69,7 +77,7 @@ public class Gamepad {
 	 * @return The state of the button.
 	 */
 	public boolean getBButton() {
-		return controller.getBButton();
+		return controller.getRawButton(2);
 	}
 	
 	/**
@@ -78,7 +86,7 @@ public class Gamepad {
 	 * @return The state of the button.
 	 */
 	public boolean getXButton() {
-		return controller.getXButton();
+		return controller.getRawButton(0);
 	}
 	
 	/**
@@ -87,7 +95,7 @@ public class Gamepad {
 	 * @return The state of the button.
 	 */
 	public boolean getYButton() {
-		return controller.getYButton();
+		return controller.getRawButton(3);
 	}
 	
 	/**
@@ -106,7 +114,7 @@ public class Gamepad {
 	 * @return The state of the button.
 	 */
 	public boolean getBackButton() {
-		return controller.getBackButton();
+		return controller.getRawButton(8);
 	}
 	
 	/**
@@ -115,7 +123,7 @@ public class Gamepad {
 	 * @return The state of the button.
 	 */
 	public boolean getStartButton() {
-		return controller.getStartButton();
+		return controller.getRawButton(9);
 	}
 	
 	public int getPOV() {

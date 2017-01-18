@@ -1,7 +1,6 @@
 package org.usfirst.frc.team619.subsystems.drive;
 
 import com.kauailabs.nav6.frc.IMU;
-import com.kauailabs.nav6.frc.IMUAdvanced;
 
 import edu.wpi.first.wpilibj.SerialPort;
 import static java.lang.Math.*;

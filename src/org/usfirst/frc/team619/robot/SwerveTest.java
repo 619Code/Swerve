@@ -8,8 +8,7 @@
 
 package org.usfirst.frc.team619.robot;
 
-import org.usfirst.frc.team619.hardware.CANTalon;
-import org.usfirst.frc.team619.hardware.Talon;
+//import org.usfirst.frc.team619.hardware.CanTalon;
 import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.logic.mapping.SwerveDriveMappingThread;
 import org.usfirst.frc.team619.subsystems.DriverStation;
@@ -19,10 +18,10 @@ import org.usfirst.frc.team619.subsystems.drive.SwerveCalc;
 import org.usfirst.frc.team619.subsystems.drive.SwerveCalcValue;
 
 import static java.lang.Math.*;
-
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import com.ctre.CANTalon;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -62,7 +61,10 @@ public class SwerveTest extends IterativeRobot {
 	boolean autonomous_initalized = false;
 	long autonomous_start;
 	double last_autonomous_pos = 0;
-
+    CANTalon driveRightRear;
+    CANTalon steerRightRear;
+    CANTalon driveRightFront;
+    CANTalon steerRightFront;
 	/**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -71,7 +73,7 @@ public class SwerveTest extends IterativeRobot {
     	System.out.println("\n");// shows code is working
         System.out.println("//////////////////////////////////////////////////////");
         System.out.println("// Cavalier Robotics                     TEAM 619   //");
-        System.out.println("// 2015 Jenga                                       //");
+        System.out.println("// 20XX Swerve                                      //");
         System.out.println("//////////////////////////////////////////////////////\n");
 
         //Create all robot subsystems (i.e. stuff from/for org.usfirst.frc.team619.subsystems)
@@ -81,16 +83,20 @@ public class SwerveTest extends IterativeRobot {
         threadManager = new ThreadManager();
 
         //driver station
-        driverStation = new DriverStation(1, 2);
+        driverStation = new DriverStation();
 
-        leftFront = new SwerveWheel( "leftFront", new Talon(3), new CANTalon(2,true), 0.0 );
-        leftRear = new SwerveWheel( "leftRear", new Talon(0), new CANTalon(3,true), 0.0 );
-        rightFront = new SwerveWheel( "rightFront", new Talon(2), new CANTalon(1), 0.0 );
-        rightRear = new SwerveWheel( "rightRear", new Talon(1), new CANTalon(4), 0.0 );
+        leftFront = new SwerveWheel( "leftFront", new CANTalon(2), new CANTalon(5), 0.0 );
+        leftRear = new SwerveWheel( "leftRear", new CANTalon(1), new CANTalon(6), 0.0 );
+        driveRightFront = new CANTalon(3);
+        steerRightFront = new CANTalon(7);
+        rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
+        driveRightRear = new CANTalon(4);
+        steerRightRear = new CANTalon(8);
+        rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
 
         //subsystems
-        driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 32.0, 21.0 );
-        wheelCalculator = new SwerveCalc(21,32);
+        driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 9.0, 9.0 );
+        wheelCalculator = new SwerveCalc(9.0, 9.0);
     }
 
     /**
@@ -98,37 +104,24 @@ public class SwerveTest extends IterativeRobot {
      */
     public void autonomousInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-    	leftFront.zero( );
-    	leftRear.zero( );
-    	rightFront.zero( );
-    	rightRear.zero( );
-//    	System.out.println("starting zero of left1 >>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
-//    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getEncPosition( ));
-//    	left1.zero( );
-//    	System.out.println("finished zero of left1 >>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
-//    	System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getEncPosition( ));
-//    	left1.rotateMotor.setPosition(0);
-
-
-    	leftFront.setTargetAngle(45);
-    	leftRear.setTargetAngle(45);
-    	rightFront.setTargetAngle(45);
-    	rightRear.setTargetAngle(45);
-    	leftFront.goToAngle( );
-    	leftRear.goToAngle( );
-    	rightFront.goToAngle( );
-    	rightRear.goToAngle( );
-
-    	leftFront.setSpeed(0.5);
-    	leftRear.setSpeed(0.5);
-    	rightFront.setSpeed(0.5);
-    	rightRear.setSpeed(0.5);
-
-    	leftFront.drive( );
-    	leftRear.drive( );
-    	rightFront.drive( );
-    	rightRear.drive( );
-
+    	
+    	int num = 4;
+//    	reset(rightFront, rightRear, leftFront, leftRear); //ONLY USE WHEN MOTORS CAN TURN
+		rightRear.zero();
+		rightFront.zero();
+		leftRear.zero();
+		leftFront.zero();
+    	
+    	for(int i = 0; i < num; i++){
+    		for(int j = 0; j <= 360; j++) {
+    			rotateAll(rightFront, rightRear, leftFront, leftRear, j);
+    			delay(5);
+    		}
+    	}
+    	
+    	System.out.println("Right Rear Position = " + steerRightRear.getEncPosition() + " error:" + steerRightRear.getError());
+		System.out.println("Right Front Position = " + steerRightFront.getEncPosition() + " error:" + steerRightFront.getError());
+    	
     	autonomous_count = 0;
 		autonomous_start = System.currentTimeMillis();
     }
@@ -147,13 +140,20 @@ public class SwerveTest extends IterativeRobot {
      */
     public void DUMMYautonomousPeriodic(){ }
     public void autonomousPeriodic( ) {
-    	autonomous_count += 1;
-    	if ( autonomous_count % 100 == 0 ) {
-    		strafe += 5;
-    		strafe = strafe % 360;
-    		SwerveCalcValue info = wheelCalculator.getRobotCentric( 0, sin(toRadians(strafe)), 0);
-    		System.out.println("angle>>> " + info.FRAngle());
-    	}
+    	//status(rightFront);
+    	//System.out.println("Right Front Steer Position"+steerRightFront.getPosition());
+//    	SmartDashboard.putNumber("Enc value", leftFront.getEncoderValue());
+//    	SmartDashboard.putNumber("Angle", leftFront.getCurrentAngle());
+//    	if(rightRear.getCurrentAngle() == 90) {
+//    		SmartDashboard.putBoolean("Is 90", true);
+//    	}
+//    	autonomous_count += 1;
+//    	if ( autonomous_count % 100 == 0 ) {
+//    		strafe += 5;
+//    		strafe = strafe % 360;
+//    		SwerveCalcValue info = wheelCalculator.getRobotCentric( 0, sin(toRadians(strafe)), 0);
+//    		System.out.println("angle>>> " + info.FRAngle());
+//    	}
     }
     public void FIXEDANGLEautonomousPeriodic(){
     	autonomous_count += 1;
@@ -161,67 +161,67 @@ public class SwerveTest extends IterativeRobot {
 ////    		System.out.println("position>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + left1.rotateMotor.getPosition( ));
 //    		last_autonomous_pos = left1.rotateMotor.getPosition( );
 //    	}
-    	if ( autonomous_count == 300 ) {
-    		System.out.println("=======>>>> going to 180deg");
-    		leftFront.setTargetAngle(180);
-    		leftRear.setTargetAngle(180);
-    		rightFront.setTargetAngle(180);
-    		rightRear.setTargetAngle(180);
-
-    		leftFront.goToAngle( );
-    		leftRear.goToAngle( );
-    		rightFront.goToAngle( );
-    		rightRear.goToAngle( );
-
-    	}
-    	if ( autonomous_count == 600 ) {
-    		System.out.println("=======>>>> going to 270deg");
-    		leftFront.setTargetAngle(270);
-    		leftRear.setTargetAngle(270);
-    		rightFront.setTargetAngle(270);
-    		rightRear.setTargetAngle(270);
-
-    		leftFront.goToAngle( );
-    		leftRear.goToAngle( );
-    		rightFront.goToAngle( );
-    		rightRear.goToAngle( );
-    	}
-    	if ( autonomous_count == 900 ) {
-    		System.out.println("=======>>>> going to 0deg");
-    		leftFront.setTargetAngle(0);
-    		leftRear.setTargetAngle(0);
-    		rightFront.setTargetAngle(0);
-    		rightRear.setTargetAngle(0);
-
-    		leftFront.goToAngle( );
-    		leftRear.goToAngle( );
-    		rightFront.goToAngle( );
-    		rightRear.goToAngle( );
-    	}
-    	if ( autonomous_count == 1200 ) {
-    		System.out.println("=======>>>> going to 60deg");
-    		leftFront.setTargetAngle(60);
-    		leftRear.setTargetAngle(60);
-    		rightFront.setTargetAngle(60);
-    		rightRear.setTargetAngle(60);
-
-    		leftFront.goToAngle( );
-    		leftRear.goToAngle( );
-    		rightFront.goToAngle( );
-    		rightRear.goToAngle( );
-    	}
-    	if ( autonomous_count == 1500 ) {
-    		System.out.println("=======>>>> going to 0deg");
-    		leftFront.setTargetAngle(0);
-    		leftRear.setTargetAngle(0);
-    		rightFront.setTargetAngle(0);
-    		rightRear.setTargetAngle(0);
-
-    		leftFront.goToAngle( );
-    		leftRear.goToAngle( );
-    		rightFront.goToAngle( );
-    		rightRear.goToAngle( );
-    	}
+//    	if ( autonomous_count == 300 ) {
+//    		System.out.println("=======>>>> going to 180deg");
+//    		leftFront.setTargetAngle(180);
+//    		leftRear.setTargetAngle(180);
+//    		rightFront.setTargetAngle(180);
+//    		rightRear.setTargetAngle(180);
+//
+//    		leftFront.goToAngle( );
+//    		leftRear.goToAngle( );
+//    		rightFront.goToAngle( );
+//    		rightRear.goToAngle( );
+//
+//    	}
+//    	if ( autonomous_count == 600 ) {
+//    		System.out.println("=======>>>> going to 270deg");
+//    		leftFront.setTargetAngle(270);
+//    		leftRear.setTargetAngle(270);
+//    		rightFront.setTargetAngle(270);
+//    		rightRear.setTargetAngle(270);
+//
+//    		leftFront.goToAngle( );
+//    		leftRear.goToAngle( );
+//    		rightFront.goToAngle( );
+//    		rightRear.goToAngle( );
+//    	}
+//    	if ( autonomous_count == 900 ) {
+//    		System.out.println("=======>>>> going to 0deg");
+//    		leftFront.setTargetAngle(0);
+//    		leftRear.setTargetAngle(0);
+//    		rightFront.setTargetAngle(0);
+//    		rightRear.setTargetAngle(0);
+//
+//    		leftFront.goToAngle( );
+//    		leftRear.goToAngle( );
+//    		rightFront.goToAngle( );
+//    		rightRear.goToAngle( );
+//    	}
+//    	if ( autonomous_count == 1200 ) {
+//    		System.out.println("=======>>>> going to 60deg");
+//    		leftFront.setTargetAngle(60);
+//    		leftRear.setTargetAngle(60);
+//    		rightFront.setTargetAngle(60);
+//    		rightRear.setTargetAngle(60);
+//
+//    		leftFront.goToAngle( );
+//    		leftRear.goToAngle( );
+//    		rightFront.goToAngle( );
+//    		rightRear.goToAngle( );
+//    	}
+//    	if ( autonomous_count == 1500 ) {
+//    		System.out.println("=======>>>> going to 0deg");
+//    		leftFront.setTargetAngle(0);
+//    		leftRear.setTargetAngle(0);
+//    		rightFront.setTargetAngle(0);
+//    		rightRear.setTargetAngle(0);
+//
+//    		leftFront.goToAngle( );
+//    		leftRear.goToAngle( );
+//    		rightFront.goToAngle( );
+//    		rightRear.goToAngle( );
+//    	}
     }
 
     /**
@@ -237,6 +237,10 @@ public class SwerveTest extends IterativeRobot {
         SmartDashboard.putNumber("BL: ", driveBase.getLeftTalon2().getSpeed());
         SmartDashboard.putNumber("BR: ", driveBase.getRightTalon2().getSpeed());
 */
+    	SmartDashboard.putNumber("leftFront", leftFront.getVoltage());
+    	SmartDashboard.putNumber("leftRear", leftFront.getVoltage());
+    	SmartDashboard.putNumber("rightFront", leftFront.getVoltage());
+    	SmartDashboard.putNumber("rightRear", leftFront.getVoltage());
     	SmartDashboard.putNumber("NavX Yaw: ", driveBase.getYaw());
     	SmartDashboard.putBoolean("Field centric: ", driveBase.getFieldCentric());
     }
@@ -254,4 +258,64 @@ public class SwerveTest extends IterativeRobot {
 
     public void disabledContinuous(){}
 
+    public void testRotate(SwerveWheel wheel, String name, double angle){
+    	//wheel.zero();
+    	wheel.setTargetAngle(angle);
+    	wheel.setSpeed(0.1);
+    	wheel.goToAngle();
+    	delay(1000);
+    	wheel.setTargetAngle(0);
+    	wheel.setSpeed(0.1);
+    	wheel.goToAngle();
+    	SmartDashboard.putNumber(name, wheel.getCurrentAngle());
+    	delay(1000);
+    }
+    
+    public void testSteer(CANTalon steer, String name, double position){
+    	steer.set(position);
+    }
+    
+    public void testDrive(SwerveWheel wheel, String name){
+    	wheel.zero( );
+    	wheel.setSpeed(0.5);
+    	wheel.drive( );
+    }
+    
+    public void delay(int milliseconds){
+    	try {
+    		Thread.sleep(milliseconds);
+    	} catch(InterruptedException e) {
+    		Thread.currentThread().interrupt();
+    	}
+    }
+    
+    public void reset(SwerveWheel rightFront, SwerveWheel rightRear, SwerveWheel leftFront, SwerveWheel leftRear){
+    	SwerveWheel[] wheels = {rightFront, rightRear, leftFront, leftRear};
+    	for(int i = 0; i < 4; i++){
+    		wheels[i].setTargetAngle(0);
+    		wheels[i].setSpeed(0.1);
+    		wheels[i].goToAngle();
+    		wheels[i].zero();
+    	}
+    }
+    
+    public void status(SwerveWheel wheel){
+    	CANTalon steer = wheel.rotateMotor;
+    	System.out.println("Description: " + steer.getDescription() + 
+    						"\nControl Mode:" + steer.getControlMode() + 
+    						"\nPosition = " + steer.getEncPosition() +
+    						"\nFirmware: " + steer.GetFirmwareVersion() +
+    						"\nLast error: " + steer.getLastError() +
+    						"\nerror:" + steer.getError());
+    }
+    
+    public void rotateAll(SwerveWheel rightFront, SwerveWheel rightRear, SwerveWheel leftFront, SwerveWheel leftRear, int angle){
+    	SwerveWheel[] wheels = {rightFront, rightRear, leftFront, leftRear};
+    	for(int i = 0; i < 4; i++){
+    		wheels[i].setTargetAngle(angle);
+    		wheels[i].setSpeed(0.1);
+    		wheels[i].goToAngle();
+    	}
+    }
+    
 }
