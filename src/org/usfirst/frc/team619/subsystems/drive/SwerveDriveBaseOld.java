@@ -256,7 +256,6 @@ public class SwerveDriveBaseOld  {
         if(isFieldCentric || isRobotCentric){
             calculateSwerveControl(LY, LX, RX);
         } else if(isObjectCentric){
-            setSpeedMode(0.5);
             calculateObjectControl(RX);
         } else{
             calculateHookControl(RX);
@@ -556,12 +555,6 @@ public class SwerveDriveBaseOld  {
         frontLeft.drive();
         backRight.drive();
         backLeft.drive();
-    }
-
-    public void setSpeedMode(double newSpeedModifier){
-        for (SwerveWheel wheel : wheelArray){
-            wheel.setSpeedModifier(newSpeedModifier);
-        }
     }
 
     /**

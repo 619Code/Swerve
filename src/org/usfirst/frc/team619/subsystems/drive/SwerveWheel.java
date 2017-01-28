@@ -9,12 +9,12 @@ public class SwerveWheel {
 	public CANTalon driveMotor; //private Talon driveMotor;
 	public CANTalon rotateMotor;
 	private String label;
-		
-	private double rAngle;
+//	private double PercentVbus = CANTalon.TalonControlMode.PercentVbus;
+	
+	private double rAngle; 
 	private double speed;
 	private int targetAngle;
 	private int encoderUnitsPerRotation = 1660;//was 1665
-	private double speedModifier = 0.3;//This sets robot default speed to 75%, sniper and turbo mode changes these numbers
 	private boolean rolling = false;
 	
 	public static final double p=5, i=0.0001, d=0;
@@ -37,7 +37,7 @@ public class SwerveWheel {
         rotateMotor.enableBrakeMode(false);
         rotateMotor.reverseOutput(true);
 		rotateMotor.setPID(p,i,d);
-
+		
         targetAngle = 0;
 		rAngle = rotateAngle;
 
@@ -190,7 +190,7 @@ public class SwerveWheel {
     
     public void drive( ) {
     	//SmartDashboard.putNumber("Speed: " + this.toString(), speed*speedModifier);
-    	driveMotor.set(speed*speedModifier);
+    	driveMotor.set(speed);
 //    	rolling = true;
     }
     
@@ -202,10 +202,6 @@ public class SwerveWheel {
     	driveMotor.set(0);
     	rolling = false;
     }
-	
-	public void setSpeedModifier(double speed){
-		speedModifier = speed;
-	}
 	
 	public double getP() {
 		return rotateMotor.getP();

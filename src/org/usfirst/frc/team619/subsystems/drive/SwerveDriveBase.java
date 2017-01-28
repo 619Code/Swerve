@@ -305,35 +305,20 @@ public class SwerveDriveBase  {
             speeds[2] /= max;
             speeds[3] /= max;
         }
-        
-        if(RX == 0) {
-        	for(int i=0; i<4; i++)
-        		if(max < speeds[i])
-        			max = speeds[i];
-        	for(double speed : speeds)
-        		speed = max;
-        }
-        
-        //0 = frontRight
-        //1 = frontLeft
-        //2 = rearLeft
-        //3 = rearRight
-        
-        speeds[0] += 0.2;
-        speeds[3] += 0.2;
-
-        //Set target speed
-        for( int i=0; i < wheelArray.length; ++i )
-            wheelArray[i].setSpeed(speeds[i]);
 
         if( abs(LY) < 0.05 && abs(LX) < 0.05 && abs(RX) < 0.05){
             // if our inputs are nothing, don't change the angle(use currentAngle as targetAngle)
 //            for( SwerveWheel wheel : wheelArray )
 //                wheel.setTargetAngle(wheel.getCurrentAngle( ));
+        	for(SwerveWheel wheel : wheelArray) {
+                wheel.setSpeed(0);
+        	}
         } else {
             //Set target angle
-            for( int i=0; i < wheelArray.length; ++i )
+            for( int i=0; i < wheelArray.length; ++i ) {
                 wheelArray[i].setTargetAngle(angles[i]);
+                wheelArray[i].setSpeed(speeds[i]);
+            }
             SmartDashboard.putNumber("Angle", angles[0]);
         }
 
@@ -353,7 +338,7 @@ public class SwerveDriveBase  {
 
         //  imu.getYaw( ) returns angle between -180 and 180
         double theta = imu.getYaw( );
-        System.out.println("Theta: " + theta);
+        //System.out.println("Theta: " + theta);
         while ( theta < 0 ) theta += 360;
         theta = toRadians(theta);
         double temp = LY*cos(theta) + LX*sin(theta);
@@ -538,7 +523,7 @@ public class SwerveDriveBase  {
                 fastestSpeed = wheel.getSpeed();
             }
         }
-
+        System.out.println("Fastest speed is "+fastestSpeed);
         if(fastestSpeed > 1){ //if the fastest speed is greater than 1(our max input) divide the target speed for each wheel by the fastest speed
             for(SwerveWheel wheel : wheelArray){
                 wheel.setSpeed(wheel.getSpeed()/fastestSpeed);
@@ -555,12 +540,6 @@ public class SwerveDriveBase  {
         frontLeft.drive();
         backRight.drive();
         backLeft.drive();
-    }
-
-    public void setSpeedMode(double newSpeedModifier){
-        for (SwerveWheel wheel : wheelArray){
-            wheel.setSpeedModifier(newSpeedModifier);
-        }
     }
 
     /**

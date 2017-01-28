@@ -34,7 +34,7 @@ public class SwerveDriveMappingThread extends RobotThread {
         this.rightFront = rightFront;
         this.rightRear = rightRear;
 		releasedSpeed = true;
-		scalePercent = 0.7;
+		scalePercent = 0.4;
     }
 
     protected void cycle() {
@@ -53,7 +53,7 @@ public class SwerveDriveMappingThread extends RobotThread {
 		case 135:
 		case 225:
 		case 180:
-			if(releasedSpeed && scalePercent >= 0.2) {
+			if(releasedSpeed && scalePercent >= 0.1) {
 				scalePercent -= 0.1;
 			}
 			releasedSpeed = false;
@@ -67,51 +67,25 @@ public class SwerveDriveMappingThread extends RobotThread {
         double zTurn = driverStation.getLeftController().getX(Hand.kLeft);
 
         //gets percentages (numbers from -1 to 1) from the joystick's axes used for driving
-        double LY = -yAxis * scalePercent;
-        double LX = xAxis * scalePercent;
-        double RX = zTurn * scalePercent;
-
-        //BUTTONS ARE NOT ASSIGNED CORRECTLY
-        //X = A
-        //A = B
-        //B == X
+        double RY = -yAxis * scalePercent;
+        double RX = xAxis * scalePercent;
+        double LX = (zTurn * scalePercent)/2;
         
-        if (driverStation.getLeftController().getAButton()) {
-        	System.out.println();
-        	System.out.println("HITTING THE A BUTTON");
-            leftFront.zero( );
-            leftRear.zero( );
-            rightFront.zero( );
-            rightRear.zero( );
-        }else if (driverStation.getLeftController().getStartButton()) {
+        if (driverStation.getLeftController().getStartButton()) {
             driveBase.switchToRobotCentric();
         }else if (driverStation.getLeftController().getBackButton()) {
             driveBase.switchToFieldCentric();
             driveBase.zeroIMU();
-        }else if (driverStation.getLeftController().getBButton()){
-        	driveBase.move(scalePercent, 0, 0);
-        } else if (driverStation.getLeftController().getBButton()){
-        	System.out.println("HITTING THE B BUTTON");
-        } else if (driverStation.getLeftController().getYButton()){
-        	leftFront.setTargetAngle(0);
-        	leftRear.setTargetAngle(0);
-        	rightFront.setTargetAngle(0);
-        	rightRear.setTargetAngle(0);
-        	
-        	leftFront.goToAngle();
-        	leftRear.goToAngle();
-        	rightFront.goToAngle();
-        	rightRear.goToAngle();
-        //	delay(1000);
+        } else if(driverStation.getLeftController().getTriggerAxis(Hand.kRight) > 0.05){
+        	RY *= driverStation.getLeftController().getTriggerAxis(Hand.kRight)+1;
+        	RX *= driverStation.getLeftController().getTriggerAxis(Hand.kRight)+1;
+        	driveBase.move(RY, RX, LX);
+        } else if(driverStation.getLeftController().getTriggerAxis(Hand.kLeft) > 0.05){
+        	RY *= 1-driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
+        	RX *= 1-driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
+        	driveBase.move(RY, RX, LX);
         } else {
-            driveBase.move(LY, LX, RX);
+        	driveBase.move(RY, RX, LX);
         }
-    }
-    public void delay(int milliseconds){
-    	try {
-    		Thread.sleep(milliseconds);
-    	} catch(InterruptedException e) {
-    		Thread.currentThread().interrupt();
-    	}
     }
 }
