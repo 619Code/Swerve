@@ -8,6 +8,7 @@
 
 package org.usfirst.frc.team619.robot;
 
+import org.opencv.core.Core;
 //vision 1/21/17
 import java.util.ArrayList;
 
@@ -139,7 +140,9 @@ public class SwerveTest extends IterativeRobot {
         
         //vision
         //filteredVisionInit();
-        actuallyTheBestWorkingIdea();
+        //actuallyTheBestWorkingIdea();
+        System.out.println("Calling Soren");
+        sorenIdea();
     }
 
     /**
@@ -165,6 +168,101 @@ public class SwerveTest extends IterativeRobot {
 //        });
 //    	visionThread.start();
 //    }
+    
+    public void sorenIdea() {
+    	grip = new GripPipeline();
+  
+    	new Thread(() -> {
+    		System.out.println("Inside sorenIdea");
+            UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+            camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
+            System.out.println("After set Resolution");
+            //camera.setFPS(30);
+            CvSink cvSink = CameraServer.getInstance().getVideo();
+            CvSource outputStream = CameraServer.getInstance().putVideo("Wilson", IMG_WIDTH, IMG_HEIGHT);
+            
+            Mat source = new Mat();
+            Mat output = new Mat();
+            
+            while(!Thread.interrupted()) {
+                cvSink.grabFrame(source);
+                //Imgproc.cvtColor(source, output, Imgproc.COLOR_BGR2GRAY);
+                //contour vars
+        		ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
+        		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
+        		ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
+        		double filterContoursMinArea = 100.0;
+        		double filterContoursMinPerimeter = 200.0;
+        		double filterContoursMinWidth = 0.0;
+        		double filterContoursMaxWidth = 1000;
+        		double filterContoursMinHeight = 0;
+        		double filterContoursMaxHeight = 1000;
+        		double[] filterContoursSolidity = {0, 100};
+        		double filterContoursMaxVertices = 1000000;
+        		double filterContoursMinVertices = 0;
+        		double filterContoursMinRatio = 0;
+        		double filterContoursMaxRatio = 1000;
+        		
+    			double[] hue = {40.0, 100.0};
+    			double[] sat = {0.0, 255.0};
+    			double[] val = {200.0, 255.0};
+        		
+    			//change colors 0_o
+    			int blue = 1;
+    			int blueMod = 1;
+    			
+    			int green = 1;
+    			int greenMod = 1;
+    			
+    			int red = 1;
+    			int redMod = 1;
+    			long time = 0;
+    			
+        			grip.hsvThreshold(source, hue, sat, val, output);
+        			grip.desaturate(output, output);
+        			grip.findContours(output, false, findContoursOutput);
+        			grip.filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, 
+        						filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, 
+        						filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+                    
+        			try{
+        			r = Imgproc.boundingRect(filterContoursOutput.get(0));
+        			
+        			}catch(Exception e) {}
+        			
+        			//change colors 0_o
+        			if(blue >= 255 || blue <= 0){
+        				blueMod *= -1;
+        			}
+        			blue += 8*blueMod;
+        			
+        			if(green >= 255 || green <= 0){
+        				greenMod *= -1;
+        			}
+        			green += 12*greenMod;
+        			
+        			if(red >= 255 || red <= 0){
+        				redMod *= -1;
+        			}
+        			red += 16*redMod;
+        			
+        			if(filterContoursOutput.size() != 0) {
+//        				turn = (r.x+(r.width/2))-(IMG_WIDTH/2);
+//        				turn /= IMG_WIDTH;
+//        				if(turn > 0.2)
+//        					turn = 0.2;
+//        				if(turn < -0.2)
+//        					turn = -0.2;
+        				Imgproc.rectangle(source, new Point(r.x, r.y), new Point(r.x+r.width, r.y+r.height), new Scalar(0, 0, 255));
+        			}
+        		Imgproc.putText(source, "v1.2", new Point(output.rows()/8,output.cols()/8), Core.FONT_ITALIC, 0.5, new Scalar(255,255,255), 1);
+            		
+                outputStream.putFrame(source);
+            }
+           
+    	}).start();
+    }
+    
     
     public void actuallyTheBestWorkingIdea() {
     	grip = new GripPipeline();
