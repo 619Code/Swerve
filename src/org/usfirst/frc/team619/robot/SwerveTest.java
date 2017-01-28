@@ -183,8 +183,10 @@ public class SwerveTest extends IterativeRobot {
             
             Mat source = new Mat();
             Mat output = new Mat();
+            long time = 0;
             
             while(!Thread.interrupted()) {
+            	time = System.currentTimeMillis();
                 cvSink.grabFrame(source);
                 //Imgproc.cvtColor(source, output, Imgproc.COLOR_BGR2GRAY);
                 //contour vars
@@ -216,7 +218,6 @@ public class SwerveTest extends IterativeRobot {
     			
     			int red = 1;
     			int redMod = 1;
-    			long time = 0;
     			
         			grip.hsvThreshold(source, hue, sat, val, output);
         			grip.desaturate(output, output);
@@ -255,7 +256,10 @@ public class SwerveTest extends IterativeRobot {
 //        					turn = -0.2;
         				Imgproc.rectangle(source, new Point(r.x, r.y), new Point(r.x+r.width, r.y+r.height), new Scalar(0, 0, 255));
         			}
-        		Imgproc.putText(source, "v1.2", new Point(output.rows()/8,output.cols()/8), Core.FONT_ITALIC, 0.5, new Scalar(255,255,255), 1);
+        		Imgproc.putText(source, "v1.3", new Point(output.rows()/8,output.cols()/8), Core.FONT_ITALIC, 0.5, new Scalar(255,255,255), 1);
+        		time = System.currentTimeMillis() - time;
+        		double newTime = 1000/((double)time);
+        		Imgproc.putText(source, "" + (int)newTime + " fps", new Point(output.rows()/8,output.cols()/4), Core.FONT_ITALIC, 0.4, new Scalar(255,255,255), 1);
             		
                 outputStream.putFrame(source);
             }
