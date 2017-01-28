@@ -177,6 +177,8 @@ public class SwerveTest extends IterativeRobot {
             UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
             camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
             System.out.println("After set Resolution");
+            camera.setBrightness(0);
+            camera.setExposureManual(0);
             //camera.setFPS(30);
             CvSink cvSink = CameraServer.getInstance().getVideo();
             CvSource outputStream = CameraServer.getInstance().putVideo("Wilson", IMG_WIDTH, IMG_HEIGHT);
@@ -194,7 +196,7 @@ public class SwerveTest extends IterativeRobot {
         		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
         		ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
         		double filterContoursMinArea = 100.0;
-        		double filterContoursMinPerimeter = 200.0;
+        		double filterContoursMinPerimeter = 100.0;
         		double filterContoursMinWidth = 0.0;
         		double filterContoursMaxWidth = 1000;
         		double filterContoursMinHeight = 0;
@@ -205,9 +207,9 @@ public class SwerveTest extends IterativeRobot {
         		double filterContoursMinRatio = 0;
         		double filterContoursMaxRatio = 1000;
         		
-    			double[] hue = {40.0, 100.0};
-    			double[] sat = {0.0, 255.0};
-    			double[] val = {200.0, 255.0};
+    			double[] hue = {30.0, 100.0};
+    			double[] sat = {200.0, 255.0};
+    			double[] val = {60.0, 110.0};
         		
     			//change colors 0_o
     			int blue = 1;
