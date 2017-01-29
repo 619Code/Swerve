@@ -75,8 +75,7 @@ public class SwerveTest extends IterativeRobot {
     CANTalon steerLeftRear;
     CANTalon driveLeftFront;
     CANTalon steerLeftFront;
-    GripPipeline grip;
-
+    
 	//Control
 	private SwerveCalc wheelCalculator;
 	double strafe = 0;
@@ -90,7 +89,7 @@ public class SwerveTest extends IterativeRobot {
 	private int height = 0;
 	private int size = 0;
 	
-	private Rect r;
+	private Rect r, r2;
 	
 	private final Object imgLock = new Object();
 
@@ -142,8 +141,9 @@ public class SwerveTest extends IterativeRobot {
         //vision
         //filteredVisionInit();
         //actuallyTheBestWorkingIdea();
-        System.out.println("Calling Soren");
-        sorenIdea();
+        //System.out.println("Calling Soren");
+        //sorenIdea();
+        basicThread();
     }
 
     /**
@@ -170,23 +170,128 @@ public class SwerveTest extends IterativeRobot {
 //    	visionThread.start();
 //    }
     
+    public void basicThread() {
+    	GripPipeline grip  = new GripPipeline();
+    	new Thread(() -> {
+	    	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+	    	camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
+	    	camera.setBrightness(0);
+	    	camera.setExposureManual(0);
+	    	
+	    	CvSink cvSink = CameraServer.getInstance().getVideo();
+	    	CvSource outputStream = CameraServer.getInstance().putVideo("v1.0", IMG_WIDTH, IMG_HEIGHT);
+	    	
+	    	Mat source = new Mat();
+	    	Mat output = new Mat();
+	    	long time = 0;
+	    	try {
+	    		Thread.sleep(1000);
+	    	}catch(Exception e){}
+	    	
+	    	while(!Thread.interrupted()) {
+	    		time = System.currentTimeMillis();
+	    		cvSink.grabFrame(source);
+	    		
+	    		//contour vars
+        		ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
+        		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
+        		ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
+        		double filterContoursMinArea = 20.0;
+        		double filterContoursMinPerimeter = 20.0;
+        		double filterContoursMinWidth = 0.0;
+        		double filterContoursMaxWidth = 1000;
+        		double filterContoursMinHeight = 0;
+        		double filterContoursMaxHeight = 1000;
+        		double[] filterContoursSolidity = {0, 100};
+        		double filterContoursMaxVertices = 1000000;
+        		double filterContoursMinVertices = 0;
+        		double filterContoursMinRatio = 0;
+        		double filterContoursMaxRatio = 1000;
+        		
+    			double[] hue = {30.0, 100.0};
+    			double[] sat = {200.0, 255.0};
+    			double[] val = {60.0, 110.0};
+        		
+    			//change colors 0_o
+    			int blue = 1;
+    			int blueMod = 1;
+    			
+    			int green = 1;
+    			int greenMod = 1;
+    			
+    			int red = 1;
+    			int redMod = 1;
+    			
+        			grip.hsvThreshold(source, hue, sat, val, output);
+        			grip.desaturate(output, output);
+        			grip.findContours(output, false, findContoursOutput);
+        			grip.filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, 
+        						filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, 
+        						filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+                    
+        			try{
+        			r = Imgproc.boundingRect(filterContoursOutput.get(0));
+        			r2 = Imgproc.boundingRect(filterContoursOutput.get(1));
+        			
+        			}catch(Exception e) {}
+        			
+        			//change colors 0_o
+        			if(blue >= 255 || blue <= 0){
+        				blueMod *= -1;
+        			}
+        			blue += 8*blueMod;
+        			
+        			if(green >= 255 || green <= 0){
+        				greenMod *= -1;
+        			}
+        			green += 12*greenMod;
+        			
+        			if(red >= 255 || red <= 0){
+        				redMod *= -1;
+        			}
+        			red += 16*redMod;
+        			size = 0;
+        			
+        			if(filterContoursOutput.size() != 0) {
+        				synchronized(imgLock) {
+        					size = filterContoursOutput.size();
+        					centerX = r.x+(r.width/2);
+        					height = r.height;
+        				}
+        				Imgproc.rectangle(source, new Point(r.x, r.y), new Point(r.x+r.width, r.y+r.height), new Scalar(0, 0, 255));
+        				if(filterContoursOutput.size() > 1) {
+        					Imgproc.rectangle(source, new Point(r2.x, r2.y), new Point(r2.x+r2.width, r2.y+r2.height), new Scalar(0, 0, 255));
+        				}
+        			}
+        		Imgproc.putText(source, "v1.3", new Point(output.rows()/8,output.cols()/8), Core.FONT_ITALIC, 0.5, new Scalar(255,255,255), 1);
+        		time = System.currentTimeMillis() - time;
+        		double newTime = 1000/((double)time);
+        		Imgproc.putText(source, "" + (int)newTime + " fps", new Point(output.rows()/8,output.cols()/4), Core.FONT_ITALIC, 0.4, new Scalar(255,255,255), 1);
+            		
+	    		outputStream.putFrame(source);
+	    	}
+    	}).start();
+    }
+    
     public void sorenIdea() {
-    	grip = new GripPipeline();
+    	GripPipeline grip = new GripPipeline();
   
     	new Thread(() -> {
-    		System.out.println("Inside sorenIdea");
             UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
             camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
-            System.out.println("After set Resolution");
             camera.setBrightness(0);
             camera.setExposureManual(0);
             //camera.setFPS(30);
+
+            System.out.println(" ERROR AT GETVIDEO");
             CvSink cvSink = CameraServer.getInstance().getVideo();
-            CvSource outputStream = CameraServer.getInstance().putVideo("Wilson", IMG_WIDTH, IMG_HEIGHT);
-            
+            System.out.println(" ERROR AT PUTVIDEO");
+            CvSource outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
             Mat source = new Mat();
             Mat output = new Mat();
             long time = 0;
+            
+            System.out.println("start while loop");
             
             while(!Thread.interrupted()) {
             	time = System.currentTimeMillis();
@@ -231,6 +336,7 @@ public class SwerveTest extends IterativeRobot {
                     
         			try{
         			r = Imgproc.boundingRect(filterContoursOutput.get(0));
+        			r2 = Imgproc.boundingRect(filterContoursOutput.get(1));
         			
         			}catch(Exception e) {}
         			
@@ -254,16 +360,12 @@ public class SwerveTest extends IterativeRobot {
         			if(filterContoursOutput.size() != 0) {
         				synchronized(imgLock) {
         					size = filterContoursOutput.size();
-        					centerX = r.x+(r.width/2);
+        					centerX = r.x+(r.width/2) + r2.x+(r2.width/2);
+        					centerX /= 2;
         					height = r.y;
         				}
-//        				turn = (r.x+(r.width/2))-(IMG_WIDTH/2);
-//        				turn /= IMG_WIDTH;
-//        				if(turn > 0.2)
-//        					turn = 0.2;
-//        				if(turn < -0.2)
-//        					turn = -0.2;
         				Imgproc.rectangle(source, new Point(r.x, r.y), new Point(r.x+r.width, r.y+r.height), new Scalar(0, 0, 255));
+        				Imgproc.rectangle(source, new Point(r2.x, r2.y), new Point(r2.x+r2.width, r2.y+r2.height), new Scalar(0, 0, 255));
         			}
         		Imgproc.putText(source, "v1.3", new Point(output.rows()/8,output.cols()/8), Core.FONT_ITALIC, 0.5, new Scalar(255,255,255), 1);
         		time = System.currentTimeMillis() - time;
@@ -278,7 +380,7 @@ public class SwerveTest extends IterativeRobot {
     
     
     public void actuallyTheBestWorkingIdea() {
-    	grip = new GripPipeline();
+    	GripPipeline grip = new GripPipeline();
     	new Thread(() -> {
     		CameraServer camera = CameraServer.getInstance();
     		UsbCamera cam = camera.startAutomaticCapture();
@@ -488,29 +590,39 @@ public class SwerveTest extends IterativeRobot {
 	    		double turn = 0;
 	    		double move = 0;
 	    		int m_size = 0;
-	    		int height = 0;
+	    		int m_height = 0;
 	            synchronized (imgLock) {
-	            	height = this.height;
+	            	m_height = height;
 	                turn = centerX;
 	                m_size = size;
 	            }
 	            if (m_size != 0) {
-	            	if(height <= 75)
-	            		move = 0.1;
-	            	if(height >= 140)
-	            		move = -0.1;
+	            	SmartDashboard.putNumber("Height", m_height);
+	            	if(m_height <= 25)
+	            		move = -0.15;
+	            	if(m_height >= 35)
+	            		move = 0.15;
 	            	
 					turn -= (IMG_WIDTH/2);
-					turn /= IMG_WIDTH*1.5;
-					if(turn > 0.18)
-						turn = 0.18;
-					if(turn < -0.18)
-						turn = -0.18;
+					turn /= IMG_WIDTH*3;
+					if(turn > 0.15)
+						turn = 0.15;
+					if(turn < -0.15)
+						turn = -0.15;
+					if(Math.abs(turn) < 0.05)
+						turn = 0;
 	            }else {
 	            	turn = 0;
+	            	move = 0;
 	            }
 		    	SmartDashboard.putNumber("Actual Turn", turn);
-		    	driveBase.move(0,0,turn);
+		    	SmartDashboard.putNumber("Move value", move);
+		    	SmartDashboard.putString("Version", "Soren 1257");
+		    	//driveBase.move(0,0,turn);
+		    	if(move != 0)
+		    		driveBase.move(move, 0, turn);
+		    	else
+		    		driveBase.move(0, 0, 0);
     		}
 	    }).start();
 	    	
