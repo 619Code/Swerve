@@ -87,6 +87,7 @@ public class SwerveTest extends IterativeRobot {
 	
 	private VisionThread visionThread;
 	private double centerX = 0;
+	private int height = 0;
 	private int size = 0;
 	
 	private Rect r;
@@ -195,8 +196,8 @@ public class SwerveTest extends IterativeRobot {
         		ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
         		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
         		ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
-        		double filterContoursMinArea = 100.0;
-        		double filterContoursMinPerimeter = 100.0;
+        		double filterContoursMinArea = 20.0;
+        		double filterContoursMinPerimeter = 20.0;
         		double filterContoursMinWidth = 0.0;
         		double filterContoursMaxWidth = 1000;
         		double filterContoursMinHeight = 0;
@@ -248,8 +249,14 @@ public class SwerveTest extends IterativeRobot {
         				redMod *= -1;
         			}
         			red += 16*redMod;
+        			size = 0;
         			
         			if(filterContoursOutput.size() != 0) {
+        				synchronized(imgLock) {
+        					size = filterContoursOutput.size();
+        					centerX = r.x+(r.width/2);
+        					height = r.y;
+        				}
 //        				turn = (r.x+(r.width/2))-(IMG_WIDTH/2);
 //        				turn /= IMG_WIDTH;
 //        				if(turn > 0.2)
@@ -471,10 +478,6 @@ public class SwerveTest extends IterativeRobot {
 //    	}).start();
 //    }
     
-    private void error() {
-    	System.out.println(" ERROR NOT HERE ");
-    }
-    
     /**
      *This function is called when autonomous is initialized
      */
@@ -483,19 +486,26 @@ public class SwerveTest extends IterativeRobot {
     	new Thread(() -> {
     		while(!Thread.interrupted()) {
 	    		double turn = 0;
+	    		double move = 0;
 	    		int m_size = 0;
+	    		int height = 0;
 	            synchronized (imgLock) {
-	            	
+	            	height = this.height;
 	                turn = centerX;
 	                m_size = size;
 	            }
-	            if (size != 0) {
+	            if (m_size != 0) {
+	            	if(height <= 75)
+	            		move = 0.1;
+	            	if(height >= 140)
+	            		move = -0.1;
+	            	
 					turn -= (IMG_WIDTH/2);
-					turn /= IMG_WIDTH;
-					if(turn > 0.2)
-						turn = 0.2;
-					if(turn < -0.2)
-						turn = -0.2;
+					turn /= IMG_WIDTH*1.5;
+					if(turn > 0.18)
+						turn = 0.18;
+					if(turn < -0.18)
+						turn = -0.18;
 	            }else {
 	            	turn = 0;
 	            }
