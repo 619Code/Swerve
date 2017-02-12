@@ -1,4 +1,4 @@
-package org.usfirst.frc.team619.subsystems.drive;
+  package org.usfirst.frc.team619.subsystems.drive;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
@@ -42,6 +42,7 @@ public class SwerveDriveBase  {
     //Used to switch between control modes
     boolean isRobotCentric = false;
     boolean isFieldCentric = true;
+    boolean isGearCentric = false;
     boolean isObjectCentric = false;
     boolean isHookCentric = false;
 
@@ -257,8 +258,10 @@ public class SwerveDriveBase  {
             calculateSwerveControl(LY, LX, RX);
         } else if(isFieldCentric){
             getFieldCentric(LY, LX, RX);
+        }else if(isGearCentric){
+            calculateSwerveControl(LX, -LY, RX);
         }else {
-            calculateSwerveControl(LY, LX, RX);
+        	calculateSwerveControl(LY, LX, RX);
         }
 
     }
@@ -583,6 +586,15 @@ public class SwerveDriveBase  {
         isRobotCentric = false;
         isFieldCentric = true;
         isHookCentric = false;
+        isGearCentric = false;
+    }
+    
+    public void switchToGearCentric() {
+        isObjectCentric = false;
+        isRobotCentric = false;
+        isFieldCentric = false;
+        isHookCentric = false;
+        isGearCentric = true;
     }
 
     /**
@@ -594,6 +606,7 @@ public class SwerveDriveBase  {
         isFieldCentric = false;
         isRobotCentric = false;
         isHookCentric = false;
+        isGearCentric = false;
     }
    /**
     * Called to switch to HookCentric
@@ -603,6 +616,7 @@ public class SwerveDriveBase  {
         isFieldCentric = false;
         isRobotCentric = false;
         isHookCentric = true;
+        isGearCentric = false;
     }
 
     /**
@@ -614,6 +628,7 @@ public class SwerveDriveBase  {
         isFieldCentric = false;
         isRobotCentric = true;
         isHookCentric = false;
+        isGearCentric = false;
     }
 
     public boolean getRobotCentric() {
@@ -622,6 +637,10 @@ public class SwerveDriveBase  {
 
     public boolean getFieldCentric() {
         return isFieldCentric;
+    }
+    
+    public boolean getGearCentric() {
+    	return isGearCentric;
     }
 
     public float getYaw() {
@@ -632,6 +651,18 @@ public class SwerveDriveBase  {
         imu.zeroYaw();
     }
 
+    public void autoZeroWheels() {
+	    frontRight.autoZero_();
+	    frontLeft.autoZero_();
+	    backLeft.autoZero_();
+	    backRight.autoZero_();
+    }
+    
+    public void goToZero() {
+    	frontLeft.setTargetAngle(0);
+    	frontLeft.goToAngle();
+    }
+    
     public void zeroWheels() {
         frontRight.zero();
         frontLeft.zero();

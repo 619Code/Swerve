@@ -13,6 +13,8 @@ public class SwerveWheel {
 	
 	private double rAngle; 
 	private double speed;
+	private double offset;
+	private int correctionAngle;
 	private int targetAngle;
 	private int encoderUnitsPerRotation = 1660;//was 1665
 	private boolean rolling = false;
@@ -39,6 +41,8 @@ public class SwerveWheel {
 		rotateMotor.setPID(p,i,d);
 		
         targetAngle = 0;
+        correctionAngle = -1337;
+        offset = 0;
 		rAngle = rotateAngle;
 
 	}
@@ -61,6 +65,42 @@ public class SwerveWheel {
 		System.out.println(label + " position " + rotateMotor.getPosition( ));
 		if ( rotateMotor.getPosition( ) != 0.0 )
 			System.err.println( "wheel " + label + " failed to store zero position" );
+	}
+	
+	public void autoZero() {
+		int correctionAngle = getCurrentAngle();
+		while(!rotateMotor.isFwdLimitSwitchClosed()){
+			correctionAngle--;
+			setTargetAngle(correctionAngle);
+			goToAngle();
+			try {
+			Thread.sleep(20);
+			}catch(Exception e) {}
+		}
+		
+		offset = getCurrentAngle();
+	}
+	
+	public boolean autoZero_() {
+		if(correctionAngle == -1337) {
+			correctionAngle = getCurrentAngle();
+		}
+		if(!rotateMotor.isFwdLimitSwitchClosed()){
+			System.out.println(rotateMotor.isFwdLimitSwitchClosed());
+			System.out.println(correctionAngle);
+			correctionAngle--;
+			setTargetAngle(correctionAngle);
+			goToAngle();
+			return false;
+		} else {
+			System.out.println(getCurrentAngle());
+			try {
+			Thread.sleep(500);
+			}catch(Exception e) {}
+			offset = getCurrentAngle();
+			correctionAngle = getCurrentAngle();
+			return true;
+		}
 	}
 
 	public void zero_old( ) {
@@ -102,7 +142,7 @@ public class SwerveWheel {
 		double deltaTheta = getTargetAngle() - getCurrentAngle();
 		
 		while ((deltaTheta < -90) || (deltaTheta > 90)){
-//			if ( label.equals("leftFront") )
+//			if ( label.equals("rotateMotor") )
 //				System.out.println( "                          --> " + deltaTheta + "/" + speed );
 			if(deltaTheta > 90){
 				deltaTheta -= 180;
@@ -112,13 +152,14 @@ public class SwerveWheel {
 				speed *= -1;
 			}
 		}
-//		if ( label.equals("leftFront") )
+//		if ( label.equals("rotateMotor") )
 //			System.out.println( "                          --> " + deltaTheta + "/" + speed );
 		
 		return deltaTheta;		
 	}
 	
-	public void setTargetAngle(double angle){		
+	public void setTargetAngle(double angle){
+		angle += offset;
 		if(angle < 0){
 			angle += 360;
 		}else if(angle >=360){

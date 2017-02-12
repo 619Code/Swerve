@@ -32,7 +32,13 @@ public class GripPipeline implements VisionPipeline {
 	private Mat desaturateOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
 	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
-
+	public final static double[] greenHue = {40.0, 100.0};
+	public final static double[] greenSat = {200.0, 255.0};
+	public final static double[] geenValue = {200.0, 255.0};
+	public final static double[] orangeHue = {0.0, 30.0};
+	public final static double[] orangeSat = {200.0, 255.0};
+	public final static double[] orangeValue = {20.0, 100.0};
+//	
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
@@ -43,9 +49,9 @@ public class GripPipeline implements VisionPipeline {
 	public void process(Mat source0) {
 		// Step HSV_Threshold0:
 		Mat hsvThresholdInput = source0;
-		double[] hsvThresholdHue = {40.0, 100.0};
+		double[] hsvThresholdHue = {0.0, 255.0};
 		double[] hsvThresholdSaturation = {0.0, 255.0};
-		double[] hsvThresholdValue = {200.0, 255.0};
+		double[] hsvThresholdValue = {0.0, 255.0};
 		hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
 		// Step Desaturate0:
@@ -214,10 +220,17 @@ public class GripPipeline implements VisionPipeline {
 			if (ratio < minRatio || ratio > maxRatio) continue;
 			output.add(contour);
 		}
+		//Sorting
+//		for(int i=0; i < output.size(); i++) {
+//		    for (int j = output.size(); j > i; j--) {
+//		        if (output.get(i).height() < output.get(j).height()) {
+//		            MatOfPoint tmp = output.get(i);
+//		            output.set(i, output.get(j));
+//		            output.set(j, tmp);
+//		        }
+//		    }
+//		}
 	}
-
-
-
-
+	
 }
 
