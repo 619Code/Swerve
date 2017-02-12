@@ -173,18 +173,9 @@ public class SwerveTest extends IterativeRobot {
      * This function is called when auto is initialized
      */    
     public void autonomousInit() {
-
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-    	System.out.println("called inside auto init");
-//		grip  = new GripPipeline();
-//		
-//		cvSink = CameraServer.getInstance().getVideo();
-//		outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
-        TargetThread targetThread = new TargetThread(15, threadManager, camera, cvSink, outputStream);
-//        targetThread.setDaemon(true);
-//        targetThread.start();
-//        threadManager.killAllThreads();
-//    	autoThread = new AutoThread(this, imgLock, driveBase, 15, threadManager);
+        TargetThread targetThread = new TargetThread(3, threadManager, cvSink, outputStream);
+    	autoThread = new AutoThread(targetThread, imgLock, driveBase, 3, threadManager);
 //    	threadManager.addThread(autoThread);
 //    	autoThread.run();
 //    	driveBase.switchToGearCentric();
@@ -355,6 +346,7 @@ public class SwerveTest extends IterativeRobot {
      */
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
+    	TargetThread targetThread = new TargetThread(3, threadManager, cvSink, outputStream);
         driveThread = new SwerveDriveMappingThread(leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
         driveThread.start();
     }
