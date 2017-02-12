@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj.vision.VisionThread;
 
 import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.logic.mapping.AutoThread;
+import org.usfirst.frc.team619.logic.mapping.TargetThread;
 import org.usfirst.frc.team619.logic.mapping.SwerveDriveMappingThread;
 import org.usfirst.frc.team619.subsystems.DriverStation;
 import org.usfirst.frc.team619.subsystems.GripPipeline;
@@ -151,7 +152,7 @@ public class SwerveTest extends IterativeRobot {
         wheelCalculator = new SwerveCalc(20.0, 18.0);
         
         //vision
-        basicThread();
+        //basicThread();
         //startCamera();
         //CameraServer.getInstance().startAutomaticCapture();
     }
@@ -284,7 +285,6 @@ public class SwerveTest extends IterativeRobot {
      */
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
- 
         driveThread = new SwerveDriveMappingThread(leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
         driveThread.start();
     }
@@ -293,8 +293,15 @@ public class SwerveTest extends IterativeRobot {
      * This function is called when auto is initialized
      */    
     public void autonomousInit() {
-    	autoThread = new AutoThread(this, imgLock, driveBase, 15, threadManager);
-    	autoThread.run();
+    	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
+    	System.out.println("called inside auto init");
+        TargetThread targetThread = new TargetThread(15, threadManager);
+        targetThread.setDaemon(true);
+        targetThread.start();
+//        threadManager.killAllThreads();
+//    	autoThread = new AutoThread(this, imgLock, driveBase, 15, threadManager);
+//    	threadManager.addThread(autoThread);
+//    	autoThread.run();
 //    	driveBase.switchToGearCentric();
 //    	new Thread(() -> {
 //    		while(!Thread.interrupted()) {

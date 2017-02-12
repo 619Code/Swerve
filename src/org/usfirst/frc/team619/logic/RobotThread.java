@@ -4,7 +4,7 @@ package org.usfirst.frc.team619.logic;
  * @author CaRobotics
  */
 public abstract class RobotThread extends Thread{
-    protected volatile boolean isRunning = false;
+    public volatile boolean isRunning = false;
     private volatile boolean isSuspended = false;
     private int period = 0;
     
