@@ -101,6 +101,10 @@ public class SwerveTest extends IterativeRobot {
 	private int height = 0;
 	private int size = 0;
 	private int xVal = 0;
+	UsbCamera camera;
+	CvSink cvSink;
+	CvSource outputStream;
+	GripPipeline grip;
 	
 	private Rect r, r2;
 	
@@ -152,6 +156,7 @@ public class SwerveTest extends IterativeRobot {
         wheelCalculator = new SwerveCalc(20.0, 18.0);
         
         //vision
+        camera = CameraServer.getInstance().startAutomaticCapture();
         //basicThread();
         //startCamera();
         //CameraServer.getInstance().startAutomaticCapture();
@@ -164,7 +169,7 @@ public class SwerveTest extends IterativeRobot {
     	}).start();
     }
     
-    public void basicThread() {
+    public void XbasicThread() {
     	GripPipeline grip  = new GripPipeline();
     	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
     	
@@ -293,11 +298,16 @@ public class SwerveTest extends IterativeRobot {
      * This function is called when auto is initialized
      */    
     public void autonomousInit() {
+
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	System.out.println("called inside auto init");
-        TargetThread targetThread = new TargetThread(15, threadManager);
-        targetThread.setDaemon(true);
-        targetThread.start();
+//		grip  = new GripPipeline();
+//		
+//		cvSink = CameraServer.getInstance().getVideo();
+//		outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
+//        TargetThread targetThread = new TargetThread(15, threadManager, camera);
+//        targetThread.setDaemon(true);
+//        targetThread.start();
 //        threadManager.killAllThreads();
 //    	autoThread = new AutoThread(this, imgLock, driveBase, 15, threadManager);
 //    	threadManager.addThread(autoThread);
