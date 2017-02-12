@@ -157,11 +157,76 @@ public class SwerveTest extends IterativeRobot {
         
         //vision
         camera = CameraServer.getInstance().startAutomaticCapture();
+		camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
+		camera.setBrightness(0);
+		camera.setExposureManual(0);
+		
+		cvSink = CameraServer.getInstance().getVideo();
+		outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
+
         //basicThread();
         //startCamera();
         //CameraServer.getInstance().startAutomaticCapture();
     }
     
+    /**
+     * This function is called when auto is initialized
+     */    
+    public void autonomousInit() {
+
+    	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
+    	System.out.println("called inside auto init");
+//		grip  = new GripPipeline();
+//		
+//		cvSink = CameraServer.getInstance().getVideo();
+//		outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
+        TargetThread targetThread = new TargetThread(15, threadManager, camera, cvSink, outputStream);
+//        targetThread.setDaemon(true);
+//        targetThread.start();
+//        threadManager.killAllThreads();
+//    	autoThread = new AutoThread(this, imgLock, driveBase, 15, threadManager);
+//    	threadManager.addThread(autoThread);
+//    	autoThread.run();
+//    	driveBase.switchToGearCentric();
+//    	new Thread(() -> {
+//    		while(!Thread.interrupted()) {
+//	    		double turn = 0;
+//	    		double move = 0;
+//	    		int m_size = 0;
+//	    		int m_height = 0;
+//	            synchronized (imgLock) {
+//	            	m_height = height;
+//	                turn = centerX;
+//	                m_size = size;
+//	            }
+//	            if (m_size > 1) {
+//	            	SmartDashboard.putNumber("Height", m_height);
+//	            	if(m_height <= 25)
+//	            		move = -0.15;
+//	            	if(m_height >= 35)
+//	            		move = 0.15;
+//	            	
+//					turn -= (IMG_WIDTH/2);
+//					turn /= IMG_WIDTH/3;
+//					if(turn > 0.15)
+//						turn = 0.15;
+//					if(turn < -0.15)
+//						turn = -0.15;
+//					if(Math.abs(turn) < 0.05)
+//						turn = 0;
+//	            }else {
+//	            	turn = 0;
+//	            	move = 0;
+//	            }
+//		    	SmartDashboard.putNumber("Actual Turn", turn);
+//		    	SmartDashboard.putNumber("Move value", move);
+//		    	//driveBase.move(0,0,turn);
+//		    	driveBase.move(move, 0, turn);
+//
+//    		}	
+//    	}).start();
+    }
+
     public void startCamera() {
     	new Thread(() -> {
     		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
@@ -294,63 +359,6 @@ public class SwerveTest extends IterativeRobot {
         driveThread.start();
     }
     
-    /**
-     * This function is called when auto is initialized
-     */    
-    public void autonomousInit() {
-
-    	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-    	System.out.println("called inside auto init");
-//		grip  = new GripPipeline();
-//		
-//		cvSink = CameraServer.getInstance().getVideo();
-//		outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
-//        TargetThread targetThread = new TargetThread(15, threadManager, camera);
-//        targetThread.setDaemon(true);
-//        targetThread.start();
-//        threadManager.killAllThreads();
-//    	autoThread = new AutoThread(this, imgLock, driveBase, 15, threadManager);
-//    	threadManager.addThread(autoThread);
-//    	autoThread.run();
-//    	driveBase.switchToGearCentric();
-//    	new Thread(() -> {
-//    		while(!Thread.interrupted()) {
-//	    		double turn = 0;
-//	    		double move = 0;
-//	    		int m_size = 0;
-//	    		int m_height = 0;
-//	            synchronized (imgLock) {
-//	            	m_height = height;
-//	                turn = centerX;
-//	                m_size = size;
-//	            }
-//	            if (m_size > 1) {
-//	            	SmartDashboard.putNumber("Height", m_height);
-//	            	if(m_height <= 25)
-//	            		move = -0.15;
-//	            	if(m_height >= 35)
-//	            		move = 0.15;
-//	            	
-//					turn -= (IMG_WIDTH/2);
-//					turn /= IMG_WIDTH/3;
-//					if(turn > 0.15)
-//						turn = 0.15;
-//					if(turn < -0.15)
-//						turn = -0.15;
-//					if(Math.abs(turn) < 0.05)
-//						turn = 0;
-//	            }else {
-//	            	turn = 0;
-//	            	move = 0;
-//	            }
-//		    	SmartDashboard.putNumber("Actual Turn", turn);
-//		    	SmartDashboard.putNumber("Move value", move);
-//		    	//driveBase.move(0,0,turn);
-//		    	driveBase.move(move, 0, turn);
-//
-//    		}	
-//    	}).start();
-    }
     
     public int getHeight() {
     	return height;
