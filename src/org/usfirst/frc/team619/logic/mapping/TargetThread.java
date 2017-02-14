@@ -63,6 +63,29 @@ public class TargetThread extends RobotThread {
 		start();
 	}
 
+	protected int compareRectangle(Rect r1, Rect r2){
+		int r1Max = r1.x + r1.width;
+		int r2Max = r2.x + r2.width;
+		if (r1.x < r2.x){
+		  // r1 is left of r2
+		  if ((r1Max >= r2.x) && (r1Max <= r2Max)){
+			  // Overlapping rectangles
+			  return 0;
+		  } else {
+			  // rectangle 1 is on the left
+			  return -1;
+		  }
+		} else if (r1.x == r2.x){
+			// overlapping
+			return 0;
+		} else if (r1.x > r2.x){
+			// r1 to the right of r2
+			if((r2Max >= r1.x) && (r2Max <= r1Max)){
+				// r2 is to the right of r1
+				return 1;
+			}
+	}
+	
 	protected void cycle() {    	
 		time = System.currentTimeMillis();
 		cvSink.grabFrame(source);
@@ -149,8 +172,38 @@ public class TargetThread extends RobotThread {
 //				Imgproc.rectangle(source, new Point(r2.x, r2.y), new Point(r2.x+r2.width, r2.y+r2.height), new Scalar(0, 0, 255));
 //			}
 			
+			Rect leftRectangle = null;
+			Rect rightRectangle = null;
+			
+			int MAX_SEPARATION = 8;
+			
+			for(int i=0; i < filterContoursOutput.size(); i++){
+				// Get bounding rectangle
+				Rect boundingRectangle = Imgproc.boundingRect(filterContoursOutput.get(i));
+				// Check if leftRectangle defined?
+				if (leftRectangle == null) {
+					// Assign it to leftRectangle
+					leftRectangle = boundingRectangle;
+				} // Check to see if the new bounding rectangle is touching the current left rectangle
+				else if (Math.abs(leftRectangle.x - boundingRectangle.x) > MAX_SEPARATION){
+					// Is the bounding rectangle to the left or right of the current left rectangle?
+					if (leftRectangle.x < boundingRectangle.x){
+						// to the right
+						rightRectangle = boundingRectangle;
+					} else {
+						// need to swap rectangles since the bounding rectangle is now left of the current left rectangle
+						rightRectangle = leftRectangle;
+						leftRectangle = boundingRectangle;
+					}
+				} else {
+						// to the left
+						switch(compareRectangle(leftRectangle, boundingRect))					
+					} 
+				} 
+			}
 			for(int i=0; i < filterContoursOutput.size(); i++) {
 				Rect rect = Imgproc.boundingRect(filterContoursOutput.get(i));
+				System.out.println("rectangle " + i + " of " + filterContoursOutput.size() + ": ("+rect.x+","+rect.y+") h:"+rect.height+" w:"+rect.width);
 				
 				Imgproc.rectangle(source, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(0, 0, 255));
 				int yesMan = rect.x + rect.width;
