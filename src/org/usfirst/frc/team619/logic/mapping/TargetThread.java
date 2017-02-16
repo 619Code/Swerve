@@ -168,7 +168,7 @@ public class TargetThread extends RobotThread {
             
 			
 		}catch(Exception e) {
-			System.out.println("Error processing GRIP code!");
+			System.out.println("Error processing GRIP code!" + e + "\n"+ e.getStackTrace());
 			//System.exit(-1);
 		}
 	}
@@ -179,13 +179,14 @@ public class TargetThread extends RobotThread {
 		// merges other rectangles together into the left or right rectangle
 		int totalRectangles = filterContoursOutput.size();
 		//none, one or both rectangles are visible
-		numRects = totalRectangles;
-		if(numRects > 2)
-			numRects = 2;
+//		numRects = totalRectangles;
+//		if(numRects > 2)
+//			numRects = 2;
 		System.out.println("Found " + totalRectangles + " rectangles");
 		
 		for (int i = 0; i < totalRectangles; i++){
 			Rect boundingRectangle = Imgproc.boundingRect(filterContoursOutput.get(i));
+			System.out.println("Rect#"+i+":"+rectangleDescription(boundingRectangle));
 			
 			// Check if leftangle is defined
 			if (leftangle == null){
@@ -194,16 +195,23 @@ public class TargetThread extends RobotThread {
 			} else {
 				switch(compareRectanglesLeftOrRight(leftangle, boundingRectangle)){
 				case -1:
-					// leftangle is on the far left of bounding rectangle
-					rightangle = leftangle;
-					leftangle = boundingRectangle;
+					// leftRectangle is on the far left of bounding rectangle
+					if (rightangle == null) {
+						rightangle = boundingRectangle;
+					} else {
+						rightangle = mergeRectangles(rightangle, boundingRectangle);
+					}
+					break;
 				case 0:
+					System.out.println("lr merge of br");
 					// Left Rectangle overlaps rectangle
 					// Merge the rectangles
 					rightangle = boundingRectangle;
+					break;
 				case 1:
 					// left rectangle is to the right of bounding rectangle
 					// swap rectangles
+					System.out.println("swap");
 					if (leftangle == null){
 						rightangle = leftangle;
 						leftangle = boundingRectangle;
@@ -215,9 +223,10 @@ public class TargetThread extends RobotThread {
 						rightangle = leftangle;
 						leftangle = boundingRectangle;
 					}
+					break;
 				}
 			}
-			centangle = mergeRectangles(leftangle, rightangle);
+			//centangle = mergeRectangles(leftangle, rightangle);
 		}
 		
 //		for (int i = 0; i < totalRectangles; i++){
@@ -257,9 +266,9 @@ public class TargetThread extends RobotThread {
 //				}
 //			}
 		//Find the center between both rectangles
-		try {
-		centerX = (rightangle.x + (centangle.x+centangle.width))/2;
-		}catch(NullPointerException e) { System.out.println(" NULL  RETCNAGLE BUT IGNORE PLS NOT IMPORTANT"); }
+//		try {
+//		centerX = (rightangle.x + (centangle.x+centangle.width))/2;
+//		}catch(NullPointerException e) { System.out.println(" NULL  RETCNAGLE BUT IGNORE PLS NOT IMPORTANT"); }
 	}
 	
 	
@@ -279,15 +288,10 @@ public class TargetThread extends RobotThread {
 		}
 	}
 	
-	protected void drawRectangle(Mat source, Rect rect, int color) {
-		Scalar colorScalar = new Scalar(0, 255, 0);
-		if(color == 0)
-			colorScalar = new Scalar(0, 0, 255);
-		else if(color == 1)
-			colorScalar = new Scalar(255, 0, 0);
+	protected void drawRectangle(Mat source, Rect rect, Scalar color) {
 		// Draw a red rectangle from the top left (tl) to the bottom right (br) of the rect on the source image
 		if (rect != null) {
-			Imgproc.rectangle(source,rect.tl(), rect.br(), colorScalar);
+			Imgproc.rectangle(source,rect.tl(), rect.br(), color);
 		}else {
 			System.out.println("THE THING IS NULL " + color);
 			source = original;
@@ -295,24 +299,32 @@ public class TargetThread extends RobotThread {
 	}
 	
 	protected void displayTargeting(){
-		try {
-			if(filterContoursOutput.get(0) != null)
-				drawRectangle(source, rightangle, 0);
-			if(filterContoursOutput.get(1) != null) {
-				drawRectangle(source, centangle, 1);
-				drawRectangle(source, leftangle, 2);
-			}
-		}catch(IndexOutOfBoundsException e) { System.out.println("INDEX OUT OF BOUNDS IGNORE THIS"); }
+//		try {
+//			if(filterContoursOutput.get(0) != null)
+//				drawRectangle(source, rightangle, 0);
+//			if(filterContoursOutput.get(1) != null) {
+//				drawRectangle(source, centangle, 1);
+//				drawRectangle(source, leftangle, 2);
+//			}
+//		}catch(IndexOutOfBoundsException e) { System.out.println("INDEX OUT OF BOUNDS IGNORE THIS"); }
+
+		if (leftangle != null){
+			drawRectangle(source, leftangle, new Scalar(0,255,0));
+		}
+		
+		if (rightangle != null){
+			drawRectangle(source, rightangle, new Scalar(0,0,255));
+		}
 		
 		Imgproc.putText(source, rectangleDescription(leftangle), 
 				new Point(40,20), 
 				Core.FONT_ITALIC, 0.4, 
 				new Scalar(255,255,255), 1);
 		
-		Imgproc.putText(source, rectangleDescription(centangle), 
-						new Point(40,40),
-						Core.FONT_ITALIC, 0.4,
-						new Scalar(255,255,255), 1);
+//		Imgproc.putText(source, rectangleDescription(centangle), 
+//						new Point(40,40),
+//						Core.FONT_ITALIC, 0.4,
+//						new Scalar(255,255,255), 1);
 	
 		Imgproc.putText(source, rectangleDescription(rightangle), 
 				new Point(40,100), 
