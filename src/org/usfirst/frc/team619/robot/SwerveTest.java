@@ -22,7 +22,6 @@ import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.logic.mapping.AutoThread;
 import org.usfirst.frc.team619.logic.mapping.TargetThread;
 import org.usfirst.frc.team619.logic.mapping.SwerveDriveMappingThread;
-import org.usfirst.frc.team619.logic.mapping.TempThread;
 import org.usfirst.frc.team619.subsystems.DriverStation;
 import org.usfirst.frc.team619.subsystems.GripPipeline;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
@@ -325,7 +324,6 @@ public class SwerveTest extends IterativeRobot {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(3, threadManager, cvSink, outputStream);
         driveThread = new SwerveDriveMappingThread(leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
-        TempThread temp = new TempThread(targetThread, imgLock, driveBase, 3, threadManager);
         driveThread.start();
     }
     
