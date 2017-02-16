@@ -220,16 +220,16 @@ public class GripPipeline implements VisionPipeline {
 			if (ratio < minRatio || ratio > maxRatio) continue;
 			output.add(contour);
 		}
-		//Sorting
-//		for(int i=0; i < output.size(); i++) {
-//		    for (int j = output.size(); j > i; j--) {
-//		        if (output.get(i).height() < output.get(j).height()) {
-//		            MatOfPoint tmp = output.get(i);
-//		            output.set(i, output.get(j));
-//		            output.set(j, tmp);
-//		        }
-//		    }
-//		}
+		//Sorting by size, largest to smallest
+		for(int i=0; i < output.size(); i++) {
+		    for (int j = output.size(); j > i; j--) {
+		        if (output.get(i).height() < output.get(j).height()) {
+		            MatOfPoint tmp = output.get(i);
+		            output.set(i, output.get(j));
+		            output.set(j, tmp);
+		        }
+		    }
+		}
 	}
 	
 }

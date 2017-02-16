@@ -1,11 +1,9 @@
 package org.usfirst.frc.team619.logic.mapping;
 
+import org.opencv.core.Rect;
 import org.usfirst.frc.team619.logic.RobotThread;
 import org.usfirst.frc.team619.logic.ThreadManager;
-import org.usfirst.frc.team619.robot.SwerveTest;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AutoThread extends RobotThread {
 	
@@ -14,6 +12,43 @@ public class AutoThread extends RobotThread {
 	private TargetThread vision;
 	boolean stop = false;
 	boolean stopMoving = false;
+	
+	//movement vars
+	double turn = 0;
+	double moveX = 0;
+	double moveY = 0;
+	
+	//Rectangles
+	Rect rightRectangle, leftRectangle;
+	
+	//current points
+	int heightRect1, heightRect2;
+	int widthRect1, widthRect2;
+	
+	int rectX1, rectX2;
+	int rectY1, rectY2;
+	
+	int rightCenter, leftCenter;
+	
+	//other
+	int centerX;
+	int numRects;
+	int camOffset = 0;
+	
+	//target ranges
+	int leastX = 10;
+	int greatestX = 30;
+	
+	int leastY = 50;
+	int greatestY = 100;
+	
+	//dont know range
+	int leastHeight = 20;
+	int greatestHeight = 40;
+	
+	//dont know range
+	int leastWidth = 20;
+	int greatestWidth = 35;
 
 	public AutoThread(TargetThread vision, Object syncLock, SwerveDriveBase driveBase, int period, ThreadManager threadManager) {
 		super(period, threadManager);
@@ -26,70 +61,29 @@ public class AutoThread extends RobotThread {
 	}
 
 	protected void cycle() {
-		//movement vars
-		double turn = 0;
-		double moveX = 0;
-		double moveY = 0;
-		
-		//current points
-		int heightRect1;
-		int heightRect2;
-		
-		int widthRect1;
-		int widthRect2;
-		
-		int rectX1;
-		int rectX2;
-		
-		int rectY1;
-		int rectY2;
-		
-		//other
-		int numRects;
-		
-		//target ranges
-		int leastX = 10;
-		int greatestX = 30;
-		
-		int leastY = 50;
-		int greatestY = 100;
-		
-		//dont know range
-		int leastHeight = 20;
-		int greatestHeight = 40;
-		
-		//dont know range
-		int leastWidth = 20;
-		int greatestWidth = 35;
+		long time = System.currentTimeMillis();
 		
 		synchronized (imgLock){
-			heightRect1 = vision.getRectHeight(0);
-			heightRect2 = vision.getRectHeight(1);
+			rightRectangle = vision.getRightangle();
+			leftRectangle = vision.getCentangle();
 			
-			widthRect1 = vision.getRectWidth(0);
-			widthRect2 = vision.getRectHeight(1);
+			rightCenter = rightRectangle.x + rightRectangle.width;
+			leftCenter =  + leftRectangle.width;
 			
-			rectX1 = vision.getRectX(0);
-			rectX2 = vision.getRectX(1);
-			
-			rectY1 = vision.getRectY(0);
-			rectY2 = vision.getRectY(1);
+			centerX = (int)vision.getCenter();
 			
 			numRects = vision.getNumRects();
 		}
 		
-		java.util.Date date = new java.util.Date();
-		System.out.println(date);
-		
-		if(numRects > 0){
+		if(numRects > 0) {
 		//if the height and width are less than target values
-			if(heightRect1 < leastHeight){
+			if(heightRect1 < leastHeight) {
 				//move forward
 				moveY = 0.3;
 				System.out.println(heightRect1);
 				System.out.println("Going forward!");
 			//if the height and width are greater than target values
-			}else if(heightRect1 > greatestHeight){
+			}else if(heightRect1 > greatestHeight) {
 				//move backwards
 				moveY = -0.3;
 				System.out.println("Going backward!");
@@ -98,14 +92,29 @@ public class AutoThread extends RobotThread {
 				stopMoving = true;
 				moveY = 0;
 			}
-			if(!stopMoving){
+			//both targets are in view
+			if(70 + camOffset < leftCenter || leftCenter < 90 + camOffset && numRects > 1) {
+				if(leftCenter < 70)
+					System.out.println("MOVE TO THE LEFT");
+				if(leftCenter > 90)
+					System.out.println("MOVE TO THE RIGHT");
+				moveX = (leftCenter - vision.IMG_WIDTH)/2; //Left of screen is -1, middle is 0, right is 1
+				moveX += camOffset; //Add camera's offset, maybe unneeded depending on mounting
+				moveX *= 0.5; //speed multiplier. Speed changes linearly but may need adjusting
+			}else //Both targets are not in view, dont change position
+				moveX = 0;
+			if(!stopMoving) {
 				System.out.println("I AM MOVING");
-				driveBase.move(moveY, 0, 0);
+				driveBase.move(moveY, moveX, 0);
 			}
 			
 		//if height and width are in range of target values
 			//move right until there is only one rectangle
-		}	
+		}
+		
+		//time taken for one cycle
+		time = System.currentTimeMillis();
+		System.out.println(time);
 		//if there is one rectangle
 			//if x value is less than target value
 				//move left

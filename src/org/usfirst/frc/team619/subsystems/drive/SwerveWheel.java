@@ -1,7 +1,6 @@
 package org.usfirst.frc.team619.subsystems.drive;
 
 //import org.usfirst.frc.team619.hardware.CanTalon;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.CANTalon;
 
 public class SwerveWheel {
@@ -67,38 +66,45 @@ public class SwerveWheel {
 			System.err.println( "wheel " + label + " failed to store zero position" );
 	}
 	
-	public void autoZero() {
+	public void autoZeroOld() {
 		int correctionAngle = getCurrentAngle();
 		while(!rotateMotor.isFwdLimitSwitchClosed()){
 			correctionAngle--;
 			setTargetAngle(correctionAngle);
 			goToAngle();
-			try {
-			Thread.sleep(20);
-			}catch(Exception e) {}
+			try { Thread.sleep(20); }catch(Exception e) {}
 		}
 		
 		offset = getCurrentAngle();
 	}
 	
-	public boolean autoZero_() {
+	public boolean autoZero() {
 		if(correctionAngle == -1337) {
 			correctionAngle = getCurrentAngle();
 		}
 		if(!rotateMotor.isFwdLimitSwitchClosed()){
 			System.out.println(rotateMotor.isFwdLimitSwitchClosed());
 			System.out.println(correctionAngle);
+			
 			correctionAngle--;
 			setTargetAngle(correctionAngle);
 			goToAngle();
+			
 			return false;
 		} else {
 			System.out.println(getCurrentAngle());
-			try {
-			Thread.sleep(500);
-			}catch(Exception e) {}
+			try { Thread.sleep(500); }catch(Exception e) {}
+			
 			offset = getCurrentAngle();
 			correctionAngle = getCurrentAngle();
+			//Zero'd position is different for each side, have front be axels toward the gear
+			if(label == "leftFront" || label == "leftRear")
+				correctionAngle += 90;
+			else
+				correctionAngle -= 90;
+			setTargetAngle(correctionAngle);
+			goToAngle();
+			
 			return true;
 		}
 	}

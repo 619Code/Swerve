@@ -8,37 +8,21 @@
 
 package org.usfirst.frc.team619.robot;
 
-import org.opencv.core.Core;
-
-
-
-
-//vision 1/21/17
-import java.util.ArrayList;
-import java.util.List;
-
-import javafx.scene.Camera;
-
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.vision.VisionThread;
 
+import org.opencv.core.Core;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
 import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.logic.mapping.AutoThread;
 import org.usfirst.frc.team619.logic.mapping.TargetThread;
 import org.usfirst.frc.team619.logic.mapping.SwerveDriveMappingThread;
+import org.usfirst.frc.team619.logic.mapping.TempThread;
 import org.usfirst.frc.team619.subsystems.DriverStation;
 import org.usfirst.frc.team619.subsystems.GripPipeline;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
@@ -49,7 +33,6 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.CANTalon;
-import com.sun.prism.paint.Color;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -96,17 +79,10 @@ public class SwerveTest extends IterativeRobot {
 	public final int IMG_WIDTH = 160;
 	public final int IMG_HEIGHT = 120;
 	
-	private VisionThread visionThread;
-	private double centerX = 0;
-	private int height = 0;
-	private int size = 0;
-	private int xVal = 0;
 	UsbCamera camera;
 	CvSink cvSink;
 	CvSource outputStream;
 	GripPipeline grip;
-	
-	private Rect r, r2;
 	
 	private final Object imgLock = new Object();
 
@@ -225,121 +201,122 @@ public class SwerveTest extends IterativeRobot {
     	}).start();
     }
     
-    public void XbasicThread() {
-    	GripPipeline grip  = new GripPipeline();
-    	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-    	
-    	camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
-    	camera.setBrightness(0);
-    	camera.setExposureManual(0);
-    	
-    	CvSink cvSink = CameraServer.getInstance().getVideo();
-    	CvSource outputStream = CameraServer.getInstance().putVideo("v1.1", IMG_WIDTH, IMG_HEIGHT);
-    	
-    	new Thread(() -> {
-    		
-	    	Mat source = new Mat();
-	    	Mat output = new Mat();
-	    	long time = 0;
-	    	int value = 0;
-	    	try {
-	    		Thread.sleep(4000);
-	    	}catch(Exception e){}
-	    	
-	    	while(!Thread.interrupted()) {
-	    		time = System.currentTimeMillis();
-	    		cvSink.grabFrame(source);
-	    		if(source == null) {
-	    			System.out.println(" ERROR VERY BAD");
-	    			continue;
-	    		}
-	    		
-	    		//contour vars
-        		ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
-        		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-        		ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
-        		double filterContoursMinArea = 0.0;
-        		double filterContoursMinPerimeter = 0.0;
-        		double filterContoursMinWidth = 0.0;
-        		double filterContoursMaxWidth = 1000;
-        		double filterContoursMinHeight = 10;
-        		double filterContoursMaxHeight = 1000;
-        		double[] filterContoursSolidity = {0, 100};
-        		double filterContoursMaxVertices = 1000000;
-        		double filterContoursMinVertices = 0;
-        		double filterContoursMinRatio = 0;
-        		double filterContoursMaxRatio = 1000;
-        		
-    			double[] hue = {40.0, 100.0};
-    			double[] sat = {200.0, 255.0};
-    			double[] val = {20.0, 90.0};
-        		
-    			//change colors 0_o
-    			int blue = 1;
-    			int blueMod = 1;
-    			
-    			int green = 1;
-    			int greenMod = 1;
-    			
-    			int red = 1;
-    			int redMod = 1;
-    			try {
-        			grip.hsvThreshold(source, hue, sat, val, output);
-        			grip.desaturate(output, output);
-        			grip.findContours(output, false, findContoursOutput);
-        			grip.filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, 
-        						filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, 
-        						filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
-                    
-        			r = Imgproc.boundingRect(filterContoursOutput.get(0));
-        			r2 = Imgproc.boundingRect(filterContoursOutput.get(1));
-        			
-        		}catch(Exception e) {}
-        			
-        		//change colors 0_o
-        		if(blue >= 255 || blue <= 0){
-        			blueMod *= -1;
-        		}
-        		blue += 8*blueMod;
-        		
-        		if(green >= 255 || green <= 0){
-        			greenMod *= -1;
-        		}
-        		green += 12*greenMod;
-        		
-        		if(red >= 255 || red <= 0){
-        			redMod *= -1;
-        		}
-        		red += 16*redMod;
-        		size = 0;
-        		
-        		if(filterContoursOutput.size() != 0 && r != null && r2 != null) {
-        			synchronized(imgLock) {
-        				size = filterContoursOutput.size();
-        				centerX = (r.x+r2.x)/2;
-        				height = r.height;
-        			}
+//    public void XbasicThread() {
+//    	GripPipeline grip  = new GripPipeline();
+//    	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+//    	
+//    	camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
+//    	camera.setBrightness(0);
+//    	camera.setExposureManual(0);
+//    	
+//    	CvSink cvSink = CameraServer.getInstance().getVideo();
+//    	CvSource outputStream = CameraServer.getInstance().putVideo("v1.1", IMG_WIDTH, IMG_HEIGHT);
+//    	
+//    	new Thread(() -> {
+//    		
+//	    	Mat source = new Mat();
+//	    	Mat output = new Mat();
+//	    	long time = 0;
+//	    	int value = 0;
+//	    	try {
+//	    		Thread.sleep(4000);
+//	    	}catch(Exception e){}
+//	    	
+//	    	while(!Thread.interrupted()) {
+//	    		time = System.currentTimeMillis();
+//	    		cvSink.grabFrame(source);
+//	    		if(source == null) {
+//	    			System.out.println(" ERROR VERY BAD");
+//	    			continue;
+//	    		}
+//	    		
+//	    		//contour vars
+//        		ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
+//        		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
+//        		ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
+//        		double filterContoursMinArea = 0.0;
+//        		double filterContoursMinPerimeter = 0.0;
+//        		double filterContoursMinWidth = 0.0;
+//        		double filterContoursMaxWidth = 1000;
+//        		double filterContoursMinHeight = 10;
+//        		double filterContoursMaxHeight = 1000;
+//        		double[] filterContoursSolidity = {0, 100};
+//        		double filterContoursMaxVertices = 1000000;
+//        		double filterContoursMinVertices = 0;
+//        		double filterContoursMinRatio = 0;
+//        		double filterContoursMaxRatio = 1000;
+//        		
+//    			double[] hue = {40.0, 100.0};
+//    			double[] sat = {200.0, 255.0};
+//    			double[] val = {20.0, 90.0};
+//        		
+//    			//change colors 0_o
+//    			int blue = 1;
+//    			int blueMod = 1;
+//    			
+//    			int green = 1;
+//    			int greenMod = 1;
+//    			
+//    			int red = 1;
+//    			int redMod = 1;
+//    			try {
+//        			grip.hsvThreshold(source, hue, sat, val, output);
+//        			grip.desaturate(output, output);
+//        			grip.findContours(output, false, findContoursOutput);
+//        			grip.filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, 
+//        						filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, 
+//        						filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+//                    
+//        			r = Imgproc.boundingRect(filterContoursOutput.get(0));
+//        			r2 = Imgproc.boundingRect(filterContoursOutput.get(1));
+//        			
+//        		}catch(Exception e) {}
+//        			
+//        		//change colors 0_o
+//        		if(blue >= 255 || blue <= 0){
+//        			blueMod *= -1;
+//        		}
+//        		blue += 8*blueMod;
+//        		
+//        		if(green >= 255 || green <= 0){
+//        			greenMod *= -1;
+//        		}
+//        		green += 12*greenMod;
+//        		
+//        		if(red >= 255 || red <= 0){
+//        			redMod *= -1;
+//        		}
+//        		red += 16*redMod;
+//        		int size = 0;
+//        		Rect r, r2;
+//        		
+//        		if(filterContoursOutput.size() != 0 && r != null && r2 != null) {
+//        			synchronized(imgLock) {
+//        				size = filterContoursOutput.size();
+//        				int centerX = (r.x+r2.x)/2;
+//        				int height = r.height;
+//        			}
 //        			Imgproc.rectangle(source, new Point(r.x, r.y), new Point(r.x+r.width, r.y+r.height), new Scalar(0, 0, 255));
 //        			if(filterContoursOutput.size() > 1) {
 //        				Imgproc.rectangle(source, new Point(r2.x, r2.y), new Point(r2.x+r2.width, r2.y+r2.height), new Scalar(0, 0, 255));
 //        			}
-        			for(int i=0; i < filterContoursOutput.size(); i++) {
-        				Rect rect = Imgproc.boundingRect(filterContoursOutput.get(i));
-        				Imgproc.rectangle(source, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(0, 0, 255));
-        				int yesMan = rect.x + rect.width;
-        				System.out.println("Width: " + yesMan);
-        				System.out.println("Height: " + rect.height);
-        			}
-        		}
-        		Imgproc.putText(source, "v1.3", new Point(output.rows()/8,output.cols()/8), Core.FONT_ITALIC, 0.5, new Scalar(255,255,255), 1);
-        		time = System.currentTimeMillis() - time;
-        		double newTime = 1000/((double)time);
-        		Imgproc.putText(source, "" + (int)newTime + " fps", new Point(output.rows()/8,output.cols()/4), Core.FONT_ITALIC, 0.4, new Scalar(255,255,255), 1);
-            	
-        		outputStream.putFrame(source);
-	    	}
-    	}).start();
-    }
+//        			for(int i=0; i < filterContoursOutput.size(); i++) {
+//        				Rect rect = Imgproc.boundingRect(filterContoursOutput.get(i));
+//        				Imgproc.rectangle(source, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(0, 0, 255));
+//        				int yesMan = rect.x + rect.width;
+//        				System.out.println("Width: " + yesMan);
+//        				System.out.println("Height: " + rect.height);
+//        			}
+//        		}
+//        		Imgproc.putText(source, "v1.3", new Point(output.rows()/8,output.cols()/8), Core.FONT_ITALIC, 0.5, new Scalar(255,255,255), 1);
+//        		time = System.currentTimeMillis() - time;
+//        		double newTime = 1000/((double)time);
+//        		Imgproc.putText(source, "" + (int)newTime + " fps", new Point(output.rows()/8,output.cols()/4), Core.FONT_ITALIC, 0.4, new Scalar(255,255,255), 1);
+//            	
+//        		outputStream.putFrame(source);
+//	    	}
+//    	}).start();
+//    }
 
     /**
      * This function is called when teleop is initialized
@@ -348,20 +325,8 @@ public class SwerveTest extends IterativeRobot {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(3, threadManager, cvSink, outputStream);
         driveThread = new SwerveDriveMappingThread(leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
+        TempThread temp = new TempThread(targetThread, imgLock, driveBase, 3, threadManager);
         driveThread.start();
-    }
-    
-    
-    public int getHeight() {
-    	return height;
-    }
-    
-    public int getSize() {
-    	return size;
-    }
-    
-    public double getCenter() {
-    	return centerX;
     }
     
     /**
