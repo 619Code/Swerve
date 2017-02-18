@@ -48,8 +48,7 @@ public class TargetThread extends RobotThread {
 	Mat source;
 	Mat original;
 	
-	public TargetThread(int period, ThreadManager threadManager,
-		CvSink cvSink, CvSource outputStream) {
+	public TargetThread(int period, ThreadManager threadManager, CvSink cvSink, CvSource outputStream) {
 		super(period, threadManager);
 		grip  = new GripPipeline();
 		this.cvSink = cvSink;
@@ -70,7 +69,7 @@ public class TargetThread extends RobotThread {
 	 * @param r2 Rectangle 2
 	 * @return Position of rightangle
 	 */
-	protected int compareRectanglesLeftOrRight(Rect r1, Rect r2){
+	protected int compareRectangles(Rect r1, Rect r2){
 		//  Compare two rectangles:
 		//  r1 to the left of r2 returns -1
 		//  r1 overlaps r2 returns 0
@@ -169,7 +168,7 @@ public class TargetThread extends RobotThread {
 			
 		}catch(Exception e) {
 			System.out.println("Error processing GRIP code!" + e + "\n"+ e.getStackTrace());
-			//System.exit(-1);
+			System.exit(-1);
 		}
 	}
 	
@@ -189,46 +188,69 @@ public class TargetThread extends RobotThread {
 			System.out.println("Rect#"+i+":"+rectangleDescription(boundingRectangle));
 			
 			// Check if leftangle is defined
-			if (leftangle == null){
-				// Assign it to the leftangle
-				leftangle = boundingRectangle;
-			} else {
-				switch(compareRectanglesLeftOrRight(leftangle, boundingRectangle)){
-				case -1:
-					// leftRectangle is on the far left of bounding rectangle
-					if (rightangle == null) {
-						rightangle = boundingRectangle;
-					} else {
-						rightangle = mergeRectangles(rightangle, boundingRectangle);
-					}
-					break;
-				case 0:
-					System.out.println("lr merge of br");
-					// Left Rectangle overlaps rectangle
-					// Merge the rectangles
-					rightangle = boundingRectangle;
-					break;
-				case 1:
-					// left rectangle is to the right of bounding rectangle
-					// swap rectangles
-					System.out.println("swap");
-					if (leftangle == null){
-						rightangle = leftangle;
-						leftangle = boundingRectangle;
-					} else {
-						// Weird edge case
-						// Right Rectangle already there
-						// re target to the left?
-						// need to test
-						rightangle = leftangle;
-						leftangle = boundingRectangle;
-					}
-					break;
-				}
-			}
-			//centangle = mergeRectangles(leftangle, rightangle);
+//			if (leftangle == null){
+//				// Assign it to the leftangle
+//				leftangle = boundingRectangle;
+//			} else {
+//				switch(compareRectanglesLeftOrRight(leftangle, boundingRectangle)){
+//				case -1:
+//					// leftRectangle is on the far left of bounding rectangle
+//					if (rightangle == null) {
+//						rightangle = boundingRectangle;
+//					} else {
+//						rightangle = mergeRectangles(rightangle, boundingRectangle);
+//					}
+//					break;
+//				case 0:
+//					System.out.println("lr merge of br");
+//					// Left Rectangle overlaps rectangle
+//					// Merge the rectangles
+//					rightangle = boundingRectangle;
+//					break;
+//				case 1:
+//					// left rectangle is to the right of bounding rectangle
+//					// swap rectangles
+//					System.out.println("swap");
+//					if (leftangle == null){
+//						rightangle = leftangle;
+//						leftangle = boundingRectangle;
+//					} else {
+//						// Weird edge case
+//						// Right Rectangle already there
+//						// re target to the left?
+//						// need to test
+//						rightangle = leftangle;
+//						leftangle = boundingRectangle;
+//					}
+//					break;
+//				}
+//			}
 		}
+		leftangle = null;
+		rightangle = null;
+		centangle = null;
+		if(filterContoursOutput.size() >= 1)
+			leftangle = Imgproc.boundingRect(filterContoursOutput.get(0));
+		if(filterContoursOutput.size() >= 2)
+			rightangle = Imgproc.boundingRect(filterContoursOutput.get(1));
 		
+		if(leftangle != null && rightangle != null) {
+			switch(compareRectangles(leftangle, rightangle)) {
+			case -1:
+				//Leftangle is in the right place
+				break;
+			case 0:
+				//overlap, careful with this
+				break;
+			case 1:
+				//rectangles are switched
+				Rect temp = leftangle;
+				leftangle = rightangle;
+				rightangle = temp;
+				break;
+			}
+			centangle = mergeRectangles(leftangle, rightangle);
+		}
 //		for (int i = 0; i < totalRectangles; i++){
 //			Rect boundingRectangle = Imgproc.boundingRect(filterContoursOutput.get(i));
 //			
@@ -337,6 +359,10 @@ public class TargetThread extends RobotThread {
     //return number of rectangles in an image
     public int getNumRects() {
     	return numRects;
+    }
+    
+    public Rect getLeftangle() {
+    	return leftangle;
     }
     
     public Rect getCentangle() {

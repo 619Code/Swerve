@@ -222,7 +222,7 @@ public class GripPipeline implements VisionPipeline {
 		}
 		//Sorting by size, largest to smallest
 		for(int i=0; i < output.size(); i++) {
-		    for (int j = output.size(); j > i; j--) {
+		    for (int j = output.size()-1; j > i; j--) {
 		        if (output.get(i).height() < output.get(j).height()) {
 		            MatOfPoint tmp = output.get(i);
 		            output.set(i, output.get(j));
