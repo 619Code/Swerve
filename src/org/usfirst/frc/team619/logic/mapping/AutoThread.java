@@ -1,9 +1,12 @@
 package org.usfirst.frc.team619.logic.mapping;
 
 import org.opencv.core.Rect;
+import org.usfirst.frc.team619.hardware.AnalogUltrasonic;
 import org.usfirst.frc.team619.logic.RobotThread;
 import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
+
+import com.ctre.CANTalon;
 
 public class AutoThread extends RobotThread {
 	
@@ -19,7 +22,7 @@ public class AutoThread extends RobotThread {
 	double moveY = 0;
 	
 	//Rectangles
-	Rect rightRectangle, leftRectangle;
+	Rect rightangle, leftangle, centangle;
 	
 	//current points
 	int heightRect1, heightRect2;
@@ -31,9 +34,9 @@ public class AutoThread extends RobotThread {
 	int rightCenter, leftCenter;
 	
 	//other
-	int centerX;
+	double centerX;
 	int numRects;
-	int camOffset = 0;
+	double distance;
 	
 	//target ranges
 	int leastX = 10;
@@ -42,94 +45,110 @@ public class AutoThread extends RobotThread {
 	int leastY = 50;
 	int greatestY = 100;
 	
-	//dont know range
-	int leastHeight = 20;
-	int greatestHeight = 40;
+	int leastHeight = 65;
+	int greatestHeight = 70;
 	
-	//dont know range
-	int leastWidth = 20;
-	int greatestWidth = 35;
+	int leastWidth = 30;
+	int greatestWidth = 40;
 
-	public AutoThread(TargetThread vision, Object syncLock, SwerveDriveBase driveBase, int period, ThreadManager threadManager) {
+	boolean isRunning;
+	boolean gearLaunched;
+	//Hardware
+	CANTalon gearOutake;
+	AnalogUltrasonic ultrasonic;
+	
+	public AutoThread(TargetThread vision, Object syncLock, SwerveDriveBase driveBase, int period, ThreadManager threadManager, CANTalon gearOutakeMotor, AnalogUltrasonic ultrasanic) {
 		super(period, threadManager);
 		driveBase.switchToGearCentric();
 		imgLock = syncLock;
 		this.driveBase = driveBase;
 		this.vision = vision;
 		this.driveBase.switchToGearCentric();
+		gearOutake = gearOutakeMotor;
+		isRunning = false;
+		gearLaunched = false;
+		ultrasonic = ultrasanic;
 		start();
 	}
 
 	protected void cycle() {
-		long time = System.currentTimeMillis();
+		rightangle = vision.getRightangle();
+		leftangle = vision.getLeftangle();
+		centangle = vision.getCentangle();
 		
-		synchronized (imgLock){
-			rightRectangle = vision.getRightangle();
-			leftRectangle = vision.getCentangle();
-			
-			rightCenter = rightRectangle.x + rightRectangle.width;
-			leftCenter =  + leftRectangle.width;
-			
-			centerX = (int)vision.getCenter();
-			
-			numRects = vision.getNumRects();
-		}
-		
-		if(numRects > 0) {
-		//if the height and width are less than target values
-			if(heightRect1 < leastHeight) {
+		distance = ultrasonic.getDistanceIn();
+		System.out.println("AND THE DISTANCE IS: " + distance);
+		numRects = vision.getNumRects();
+		//try { Thread.sleep(5000); }catch(Exception e){}
+		if(numRects > 1 && !gearLaunched) {
+			System.out.println("IM SETTING ISRUNNING TO TRUE ANY MINUTE NOW");
+			isRunning = true;
+			centerX = (centangle.x + (centangle.x+centangle.width))/2;
+//			System.out.println(centangle.height);
+			//if the height and width are less than target values
+			if(centangle.height < leastHeight) {
 				//move forward
-				moveY = 0.3;
-				System.out.println(heightRect1);
-				System.out.println("Going forward!");
+				moveY = 0.2;
+//				System.out.println(centangle.height);
+//				System.out.println("Going forward!");
 			//if the height and width are greater than target values
-			}else if(heightRect1 > greatestHeight) {
+			}else if(centangle.height > greatestHeight) {
 				//move backwards
-				moveY = -0.3;
-				System.out.println("Going backward!");
-			}else{
-				System.out.println("STOPPING");
-				stopMoving = true;
+				moveY = -0.2;
+//				System.out.println("Going backward!");
+			}else	
 				moveY = 0;
-			}
 			//both targets are in view
-			if(70 + camOffset < leftCenter || leftCenter < 90 + camOffset && numRects > 1) {
-				if(leftCenter < 70)
-					System.out.println("MOVE TO THE LEFT");
-				if(leftCenter > 90)
-					System.out.println("MOVE TO THE RIGHT");
-				moveX = (leftCenter - vision.IMG_WIDTH)/2; //Left of screen is -1, middle is 0, right is 1
-				moveX += camOffset; //Add camera's offset, maybe unneeded depending on mounting
-				moveX *= 0.5; //speed multiplier. Speed changes linearly but may need adjusting
-			}else //Both targets are not in view, dont change position
+			int imgCenter = vision.IMG_WIDTH/2;
+			System.out.println("Center: "+centerX);
+			if(imgCenter-10 < centerX && centerX < imgCenter+10 && numRects > 1) {
 				moveX = 0;
-			if(!stopMoving) {
-				System.out.println("I AM MOVING");
-				driveBase.move(moveY, moveX, 0);
-			}
+//				if(centerX > imgCenter+10)
+//					System.out.println("MOVE TO THE RIGHT " + centerX);
+//				if(centerX < imgCenter-10)
+//					System.out.println("MOVE TO THE LEFT " + centerX);
+				//moveX *= -0.8; //speed multiplier. Speed changes linearly but may need adjusting
+			}else{
+				moveX = (centerX-imgCenter)/imgCenter; //Left of screen is -1, middle is 0, right is 1
+				moveX *= 0.9;
+				if(moveX > 0.3){
+					moveX = 0.3;
+				} else if(moveX < -0.3){
+					moveX = -0.3;
+				}
+				System.out.println("ADJUSTED VALUE: " + moveX);
+			} //Both targets are not in view, dont change position
+				//moveX = 0;
+			System.out.println(moveY);
 			
-		//if height and width are in range of target values
-			//move right until there is only one rectangle
+			driveBase.move(moveY, moveX, 0);
+		}else if(!gearLaunched) {
+			System.out.println("GEAR ISNT LAUNCHED YET HUEUEUEUEU");
+			driveBase.move(0,0,0);
+			System.out.println("I THINK ISRUNNING IS: " + isRunning);
+			if(isRunning == true && distance < 76) {
+				System.out.println("LAUNCH GEAR NOW");
+				gearOutake.set(-1);
+				driveBase.move(-0.25, 0, 0);
+				try{ Thread.sleep(100); }catch(Exception e) { }
+				gearLaunched = true;
+			}
+			if(gearLaunched && isRunning == true){
+				System.out.println("WHY AM I IN HERE FSHJSFHSDFHDFHJSDFHFFFDHDFHDFJFJFDSJDJJFJHSDFJDFJDFJDFJJHSDFJKSDFJDJDFJFJHDFFDFJHFDFDFJFFDFDFDFSHJFSDHJSDFHJSFDHJSDFJHSDFJHDSFJHKLFJKFSDH");
+				gearOutake.set(0);
+				isRunning = false;
+				try { Thread.sleep(1150); }catch(Exception e) {}
+				driveBase.move(0, 0, 0);
+//				driveBase.move(-0.25, 0, 0);
+//				gearOutake.set(-0.2);
+			}
 		}
-		
-		//time taken for one cycle
-		time = System.currentTimeMillis();
-		System.out.println(time);
-		//if there is one rectangle
-			//if x value is less than target value
-				//move left
-			//if x value sis greater than target value
-				//move right
-			//else the target value is in target range
-			//if y value is less than target value
-				//move forward
-			//if y value is greater than target value
-				//move back
-			//else then the robot is in target range
-				//shoot gear
-				//stop robot
-		//else no rectangles
-			//stop robot
+//		}else {
+//			try { Thread.sleep(200); }catch(Exception e) {}
+//			gearOutake.set(0);
+//			try { Thread.sleep(1000); }catch(Exception e){}
+//			driveBase.move(0, 0, 0);
+//		}
 	}
 	
 //	protected void cycleOld() {

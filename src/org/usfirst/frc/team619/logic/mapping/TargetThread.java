@@ -42,15 +42,24 @@ public class TargetThread extends RobotThread {
 	Rect leftangle;
 	int centerX;
 	int numRects;
+	Mat output;
+	Object imgLock;
 	
+	public final static double[] brightGreenHue = {60.0, 80.0};
+	public final static double[] brightGreenSat = {225.0, 255.0};
+	public final static double[] brightGreenVal = {85.0, 200.0};
 	
 	ArrayList<MatOfPoint> findContoursOutput;
 	Mat source;
 	Mat original;
 	
-	public TargetThread(int period, ThreadManager threadManager, CvSink cvSink, CvSource outputStream) {
+	public TargetThread(Object imgLock, int period, ThreadManager threadManager, CvSink cvSink, CvSource outputStream) {
 		super(period, threadManager);
 		grip  = new GripPipeline();
+		source = new Mat();
+		output = new Mat();
+		original = new Mat();
+		this.imgLock = imgLock;
 		this.cvSink = cvSink;
 		this.outputStream = outputStream;
 		start();
@@ -115,9 +124,6 @@ public class TargetThread extends RobotThread {
 		// Get the bounding rectangles from the current image
 		// store all the rectangles in the findContoursOutput variable
 		
-		source = new Mat();
-		Mat output = new Mat();
-		
 		cvSink.grabFrame(source);
 		original = source;
 		
@@ -140,9 +146,12 @@ public class TargetThread extends RobotThread {
 		double filterContoursMinRatio = 0;
 		double filterContoursMaxRatio = 1000;
 		
-		double[] hue = {40.0, 100.0};
-		double[] sat = {200.0, 255.0};
-		double[] val = {20.0, 90.0};
+//		double[] hue = {40.0, 100.0};
+//		double[] sat = {200.0, 255.0};
+//		double[] val = {20.0, 90.0};
+		double[] hue = brightGreenHue;
+		double[] sat = brightGreenSat;
+		double[] val = brightGreenVal;
 		
 		//change colors 0_o
 //		int blue = 1;
@@ -153,41 +162,35 @@ public class TargetThread extends RobotThread {
 //		
 //		int red = 1;
 //		int redMod = 1;
-		try {
-			grip.hsvThreshold(source, hue, sat, val, output);
-			grip.desaturate(output, output);
-			grip.findContours(output, false, findContoursOutput);
-			grip.filterContours(filterContoursContours, filterContoursMinArea, 
-								filterContoursMinPerimeter, filterContoursMinWidth, 
-								filterContoursMaxWidth, filterContoursMinHeight, 
-								filterContoursMaxHeight, filterContoursSolidity, 
-								filterContoursMaxVertices, filterContoursMinVertices, 
-								filterContoursMinRatio, filterContoursMaxRatio, 
-								filterContoursOutput);
-            
-			
-		}catch(Exception e) {
-			System.out.println("Error processing GRIP code!" + e + "\n"+ e.getStackTrace());
-			System.exit(-1);
-		}
+		//System.out.println("Target Thread Synced");
+		grip.hsvThreshold(source, hue, sat, val, output);
+		grip.desaturate(output, output);
+		grip.findContours(output, false, findContoursOutput);
+		grip.filterContours(filterContoursContours, filterContoursMinArea, 
+							filterContoursMinPerimeter, filterContoursMinWidth, 
+							filterContoursMaxWidth, filterContoursMinHeight, 
+							filterContoursMaxHeight, filterContoursSolidity, 
+							filterContoursMaxVertices, filterContoursMinVertices, 
+							filterContoursMinRatio, filterContoursMaxRatio, 
+							filterContoursOutput);
 	}
 	
 	protected void processRectangles(){
 		// Iterates through the rectangles
 		// identifies which rectangle is left and right
 		// merges other rectangles together into the left or right rectangle
-		int totalRectangles = filterContoursOutput.size();
+		numRects = filterContoursOutput.size();
 		//none, one or both rectangles are visible
 //		numRects = totalRectangles;
 //		if(numRects > 2)
 //			numRects = 2;
-		System.out.println("Found " + totalRectangles + " rectangles");
+//		System.out.println("Found " + numRects + " rectangles");
 		
-		for (int i = 0; i < totalRectangles; i++){
-			Rect boundingRectangle = Imgproc.boundingRect(filterContoursOutput.get(i));
-			System.out.println("Rect#"+i+":"+rectangleDescription(boundingRectangle));
-			
-			// Check if leftangle is defined
+//		for (int i = 0; i < numRects; i++){
+//			Rect boundingRectangle = Imgproc.boundingRect(filterContoursOutput.get(i));
+//			System.out.println("Rect#"+i+":"+rectangleDescription(boundingRectangle));
+//			
+//			// Check if leftangle is defined
 //			if (leftangle == null){
 //				// Assign it to the leftangle
 //				leftangle = boundingRectangle;
@@ -225,32 +228,33 @@ public class TargetThread extends RobotThread {
 //					break;
 //				}
 //			}
-		}
-		leftangle = null;
-		rightangle = null;
-		centangle = null;
-		if(filterContoursOutput.size() >= 1)
-			leftangle = Imgproc.boundingRect(filterContoursOutput.get(0));
-		if(filterContoursOutput.size() >= 2)
-			rightangle = Imgproc.boundingRect(filterContoursOutput.get(1));
-		
-		if(leftangle != null && rightangle != null) {
-			switch(compareRectangles(leftangle, rightangle)) {
-			case -1:
-				//Leftangle is in the right place
-				break;
-			case 0:
-				//overlap, careful with this
-				break;
-			case 1:
-				//rectangles are switched
-				Rect temp = leftangle;
-				leftangle = rightangle;
-				rightangle = temp;
-				break;
-			}
-			centangle = mergeRectangles(leftangle, rightangle);
-		}
+//		}
+			if(numRects >= 1)
+				leftangle = Imgproc.boundingRect(filterContoursOutput.get(0));
+			else
+				leftangle = null;
+			if(numRects >= 2)
+				rightangle = Imgproc.boundingRect(filterContoursOutput.get(1));
+			else
+				rightangle = null;
+			if(leftangle != null && rightangle != null) {
+				switch(compareRectangles(leftangle, rightangle)) {
+				case -1:
+					//Leftangle is in the right place
+					break;
+				case 0:
+					//overlap, careful with this
+					break;
+				case 1:
+					//rectangles are switched
+					Rect temp = leftangle;
+					leftangle = rightangle;
+					rightangle = temp;
+					break;
+				}
+				centangle = mergeRectangles(leftangle, rightangle);
+			}else
+				centangle = null;
 //		for (int i = 0; i < totalRectangles; i++){
 //			Rect boundingRectangle = Imgproc.boundingRect(filterContoursOutput.get(i));
 //			
@@ -329,7 +333,13 @@ public class TargetThread extends RobotThread {
 //				drawRectangle(source, leftangle, 2);
 //			}
 //		}catch(IndexOutOfBoundsException e) { System.out.println("INDEX OUT OF BOUNDS IGNORE THIS"); }
-
+		
+		if (centangle != null) {
+			drawRectangle(source, centangle, new Scalar(255, 0, 0));
+			int center = (centangle.x + (centangle.x+centangle.width))/2;
+			Imgproc.line(source, new Point(center, 0), new Point(center, 120), new Scalar(255, 255, 255));
+		}
+		
 		if (leftangle != null){
 			drawRectangle(source, leftangle, new Scalar(0,255,0));
 		}
@@ -337,6 +347,8 @@ public class TargetThread extends RobotThread {
 		if (rightangle != null){
 			drawRectangle(source, rightangle, new Scalar(0,0,255));
 		}
+		
+		Imgproc.line(source, new Point(80,0), new Point(80, 120), new Scalar(200, 200, 0));
 		
 		Imgproc.putText(source, rectangleDescription(leftangle), 
 				new Point(40,20), 
@@ -361,11 +373,11 @@ public class TargetThread extends RobotThread {
     	return numRects;
     }
     
-    public Rect getLeftangle() {
+    public synchronized Rect getLeftangle() {
     	return leftangle;
     }
     
-    public Rect getCentangle() {
+    public synchronized Rect getCentangle() {
     	return centangle;
     }
     
@@ -380,40 +392,40 @@ public class TargetThread extends RobotThread {
     public boolean isRunning() {
     	return isRunning;
     }
-    
-    public int getRectWidth(int rectIndex) {
-    	int width = 0;
-    	if(rectIndex == 0 && rightangle != null)
-    		width = rightangle.width;
-    	else if(centangle != null)
-    		width = centangle.width;
-    	return width;
-    }
-    
-    public int getRectHeight(int rectIndex) {
-    	int height = 0;
-    	if(rectIndex == 0 && rightangle != null)
-    		height = rightangle.height;
-    	else if(centangle != null)
-    		height = centangle.height;
-    	return height;
-    }
-    
-    public int getRectX(int rectIndex) {
-    	int x = 0;
-    	if(rectIndex == 0 && rightangle != null)
-    		x = rightangle.x;
-    	else if(centangle != null)
-    		x = centangle.x;
-    	return x;
-    }
-    
-    public int getRectY(int rectIndex) {
-    	int y = 0;
-    	if(rectIndex == 0 && rightangle != null)
-    		y = rightangle.y;
-    	else if(centangle != null)
-    		y = centangle.y;
-    	return y;
-    }
+//    
+//    public int getRectWidth(int rectIndex) {
+//    	int width = 0;
+//    	if(rectIndex == 0 && rightangle != null)
+//    		width = rightangle.width;
+//    	else if(centangle != null)
+//    		width = centangle.width;
+//    	return width;
+//    }
+//    
+//    public int getRectHeight(int rectIndex) {
+//    	int height = 0;
+//    	if(rectIndex == 0 && rightangle != null)
+//    		height = rightangle.height;
+//    	else if(centangle != null)
+//    		height = centangle.height;
+//    	return height;
+//    }
+//    
+//    public int getRectX(int rectIndex) {
+//    	int x = 0;
+//    	if(rectIndex == 0 && rightangle != null)
+//    		x = rightangle.x;
+//    	else if(centangle != null)
+//    		x = centangle.x;
+//    	return x;
+//    }
+//    
+//    public int getRectY(int rectIndex) {
+//    	int y = 0;
+//    	if(rectIndex == 0 && rightangle != null)
+//    		y = rightangle.y;
+//    	else if(centangle != null)
+//    		y = centangle.y;
+//    	return y;
+//    }
 }

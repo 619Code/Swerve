@@ -18,6 +18,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.usfirst.frc.team619.hardware.AnalogUltrasonic;
 import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.logic.mapping.AutoThread;
 import org.usfirst.frc.team619.logic.mapping.TargetThread;
@@ -69,6 +70,14 @@ public class SwerveTest extends IterativeRobot {
     CANTalon driveLeftFront;
     CANTalon steerLeftFront;
     
+    CANTalon climberMotor1;
+    CANTalon climberMotor2;
+    CANTalon intakeMotor;
+    CANTalon outakeMotor;
+    CANTalon gearOutakeMotor;
+    
+    AnalogUltrasonic ultrasonic;
+    
 	//Control
 	private SwerveCalc wheelCalculator;
 	double strafe = 0;
@@ -113,6 +122,10 @@ public class SwerveTest extends IterativeRobot {
         //driver station
         driverStation = new DriverStation();
         
+        //Hardware
+        ultrasonic = new AnalogUltrasonic(0);
+        
+        //CanTalons
         driveLeftFront = new CANTalon(7);
         steerLeftFront = new CANTalon(5);
         leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
@@ -125,10 +138,16 @@ public class SwerveTest extends IterativeRobot {
         driveRightRear = new CANTalon(1);
         steerRightRear = new CANTalon(3);
         rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
+        
+        climberMotor1 = new CANTalon(9);
+        climberMotor2 = new CANTalon(10);
+        intakeMotor = new CANTalon(8);
+        outakeMotor = new CANTalon(11);
+        gearOutakeMotor = new CANTalon(12);
 
         //subsystems
-        driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 18.0, 20.0 );
-        wheelCalculator = new SwerveCalc(20.0, 18.0);
+        driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 17.0, 19.0 );
+        wheelCalculator = new SwerveCalc(19.0, 17.0);
         
         //vision
         camera = CameraServer.getInstance().startAutomaticCapture();
@@ -149,8 +168,8 @@ public class SwerveTest extends IterativeRobot {
      */    
     public void autonomousInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-        TargetThread targetThread = new TargetThread(3, threadManager, cvSink, outputStream);
-    	autoThread = new AutoThread(targetThread, imgLock, driveBase, 3, threadManager);
+        TargetThread targetThread = new TargetThread(imgLock, 3, threadManager, cvSink, outputStream);
+    	autoThread = new AutoThread(targetThread, imgLock, driveBase, 3, threadManager, gearOutakeMotor, ultrasonic);
 //    	threadManager.addThread(autoThread);
 //    	autoThread.run();
 //    	driveBase.switchToGearCentric();
@@ -322,7 +341,7 @@ public class SwerveTest extends IterativeRobot {
      */
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-    	TargetThread targetThread = new TargetThread(3, threadManager, cvSink, outputStream);
+    	TargetThread targetThread = new TargetThread(imgLock, 3, threadManager, cvSink, outputStream);
         driveThread = new SwerveDriveMappingThread(leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
         driveThread.start();
     }
@@ -415,8 +434,7 @@ public class SwerveTest extends IterativeRobot {
         SmartDashboard.putNumber("BL: ", driveBase.getLeftTalon2().getSpeed());
         SmartDashboard.putNumber("BR: ", driveBase.getRightTalon2().getSpeed());
 */
-    	SmartDashboard.putNumber("NavX Yaw: ", driveBase.getYaw());
-    	SmartDashboard.putBoolean("Field centric: ", driveBase.getFieldCentric());
+    	System.out.println(ultrasonic.getDistanceIn());
     }
     
     
