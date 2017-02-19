@@ -51,6 +51,7 @@ public class SwerveTest extends IterativeRobot {
 	//Logic
 	SwerveDriveMappingThread driveThread;
 	AutoThread autoThread;
+	TargetThread targetThread;
 
 	//Subsystems
 	SwerveDriveBase driveBase;
@@ -161,6 +162,7 @@ public class SwerveTest extends IterativeRobot {
         //basicThread();
         //startCamera();
         //CameraServer.getInstance().startAutomaticCapture();
+		targetThread = new TargetThread(imgLock, 3, threadManager, cvSink, outputStream);
     }
     
     /**
@@ -168,7 +170,6 @@ public class SwerveTest extends IterativeRobot {
      */    
     public void autonomousInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-        TargetThread targetThread = new TargetThread(imgLock, 3, threadManager, cvSink, outputStream);
     	autoThread = new AutoThread(targetThread, imgLock, driveBase, 3, threadManager, gearOutakeMotor, ultrasonic);
 //    	threadManager.addThread(autoThread);
 //    	autoThread.run();

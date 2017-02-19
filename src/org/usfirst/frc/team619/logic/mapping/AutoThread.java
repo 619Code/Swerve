@@ -81,7 +81,6 @@ public class AutoThread extends RobotThread {
 		numRects = vision.getNumRects();
 		//try { Thread.sleep(5000); }catch(Exception e){}
 		if(numRects > 1 && !gearLaunched) {
-			System.out.println("IM SETTING ISRUNNING TO TRUE ANY MINUTE NOW");
 			isRunning = true;
 			centerX = (centangle.x + (centangle.x+centangle.width))/2;
 //			System.out.println(centangle.height);
@@ -123,9 +122,7 @@ public class AutoThread extends RobotThread {
 			
 			driveBase.move(moveY, moveX, 0);
 		}else if(!gearLaunched) {
-			System.out.println("GEAR ISNT LAUNCHED YET HUEUEUEUEU");
 			driveBase.move(0,0,0);
-			System.out.println("I THINK ISRUNNING IS: " + isRunning);
 			if(isRunning == true && distance < 76) {
 				System.out.println("LAUNCH GEAR NOW");
 				gearOutake.set(-1);
@@ -134,7 +131,6 @@ public class AutoThread extends RobotThread {
 				gearLaunched = true;
 			}
 			if(gearLaunched && isRunning == true){
-				System.out.println("WHY AM I IN HERE FSHJSFHSDFHDFHJSDFHFFFDHDFHDFJFJFDSJDJJFJHSDFJDFJDFJDFJJHSDFJKSDFJDJDFJFJHDFFDFJHFDFDFJFFDFDFDFSHJFSDHJSDFHJSFDHJSDFJHSDFJHDSFJHKLFJKFSDH");
 				gearOutake.set(0);
 				isRunning = false;
 				try { Thread.sleep(1150); }catch(Exception e) {}
