@@ -19,21 +19,18 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SwerveDriveMappingThread extends RobotThread {
     protected SwerveDriveBase driveBase;
     protected DriverStation driverStation;
-    protected SwerveWheel leftFront;
-    protected SwerveWheel leftRear;
-    protected SwerveWheel rightFront;
-    protected SwerveWheel rightRear;
+    protected SwerveWheel leftFront, leftRear;
+    protected SwerveWheel rightFront, rightRear;
+    protected CANTalon climberMotor1, climberMotor2;
+    protected CANTalon intakeMotor, outakeMotor;
+    protected CANTalon gearMotor;
     private boolean releasedSpeed;
     private double scalePercent;
-    CANTalon climberMotor1 = new CANTalon(9);
-    CANTalon climberMotor2 = new CANTalon(10);
-    CANTalon intakeMotor = new CANTalon(8);
-    CANTalon outakeMotor = new CANTalon(11);
-    CANTalon gearOutakeMotor = new CANTalon(12);
     boolean gearCentric = false;
     boolean gearCentricPress = false;
     
-    public SwerveDriveMappingThread(SwerveWheel leftFront, SwerveWheel leftRear, SwerveWheel rightFront, SwerveWheel rightRear, 
+    public SwerveDriveMappingThread(CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
+    		CANTalon gearMotor, SwerveWheel leftFront, SwerveWheel leftRear, SwerveWheel rightFront, SwerveWheel rightRear, 
     		SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
         this.driveBase = driveBase;
@@ -42,6 +39,11 @@ public class SwerveDriveMappingThread extends RobotThread {
         this.leftRear = leftRear;
         this.rightFront = rightFront;
         this.rightRear = rightRear;
+        this.climberMotor1 = climberMotor1;
+        this.climberMotor2 = climberMotor2;
+        this.intakeMotor = intakeMotor;
+        this.outakeMotor = outakeMotor;
+        this.gearMotor = gearMotor;
 		releasedSpeed = true;
 		scalePercent = 0.4;
     }
@@ -110,19 +112,20 @@ public class SwerveDriveMappingThread extends RobotThread {
         	climberMotor1.set(0.5);
         	climberMotor2.set(0.5);
         } else if(driverStation.getRightController().getBumper(Hand.kRight)){
-        	intakeMotor.set(-0.5);
+        	intakeMotor.set(-1);
+        	System.out.println("INTAKE RIGHT NOW~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }else if(driverStation.getRightController().getBumper(Hand.kLeft)){
         	outakeMotor.set(0.5);
         }else if(driverStation.getRightController().getBButton()){
-        	gearOutakeMotor.set(-1);
+        	gearMotor.set(-0.5);
         }else if(driverStation.getRightController().getYButton()){
-        	gearOutakeMotor.set(1);
+        	//gearMotor.set(0.5);
         } else {
         	climberMotor1.set(0);
         	climberMotor2.set(0);
         	intakeMotor.set(0);
         	outakeMotor.set(0);
-        	gearOutakeMotor.set(0);
+        	gearMotor.set(0);
         }
     }
 }

@@ -51,7 +51,6 @@ public class SwerveTest extends IterativeRobot {
 	//Logic
 	SwerveDriveMappingThread driveThread;
 	AutoThread autoThread;
-	TargetThread targetThread;
 
 	//Subsystems
 	SwerveDriveBase driveBase;
@@ -103,6 +102,11 @@ public class SwerveTest extends IterativeRobot {
 	long autonomous_start;
 	double last_autonomous_pos = 0;
 	
+	//test
+    private double testPeriodicSpeed = 0.1;
+    private boolean testPeriodicForward = true;
+    private int testPeriodicCount = 0;
+	
 	/**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -127,24 +131,24 @@ public class SwerveTest extends IterativeRobot {
         ultrasonic = new AnalogUltrasonic(0);
         
         //CanTalons
-        driveLeftFront = new CANTalon(7);
+        driveLeftFront = new CANTalon(1);
         steerLeftFront = new CANTalon(5);
         leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
-        driveLeftRear = new CANTalon(6);
-        steerLeftRear = new CANTalon(4);
+        driveLeftRear = new CANTalon(12);
+        steerLeftRear = new CANTalon(8);
         leftRear = new SwerveWheel( "leftRear", driveLeftRear, steerLeftRear, 0.0 );
         driveRightFront = new CANTalon(0);
-        steerRightFront = new CANTalon(2);
+        steerRightFront = new CANTalon(6);
         rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
-        driveRightRear = new CANTalon(1);
-        steerRightRear = new CANTalon(3);
+        driveRightRear = new CANTalon(11); //13
+        steerRightRear = new CANTalon(7);
         rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
         
-        climberMotor1 = new CANTalon(9);
-        climberMotor2 = new CANTalon(10);
-        intakeMotor = new CANTalon(8);
-        outakeMotor = new CANTalon(11);
-        gearOutakeMotor = new CANTalon(12);
+        climberMotor1 = new CANTalon(2);
+        climberMotor2 = new CANTalon(3);
+        intakeMotor = new CANTalon(10); //9
+//      outakeMotor = new CANTalon(10); //10
+        gearOutakeMotor = new CANTalon(4);
 
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 17.0, 19.0 );
@@ -162,7 +166,8 @@ public class SwerveTest extends IterativeRobot {
         //basicThread();
         //startCamera();
         //CameraServer.getInstance().startAutomaticCapture();
-		targetThread = new TargetThread(imgLock, 3, threadManager, cvSink, outputStream);
+		
+		//Vision thread
     }
     
     /**
@@ -170,6 +175,7 @@ public class SwerveTest extends IterativeRobot {
      */    
     public void autonomousInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
+    	TargetThread targetThread = new TargetThread(cvSink, outputStream, 3, threadManager);
     	autoThread = new AutoThread(targetThread, imgLock, driveBase, 3, threadManager, gearOutakeMotor, ultrasonic);
 //    	threadManager.addThread(autoThread);
 //    	autoThread.run();
@@ -342,8 +348,9 @@ public class SwerveTest extends IterativeRobot {
      */
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-    	TargetThread targetThread = new TargetThread(imgLock, 3, threadManager, cvSink, outputStream);
-        driveThread = new SwerveDriveMappingThread(leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
+    	TargetThread targetThread = new TargetThread(cvSink, outputStream, 3, threadManager);
+        driveThread = new SwerveDriveMappingThread(climberMotor1, climberMotor2, intakeMotor, outakeMotor, gearOutakeMotor, 
+        		leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
         driveThread.start();
     }
     
@@ -439,15 +446,27 @@ public class SwerveTest extends IterativeRobot {
     }
     
     
-    private double testPeriodicSpeed = 0.1;
-    private boolean testPeriodicForward = true;
-    private int testPeriodicCount = 0;
+
     public void testInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
+    	
     	testPeriodicSpeed = 0.1;
     	testPeriodicForward = true;
     	testPeriodicCount = 0;
-		SmartDashboard.putBoolean("Limit switch", steerLeftFront.isFwdLimitSwitchClosed());
+    	
+    	testDrive(rightFront, "right Front");
+    	testRotate(rightFront, "right Steer", 90.0);
+    	testDrive(leftFront, "left Front");
+    	testRotate(leftFront, "left Steer", 90.0);
+    	testDrive(leftRear, "left Rear");
+    	testRotate(leftRear, "left Rear", 90.0);
+    	testDrive(rightRear, "right Rear");
+    	testRotate(rightRear, "right Rear", 90.0);
+    	
+//    	testPeriodicSpeed = 0.1;
+//    	testPeriodicForward = true;
+//    	testPeriodicCount = 0;
+//		SmartDashboard.putBoolean("Limit switch", steerLeftFront.isFwdLimitSwitchClosed());
 		
 //    	rightRear.zero();
 //		rightFront.zero();
@@ -461,59 +480,59 @@ public class SwerveTest extends IterativeRobot {
     /**
      * This function is called periodically during test mode
      */
-    public void testPeriodic() {
-    	testPeriodicCount += 1;
-    	//leftFront.autoZero();
-		SmartDashboard.putBoolean("Limit switch", steerLeftFront.isFwdLimitSwitchClosed());
-    	if (++testPeriodicCount < 200) {
-    		SmartDashboard.putNumber("test periodic speed: ", testPeriodicSpeed);
-    		SmartDashboard.putNumber("hall count: ", driveLeftFront.getEncPosition());
-    		
-//    		if (testPeriodicSpeed >= 0.4) {
-//    			testPeriodicSpeed = 0.4;
-//    			testPeriodicForward = false;	
-//    		} else if (testPeriodicSpeed <= 0.0) {
-//    			testPeriodicSpeed = 0.0;
-//    			testPeriodicForward = true;
-//    		}
-//    		if (testPeriodicForward)
-//    			testPeriodicSpeed += 0.05;
-//    		else
-//    			testPeriodicSpeed -= 0.05;
-//    		leftFront.setSpeed(testPeriodicSpeed);
-//    		leftFront.drive( );
-    	}
-    	
-		currentAngle += 4;
-		leftFront.setTargetAngle(currentAngle);
-		leftFront.setSpeed(1);
-		leftFront.goToAngle();
-		//System.out.println(currentAngle);
-		System.out.println(steerLeftFront.isFwdLimitSwitchClosed());
-		if(testPeriodicCount%500 == 0){
-			delay(500);
-//			int correctionAngle = currentAngle;
-//			System.out.println(steerLeftFront.isFwdLimitSwitchClosed());
-//			while(!steerLeftFront.isFwdLimitSwitchClosed()){
-//				correctionAngle--;
-//				leftFront.setTargetAngle(correctionAngle);
-//				leftFront.goToAngle();
-//				delay(20);
-//			}
-//			System.out.println("IT DOESNT ESCAPE");
-//			delay(1000);
-//			currentAngle = 100;
-//			leftFront.setTargetAngle(currentAngle);
-//			leftFront.goToAngle();
+//    public void testPeriodic() {
+//    	testPeriodicCount += 1;
+//    	//leftFront.autoZero();
+//		SmartDashboard.putBoolean("Limit switch", steerLeftFront.isFwdLimitSwitchClosed());
+//    	if (++testPeriodicCount < 200) {
+//    		SmartDashboard.putNumber("test periodic speed: ", testPeriodicSpeed);
+//    		SmartDashboard.putNumber("hall count: ", driveLeftFront.getEncPosition());
+//    		
+////    		if (testPeriodicSpeed >= 0.4) {
+////    			testPeriodicSpeed = 0.4;
+////    			testPeriodicForward = false;	
+////    		} else if (testPeriodicSpeed <= 0.0) {
+////    			testPeriodicSpeed = 0.0;
+////    			testPeriodicForward = true;
+////    		}
+////    		if (testPeriodicForward)
+////    			testPeriodicSpeed += 0.05;
+////    		else
+////    			testPeriodicSpeed -= 0.05;
+////    		leftFront.setSpeed(testPeriodicSpeed);
+////    		leftFront.drive( );
+//    	}
+//    	
+//		currentAngle += 4;
+//		leftFront.setTargetAngle(currentAngle);
+//		leftFront.setSpeed(1);
+//		leftFront.goToAngle();
+//		//System.out.println(currentAngle);
+//		System.out.println(steerLeftFront.isFwdLimitSwitchClosed());
+//		if(testPeriodicCount%500 == 0){
 //			delay(500);
-			leftFront.autoZero();
-			delay(1000);
-			leftFront.setTargetAngle(100);
-			leftFront.goToAngle();
-			delay(2000);
-		}
-		delay(10);
-    }
+////			int correctionAngle = currentAngle;
+////			System.out.println(steerLeftFront.isFwdLimitSwitchClosed());
+////			while(!steerLeftFront.isFwdLimitSwitchClosed()){
+////				correctionAngle--;
+////				leftFront.setTargetAngle(correctionAngle);
+////				leftFront.goToAngle();
+////				delay(20);
+////			}
+////			System.out.println("IT DOESNT ESCAPE");
+////			delay(1000);
+////			currentAngle = 100;
+////			leftFront.setTargetAngle(currentAngle);
+////			leftFront.goToAngle();
+////			delay(500);
+//			leftFront.autoZero();
+//			delay(1000);
+//			leftFront.setTargetAngle(100);
+//			leftFront.goToAngle();
+//			delay(2000);
+//		}
+//		delay(10);
+//    }
     public void disabledInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	CameraServer.getInstance().removeCamera("USB Camera 0");

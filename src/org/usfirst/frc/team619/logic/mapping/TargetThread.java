@@ -53,7 +53,7 @@ public class TargetThread extends RobotThread {
 	Mat source;
 	Mat original;
 	
-	public TargetThread(Object imgLock, int period, ThreadManager threadManager, CvSink cvSink, CvSource outputStream) {
+	public TargetThread(CvSink cvSink, CvSource outputStream, int period, ThreadManager threadManager) {
 		super(period, threadManager);
 		grip  = new GripPipeline();
 		source = new Mat();
