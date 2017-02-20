@@ -45,8 +45,11 @@ public class SwerveDriveBase  {
     boolean isGearCentric = false;
     boolean isObjectCentric = false;
     boolean isHookCentric = false;
+    boolean compensateDrift = false;
 
     double radius = 55;
+    double headerAngle;
+    int maxDrift = 5;
 
     SwerveWheel[] wheelArray;
 
@@ -133,6 +136,7 @@ public class SwerveDriveBase  {
         } catch (RuntimeException ex ) {
             System.out.println("Error instantiating navX-MXP:  " + ex.getMessage());
         }
+        headerAngle = imu.getAngle();
 
         initPIDControllers();
     }
@@ -248,14 +252,17 @@ public class SwerveDriveBase  {
 
     /**
      * Calls the correct movement method based on control mode
-     * @param RY Left stick Y Axis
-     * @param RX Left stick X Axis
-     * @param LX Right stick X Axis
+     * @param RY Right stick Y Axis
+     * @param RX Right stick X Axis
+     * @param LX Left stick X Axis
      */
 
     public void move(double RY, double RX, double LX){
         if(isRobotCentric){
-            calculateSwerveControl(RY, RX, LX);
+        	if(compensateDrift == true)
+        		compensateDrift(RY, RX, LX);
+        	else
+        		calculateSwerveControl(RY, RX, LX);
         } else if(isFieldCentric){
             getFieldCentric(RY, RX, LX);
         }else if(isGearCentric){
@@ -264,6 +271,16 @@ public class SwerveDriveBase  {
         	calculateSwerveControl(RY, RX, LX);
         }
 
+    }
+    
+    private void compensateDrift(double RY, double RX, double LY) {
+//    	if(LY == 0.0) {
+//    		//Drift stuff
+//    	}else {
+//    		headerAngle = imu.getYaw();
+//    		if(headerAngle < 360)
+//    	}
+    		
     }
 
     /**
@@ -280,7 +297,7 @@ public class SwerveDriveBase  {
         //     RX  <=>   STR
         //     LX  <=>   RCW
 
-        //math for rotation vector, different for every wheel so we calculate for each one seperateRY
+        //math for rotation vector, different for every wheel so we calculate for each one seperately
         double A = RX - LX*(L/R);
         double B = RX + LX*(L/R);
         double C = RY - LX*(W/R);

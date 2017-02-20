@@ -140,14 +140,14 @@ public class SwerveTest extends IterativeRobot {
         driveRightFront = new CANTalon(0);
         steerRightFront = new CANTalon(6);
         rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
-        driveRightRear = new CANTalon(11); //13
+        driveRightRear = new CANTalon(13);
         steerRightRear = new CANTalon(7);
         rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
         
         climberMotor1 = new CANTalon(2);
         climberMotor2 = new CANTalon(3);
-        intakeMotor = new CANTalon(10); //9
-//      outakeMotor = new CANTalon(10); //10
+        intakeMotor = new CANTalon(9);
+        outakeMotor = new CANTalon(10);
         gearOutakeMotor = new CANTalon(4);
 
         //subsystems
@@ -349,8 +349,8 @@ public class SwerveTest extends IterativeRobot {
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(cvSink, outputStream, 3, threadManager);
-        driveThread = new SwerveDriveMappingThread(climberMotor1, climberMotor2, intakeMotor, outakeMotor, gearOutakeMotor, 
-        		leftFront, leftRear, rightFront, rightRear, driveBase, driverStation, 15, threadManager);
+        driveThread = new SwerveDriveMappingThread(climberMotor1, climberMotor2, intakeMotor, 
+        		outakeMotor, gearOutakeMotor, driveBase, driverStation, 15, threadManager);
         driveThread.start();
     }
     

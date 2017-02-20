@@ -30,8 +30,7 @@ public class SwerveDriveMappingThread extends RobotThread {
     boolean gearCentricPress = false;
     
     public SwerveDriveMappingThread(CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
-    		CANTalon gearMotor, SwerveWheel leftFront, SwerveWheel leftRear, SwerveWheel rightFront, SwerveWheel rightRear, 
-    		SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
+    		CANTalon gearMotor, SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
         this.driveBase = driveBase;
         this.driverStation = driverStation;
@@ -113,14 +112,13 @@ public class SwerveDriveMappingThread extends RobotThread {
         	climberMotor2.set(0.5);
         } else if(driverStation.getRightController().getBumper(Hand.kRight)){
         	intakeMotor.set(-1);
-        	System.out.println("INTAKE RIGHT NOW~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }else if(driverStation.getRightController().getBumper(Hand.kLeft)){
-        	outakeMotor.set(0.5);
+        	outakeMotor.set(-1);
         }else if(driverStation.getRightController().getBButton()){
-        	gearMotor.set(-0.5);
-        }else if(driverStation.getRightController().getYButton()){
-        	//gearMotor.set(0.5);
-        } else {
+        	gearMotor.set(-1);
+        }else if(driverStation.getRightController().getXButton()) {
+        	gearMotor.set(0.5);
+        }else {
         	climberMotor1.set(0);
         	climberMotor2.set(0);
         	intakeMotor.set(0);
