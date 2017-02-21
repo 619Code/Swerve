@@ -19,25 +19,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class SwerveDriveMappingThread extends RobotThread {
     protected SwerveDriveBase driveBase;
     protected DriverStation driverStation;
-    protected SwerveWheel leftFront, leftRear;
-    protected SwerveWheel rightFront, rightRear;
     protected CANTalon climberMotor1, climberMotor2;
     protected CANTalon intakeMotor, outakeMotor;
     protected CANTalon gearMotor;
     private boolean releasedSpeed;
     private double scalePercent;
-    boolean gearCentric = false;
-    boolean gearCentricPress = false;
+    boolean drift = true;
+    boolean jiggled, jiggledBack;
     
     public SwerveDriveMappingThread(CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
     		CANTalon gearMotor, SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
         this.driveBase = driveBase;
         this.driverStation = driverStation;
-        this.leftFront = leftFront;
-        this.leftRear = leftRear;
-        this.rightFront = rightFront;
-        this.rightRear = rightRear;
         this.climberMotor1 = climberMotor1;
         this.climberMotor2 = climberMotor2;
         this.intakeMotor = intakeMotor;
@@ -71,7 +65,8 @@ public class SwerveDriveMappingThread extends RobotThread {
 		default:
 			break;
 		}
-
+		
+		int pov = driverStation.getRightController().getPOV();
         double xAxis = driverStation.getLeftController().getX(Hand.kRight);
         double yAxis = driverStation.getLeftController().getY(Hand.kRight);
         double zTurn = driverStation.getLeftController().getX(Hand.kLeft);
@@ -80,6 +75,10 @@ public class SwerveDriveMappingThread extends RobotThread {
         double RY = -yAxis * scalePercent;
         double RX = xAxis * scalePercent;
         double LX = (zTurn * scalePercent)*0.75;
+        
+        RY = deadzone(RY);
+        RX = deadzone(RX);
+        LX = deadzone(LX);
         
         //left controller (drive)
         if (driverStation.getLeftController().getStartButton()) {
@@ -99,15 +98,20 @@ public class SwerveDriveMappingThread extends RobotThread {
         } else if(driverStation.getLeftController().getTriggerAxis(Hand.kLeft) > 0.05){
         	RY *= 1-driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
         	RX *= 1-driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
+        }else if(driverStation.getLeftController().getStickButton(Hand.kRight)) {
+        	drift = !drift;
+//        	driveBase.setDriftCompensation(drift);
         }
-    	driveBase.move(RY, RX, LX);
-        
+        if(drift == true) {}
+//        	driveBase.compensateDrift(RY, RX, LX);
+        else
+        	driveBase.move(RY, RX, LX);
+    	
         //right controller (manipulators)
-        if (driverStation.getRightController().getPOV() == 0) {
-        	System.out.println("CLIMB");
+        if (pov == 315 || pov == 0 || pov == 45) {
         	climberMotor1.set(-1);
         	climberMotor2.set(-1);
-        }else if(driverStation.getRightController().getPOV() == 180) {
+        }else if(pov == 135 || pov == 180 || pov == 225) {
         	climberMotor1.set(0.5);
         	climberMotor2.set(0.5);
         } else if(driverStation.getRightController().getBumper(Hand.kRight)){
@@ -118,12 +122,28 @@ public class SwerveDriveMappingThread extends RobotThread {
         	gearMotor.set(-1);
         }else if(driverStation.getRightController().getXButton()) {
         	gearMotor.set(0.5);
+        }else if(driverStation.getRightController().getYButton()) {
+        	if(jiggled == false) {
+        		jiggled = true;
+        		gearMotor.set(-1);
+        	}else if(jiggledBack == false) {
+        		jiggledBack = true;
+        		gearMotor.set(1);
+        	}
         }else {
-        	climberMotor1.set(0);
-        	climberMotor2.set(0);
-        	intakeMotor.set(0);
-        	outakeMotor.set(0);
-        	gearMotor.set(0);
+        	jiggled = false;
+        	jiggledBack = false;
+//        	climberMotor1.set(0);
+//        	climberMotor2.set(0);
+//        	intakeMotor.set(0);
+//        	outakeMotor.set(0);
+//        	gearMotor.set(0);
         }
+    }
+    
+    private double deadzone(double val) {
+    	if(Math.abs(val) < 0.02)
+    		return 0;
+    	return val;
     }
 }
