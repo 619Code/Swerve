@@ -13,9 +13,10 @@ public class SwerveWheel {
 	private double rAngle; 
 	private double speed;
 	private double offset;
-	private int correctionAngle;
+	private int tempOffset;
 	private int targetAngle;
 	private int encoderUnitsPerRotation = 1660;//was 1665
+	private boolean zeroState = false;
 	private boolean rolling = false;
 	
 	public static final double p=5, i=0.0001, d=0;
@@ -40,7 +41,7 @@ public class SwerveWheel {
 		rotateMotor.setPID(p,i,d);
 		
         targetAngle = 0;
-        correctionAngle = -1337;
+        tempOffset = -1337; 
         offset = 0;
 		rAngle = rotateAngle;
 
@@ -66,46 +67,30 @@ public class SwerveWheel {
 			System.err.println( "wheel " + label + " failed to store zero position" );
 	}
 	
-	public void autoZeroOld() {
-		int correctionAngle = getCurrentAngle();
-		while(!rotateMotor.isFwdLimitSwitchClosed()){
-			correctionAngle--;
-			setTargetAngle(correctionAngle);
-			goToAngle();
-			try { Thread.sleep(20); }catch(Exception e) {}
-		}
-		
-		offset = getCurrentAngle();
-	}
-	
-	public boolean autoZero() {
-		if(correctionAngle == -1337) {
-			correctionAngle = getCurrentAngle();
+	public void autoZero() {
+		if(tempOffset == -1337) {
+			tempOffset = getCurrentAngle();
 		}
 		if(!rotateMotor.isFwdLimitSwitchClosed()){
 			System.out.println(rotateMotor.isFwdLimitSwitchClosed());
-			System.out.println(correctionAngle);
+			System.out.println(tempOffset);
 			
-			correctionAngle--;
-			setTargetAngle(correctionAngle);
+			tempOffset -= 2;
+			setTargetAngle(tempOffset);
 			goToAngle();
-			
-			return false;
 		} else {
 			System.out.println(getCurrentAngle());
-			try { Thread.sleep(500); }catch(Exception e) {}
 			
-			offset = getCurrentAngle();
-			correctionAngle = getCurrentAngle();
-			//Zero'd position is different for each side, have front be axels toward the gear
+			zeroState = true;
+			tempOffset = getCurrentAngle();
+			//Zero'd position is different for each side, front is toward the gear
 			if(label == "leftFront" || label == "leftRear")
-				correctionAngle += 90;
+				tempOffset += 90;
 			else
-				correctionAngle -= 90;
-			setTargetAngle(correctionAngle);
+				tempOffset -= 90;
+			offset = tempOffset;
+			setTargetAngle(0);
 			goToAngle();
-			
-			return true;
 		}
 	}
 
@@ -241,13 +226,17 @@ public class SwerveWheel {
 //    	rolling = true;
     }
     
-    public double getVoltage() {
-    	return driveMotor.getBusVoltage();
-    }
-    
     public void stop( ) {
     	driveMotor.set(0);
     	rolling = false;
+    }
+    
+    public void setRotateZero(boolean state) {
+    	zeroState = state;
+    }
+    
+    public double getVoltage() {
+    	return driveMotor.getBusVoltage();
     }
 	
 	public double getP() {
@@ -261,5 +250,18 @@ public class SwerveWheel {
 	public double getD() {
 		return rotateMotor.getD();
 	}
+	
+	public int gettempOffset() {
+		return tempOffset;
+	}
+	
+	public boolean isLimitSwitchActivate() {
+		return rotateMotor.isFwdLimitSwitchClosed();
+	}
+	
+	public boolean isRotateMotorZero() {
+		return zeroState;
+	}
+	
 
 }

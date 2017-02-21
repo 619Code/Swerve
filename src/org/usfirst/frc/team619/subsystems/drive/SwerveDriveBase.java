@@ -45,10 +45,11 @@ public class SwerveDriveBase  {
     boolean isGearCentric = false;
     boolean isObjectCentric = false;
     boolean isHookCentric = false;
-    boolean compensateDrift = false;
+    boolean drift = true;
 
     double radius = 55;
     double targetHeading;
+    double fieldCentricHeading;
     int maxDrift = 2;
 
     SwerveWheel[] wheelArray;
@@ -259,10 +260,7 @@ public class SwerveDriveBase  {
 
     public void move(double RY, double RX, double LX){
         if(isRobotCentric){
-        	if(compensateDrift == true)
-        		compensateDrift(RY, RX, LX);
-        	else
-        		calculateSwerveControl(RY, RX, LX);
+        	calculateSwerveControl(RY, RX, LX);
         } else if(isFieldCentric){
             getFieldCentric(RY, RX, LX);
         }else if(isGearCentric){
@@ -272,16 +270,25 @@ public class SwerveDriveBase  {
         }
     }
     
-    
-    public void compensateDrift(double RY, double RX, double LX) {
-		double currentAngle = imu.getAngle();
-		System.out.println("LX " + LX + " RX " + RX + " RY " +RY);
+    protected double compensateDrift(double RY, double RX, double LX) {
+		double currentAngle = imu.getYaw();
+		if(currentAngle < 0)
+			currentAngle += 360;
+		
+		//In field centric mode without zeroing the
+		if(isFieldCentric)
+			targetHeading += fieldCentricHeading;
+		if(targetHeading > 360)
+			targetHeading -= 360;
+		
+		//Reset heading when the robot is stopped or spun by the driver
+		//Driver path is straight, robot should not turn
     	if(LX == 0 && (RY != 0 || RX != 0)) {
-    		System.out.println("WOAH");
-    		//Drift stuff
+    		//Maximum angle away from the target
     		double lowerLimit = targetHeading-maxDrift;
     		double upperLimit = targetHeading+maxDrift;
     		
+    		//Edge cases of wrapping to zero
     		if(lowerLimit < 0) {
     			lowerLimit += 360;
     			double temp = lowerLimit;
@@ -299,12 +306,12 @@ public class SwerveDriveBase  {
 //    				currentAngle = 360 - currentAngle;
     			double theta = targetHeading - currentAngle;
     			LX = Math.sin(toRadians(theta));
+    			
     		}
-    		move(RY, RX, LX);
     	}else { //not drifting
     		targetHeading = currentAngle;
-    		move(RY, RX, LX);
-    	}		
+    	}
+    	return LX;
     }
     
     /**
@@ -320,6 +327,10 @@ public class SwerveDriveBase  {
         //     RY  <=>   FWD
         //     RX  <=>   STR
         //     LX  <=>   RCW
+    	
+    	//compensate for rotational drift
+    	if(drift = true)
+    		LX = compensateDrift(RY, RX, LX);
 
         //math for rotation vector, different for every wheel so we calculate for each one seperately
         double A = RX - LX*(L/R);
@@ -621,15 +632,20 @@ public class SwerveDriveBase  {
     /**
      * Called to switch to field centric mode
      */
-
     public void switchToFieldCentric(){
         isObjectCentric = false;
         isRobotCentric = false;
         isFieldCentric = true;
         isHookCentric = false;
         isGearCentric = false;
+        fieldCentricHeading = imu.getYaw();
+        if(fieldCentricHeading < 0)
+        	fieldCentricHeading += 360;
     }
     
+    /**
+     * Called to switch to gear centric mode
+     */
     public void switchToGearCentric() {
         isObjectCentric = false;
         isRobotCentric = false;
@@ -641,7 +657,6 @@ public class SwerveDriveBase  {
     /**
      * Called to switch to object centric mode
      */
-
     public void switchToObjectCentric(){
         isObjectCentric = true;
         isFieldCentric = false;
@@ -671,6 +686,22 @@ public class SwerveDriveBase  {
         isHookCentric = false;
         isGearCentric = false;
     }
+    
+    public void setDriftRange(int range) {
+    	maxDrift = range;
+    }
+    
+    public void setDriftCompensation(boolean state) {
+    	state = drift;
+    }
+    
+    public boolean isDriftCompensated() {
+    	return drift;
+    }
+    
+    public int getDriftRange() {
+    	return maxDrift;
+    }
 
     public boolean getRobotCentric() {
         return isRobotCentric;
@@ -690,6 +721,7 @@ public class SwerveDriveBase  {
 
     public void zeroIMU() {
         imu.zeroYaw();
+        fieldCentricHeading = 0;
     }
 
     public void autoZeroWheels() {

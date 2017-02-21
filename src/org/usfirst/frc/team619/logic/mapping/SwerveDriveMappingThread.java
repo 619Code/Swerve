@@ -25,11 +25,13 @@ public class SwerveDriveMappingThread extends RobotThread {
     private boolean releasedSpeed;
     private double scalePercent;
     boolean drift = true;
+    boolean speedToggle;
     boolean jiggled, jiggledBack;
     
     public SwerveDriveMappingThread(CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
     		CANTalon gearMotor, SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
+        
         this.driveBase = driveBase;
         this.driverStation = driverStation;
         this.climberMotor1 = climberMotor1;
@@ -37,13 +39,19 @@ public class SwerveDriveMappingThread extends RobotThread {
         this.intakeMotor = intakeMotor;
         this.outakeMotor = outakeMotor;
         this.gearMotor = gearMotor;
+        
+        driveBase.setDriftCompensation(true);
+        driveBase.setDriftRange(2);
 		releasedSpeed = true;
-		scalePercent = 0.4;
+		jiggled = false;
+		jiggledBack = false;
+		speedToggle = false;
+		scalePercent = 0.6;
     }
 
     protected void cycle() {
 		switch(driverStation.getLeftController().getPOV()) {
-		case -1: 
+		default: 
 			releasedSpeed = true;
 			break;
 		case 45:
@@ -62,15 +70,17 @@ public class SwerveDriveMappingThread extends RobotThread {
 			}
 			releasedSpeed = false;
 			break;
-		default:
-			break;
 		}
 		
 		int pov = driverStation.getRightController().getPOV();
+		
         double xAxis = driverStation.getLeftController().getX(Hand.kRight);
         double yAxis = driverStation.getLeftController().getY(Hand.kRight);
         double zTurn = driverStation.getLeftController().getX(Hand.kLeft);
 
+        double leftTrigger = driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
+        double rightTrigger = driverStation.getRightController().getTriggerAxis(Hand.kRight);
+        
         //gets percentages (numbers from -1 to 1) from the joystick's axes used for driving
         double RY = -yAxis * scalePercent;
         double RX = xAxis * scalePercent;
@@ -85,38 +95,54 @@ public class SwerveDriveMappingThread extends RobotThread {
             driveBase.switchToRobotCentric();
         }else if (driverStation.getLeftController().getBackButton()) {
             driveBase.switchToFieldCentric();
-            driveBase.zeroIMU();
         } else if(driverStation.getLeftController().getAButton()) {
         	driveBase.switchToGearCentric();
         } else if(driverStation.getLeftController().getBButton()) {
         	driveBase.goToZero();
         } else if(driverStation.getLeftController().getYButton()) {
         	driveBase.autoZeroWheels();
-        } else if(driverStation.getLeftController().getTriggerAxis(Hand.kRight) > 0.05){
-        	RY *= driverStation.getLeftController().getTriggerAxis(Hand.kRight)+1;
-        	RX *= driverStation.getLeftController().getTriggerAxis(Hand.kRight)+1;
-        } else if(driverStation.getLeftController().getTriggerAxis(Hand.kLeft) > 0.05){
-        	RY *= 1-driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
-        	RX *= 1-driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
+        } else if(driverStation.getLeftController().getBumper(Hand.kLeft)) {
+        	//Set drive values to 60%
+        	RY *= (0.6/scalePercent);
+        	RX *= (0.6/scalePercent);
+        	LX *= (0.6/scalePercent);
+        } else if(rightTrigger > 0.05){
+        	RY *= rightTrigger+1;
+        	RX *= rightTrigger+1;
+        } else if(leftTrigger > 0.05){
+        	RY *= 1-leftTrigger;
+        	RX *= 1-leftTrigger;
         }else if(driverStation.getLeftController().getStickButton(Hand.kRight)) {
         	drift = !drift;
+        	driveBase.setDriftCompensation(drift);
+        }else if(driverStation.getLeftController().getStickButton(Hand.kRight)) {
+            driveBase.zeroIMU();
         }
-        if(drift == true)
-        	driveBase.compensateDrift(RY, RX, LX);
-        else
-        	driveBase.move(RY, RX, LX);
+        driveBase.move(RY, RX, LX);
     	
         //right controller (manipulators)
-        if (pov == 315 || pov == 0 || pov == 45) {
+        switch(pov) {
+        case 315:
+        case 0:
+        case 45:
         	climberMotor1.set(-1);
         	climberMotor2.set(-1);
-        }else if(pov == 135 || pov == 180 || pov == 225) {
-        	climberMotor1.set(0.5);
-        	climberMotor2.set(0.5);
-        } else if(driverStation.getRightController().getBumper(Hand.kRight)){
+        	break;
+        case 135:
+        case 180:
+        case 225:
+        	climberMotor1.set(-1);
+        	climberMotor2.set(-1);
+        	break;
+        }
+        if(driverStation.getRightController().getBumper(Hand.kRight)){
         	intakeMotor.set(-1);
+        }else if(driverStation.getRightController().getTriggerAxis(Hand.kRight) > 0.25) {
+        	intakeMotor.set(driverStation.getRightController().getTriggerAxis(Hand.kRight));
         }else if(driverStation.getRightController().getBumper(Hand.kLeft)){
         	outakeMotor.set(-1);
+        }else if(driverStation.getRightController().getTriggerAxis(Hand.kLeft) > 0.25) {
+        	outakeMotor.set(driverStation.getRightController().getTriggerAxis(Hand.kLeft));
         }else if(driverStation.getRightController().getBButton()){
         	gearMotor.set(-1);
         }else if(driverStation.getRightController().getXButton()) {
@@ -132,12 +158,12 @@ public class SwerveDriveMappingThread extends RobotThread {
         }else {
         	jiggled = false;
         	jiggledBack = false;
-//        	climberMotor1.set(0);
-//        	climberMotor2.set(0);
-//        	intakeMotor.set(0);
-//        	outakeMotor.set(0);
-//        	gearMotor.set(0);
-        }
+        	climberMotor1.set(0);
+        	climberMotor2.set(0);
+        	intakeMotor.set(0);
+        	outakeMotor.set(0);
+        	gearMotor.set(0);
+        } 
     }
     
     private double deadzone(double val) {

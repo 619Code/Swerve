@@ -149,7 +149,7 @@ public class SwerveTest extends IterativeRobot {
         intakeMotor = new CANTalon(9);
         outakeMotor = new CANTalon(10);
         gearOutakeMotor = new CANTalon(4);
-        //Unused = new CANTalon(12) is broken
+        //Unused = new CANTalon(12)
 
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 17.0, 19.0 );
