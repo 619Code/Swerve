@@ -100,10 +100,9 @@ public class SwerveDriveMappingThread extends RobotThread {
         	RX *= 1-driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
         }else if(driverStation.getLeftController().getStickButton(Hand.kRight)) {
         	drift = !drift;
-//        	driveBase.setDriftCompensation(drift);
         }
-        if(drift == true) {}
-//        	driveBase.compensateDrift(RY, RX, LX);
+        if(drift == true)
+        	driveBase.compensateDrift(RY, RX, LX);
         else
         	driveBase.move(RY, RX, LX);
     	
