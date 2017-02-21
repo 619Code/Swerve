@@ -48,8 +48,8 @@ public class SwerveDriveBase  {
     boolean compensateDrift = false;
 
     double radius = 55;
-    double headerAngle;
-    int maxDrift = 5;
+    double targetHeading;
+    int maxDrift = 2;
 
     SwerveWheel[] wheelArray;
 
@@ -136,7 +136,7 @@ public class SwerveDriveBase  {
         } catch (RuntimeException ex ) {
             System.out.println("Error instantiating navX-MXP:  " + ex.getMessage());
         }
-        headerAngle = imu.getAngle();
+        targetHeading = imu.getAngle();
 
         initPIDControllers();
     }
@@ -270,19 +270,43 @@ public class SwerveDriveBase  {
         }else {
         	calculateSwerveControl(RY, RX, LX);
         }
-
     }
     
-    private void compensateDrift(double RY, double RX, double LY) {
-//    	if(LY == 0.0) {
-//    		//Drift stuff
-//    	}else {
-//    		headerAngle = imu.getYaw();
-//    		if(headerAngle < 360)
-//    	}
+    
+    public void compensateDrift(double RY, double RX, double LX) {
+		double currentAngle = imu.getAngle();
+		System.out.println("LX " + LX + " RX " + RX + " RY " +RY);
+    	if(LX == 0 && (RY != 0 || RX != 0)) {
+    		System.out.println("WOAH");
+    		//Drift stuff
+    		double lowerLimit = targetHeading-maxDrift;
+    		double upperLimit = targetHeading+maxDrift;
     		
+    		if(lowerLimit < 0) {
+    			lowerLimit += 360;
+    			double temp = lowerLimit;
+    			lowerLimit = upperLimit;
+    			upperLimit = temp;
+    		}else if(upperLimit > 360) {
+    			upperLimit -= 360;
+    			double temp = lowerLimit;
+    			lowerLimit = upperLimit;
+    			upperLimit = temp;
+    		}
+    			
+    		if(lowerLimit > currentAngle || currentAngle > upperLimit) {
+//    			if(currentAngle > targetHeading + 180 || currentAngle < targetHeading - 180) //Test for 0 looping back to 360
+//    				currentAngle = 360 - currentAngle;
+    			double theta = targetHeading - currentAngle;
+    			LX = Math.sin(toRadians(theta));
+    		}
+    		move(RY, RX, LX);
+    	}else { //not drifting
+    		targetHeading = currentAngle;
+    		move(RY, RX, LX);
+    	}		
     }
-
+    
     /**
      * Called by move command, controls both field centric and robot centric modes
      * @param RY Right stick Y Axis
