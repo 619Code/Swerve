@@ -43,7 +43,6 @@ public class TargetThread extends RobotThread {
 	int centerX;
 	int numRects;
 	Mat output;
-	Object imgLock;
 	
 	public final static double[] brightGreenHue = {60.0, 80.0};
 	public final static double[] brightGreenSat = {225.0, 255.0};
@@ -59,7 +58,6 @@ public class TargetThread extends RobotThread {
 		source = new Mat();
 		output = new Mat();
 		original = new Mat();
-		this.imgLock = imgLock;
 		this.cvSink = cvSink;
 		this.outputStream = outputStream;
 		start();

@@ -1,15 +1,15 @@
 package org.usfirst.frc.team619.logic.mapping;
 
+import org.opencv.core.Rect;
+import org.usfirst.frc.team619.hardware.AnalogUltrasonic;
 import org.usfirst.frc.team619.logic.RobotThread;
 import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.subsystems.DriverStation;
 import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
-import org.usfirst.frc.team619.subsystems.drive.SwerveWheel;
 
 import com.ctre.CANTalon;
 
 import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 /**
@@ -18,31 +18,37 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class SwerveDriveMappingThread extends RobotThread {
     protected SwerveDriveBase driveBase;
+    protected TargetThread vision;
     protected DriverStation driverStation;
+    protected AnalogUltrasonic ultrasonic;
     protected CANTalon climberMotor1, climberMotor2;
     protected CANTalon intakeMotor, outakeMotor;
     protected CANTalon gearMotor;
     private boolean releasedSpeed;
     private double scalePercent;
     boolean drift = true;
+    boolean gearLaunched;
     boolean speedToggle;
     boolean jiggled, jiggledBack;
     
-    public SwerveDriveMappingThread(CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
-    		CANTalon gearMotor, SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
+    public SwerveDriveMappingThread(AnalogUltrasonic ultrasonic, CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
+    		CANTalon gearMotor, TargetThread targetThread, SwerveDriveBase driveBase, DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
         
+        this.vision = targetThread;
         this.driveBase = driveBase;
         this.driverStation = driverStation;
         this.climberMotor1 = climberMotor1;
         this.climberMotor2 = climberMotor2;
         this.intakeMotor = intakeMotor;
         this.outakeMotor = outakeMotor;
+        this.ultrasonic = ultrasonic;
         this.gearMotor = gearMotor;
         
         driveBase.setDriftCompensation(true);
         driveBase.setDriftRange(2);
 		releasedSpeed = true;
+		gearLaunched = false;
 		jiggled = false;
 		jiggledBack = false;
 		speedToggle = false;
@@ -113,12 +119,22 @@ public class SwerveDriveMappingThread extends RobotThread {
         	RY *= 1-leftTrigger;
         	RX *= 1-leftTrigger;
         }else if(driverStation.getLeftController().getStickButton(Hand.kRight)) {
-        	drift = !drift;
+        	drift = !driveBase.isDriftCompensated();
         	driveBase.setDriftCompensation(drift);
         }else if(driverStation.getLeftController().getStickButton(Hand.kRight)) {
             driveBase.zeroIMU();
         }
-        driveBase.move(RY, RX, LX);
+        
+        if(driverStation.getLeftController().getXButton()) {
+        	boolean delivered = autoGear();
+        	if(delivered)
+        		System.out.println("LAUNCH GEAR NOW");
+        	else
+        		System.out.println("ALIGNING ROBOT......");
+        }else {
+        	gearLaunched = false;
+            driveBase.move(RY, RX, LX);
+        }
     	
         //right controller (manipulators)
         switch(pov) {
@@ -131,9 +147,13 @@ public class SwerveDriveMappingThread extends RobotThread {
         case 135:
         case 180:
         case 225:
-        	climberMotor1.set(-1);
-        	climberMotor2.set(-1);
+        	climberMotor1.set(1);
+        	climberMotor2.set(1);
         	break;
+        default:
+        	climberMotor1.set(0);
+        	climberMotor2.set(0);
+        		
         }
         if(driverStation.getRightController().getBumper(Hand.kRight)){
         	intakeMotor.set(-1);
@@ -143,11 +163,13 @@ public class SwerveDriveMappingThread extends RobotThread {
         	outakeMotor.set(-1);
         }else if(driverStation.getRightController().getTriggerAxis(Hand.kLeft) > 0.25) {
         	outakeMotor.set(driverStation.getRightController().getTriggerAxis(Hand.kLeft));
-        }else if(driverStation.getRightController().getBButton()){
+        }else if(driverStation.getRightController().getYButton()){
         	gearMotor.set(-1);
-        }else if(driverStation.getRightController().getXButton()) {
+        }else if(driverStation.getRightController().getAButton()) {
         	gearMotor.set(0.5);
-        }else if(driverStation.getRightController().getYButton()) {
+        }else if(driverStation.getRightController().getXButton()) {
+        	gearMotor.set(0.1);
+        }else if(driverStation.getRightController().getBButton()) {
         	if(jiggled == false) {
         		jiggled = true;
         		gearMotor.set(-1);
@@ -158,12 +180,54 @@ public class SwerveDriveMappingThread extends RobotThread {
         }else {
         	jiggled = false;
         	jiggledBack = false;
-        	climberMotor1.set(0);
-        	climberMotor2.set(0);
         	intakeMotor.set(0);
         	outakeMotor.set(0);
         	gearMotor.set(0);
         } 
+    }
+    
+    private boolean autoGear() {
+		Rect centangle = vision.getCentangle();
+		int leastHeight = 65;
+		int greatestHeight = 73;
+		int numRects = vision.getNumRects();
+		double moveY, moveX;
+		double distance = ultrasonic.getDistanceIn();
+		
+		if(numRects > 1 && !gearLaunched) {
+			double centerX = (centangle.x + (centangle.x+centangle.width))/2;
+			
+			if(centangle.height < leastHeight) {
+				//move forward
+				moveY = 0.25;
+			}else if(centangle.height > greatestHeight) {
+				//move backwards
+				moveY = -0.25;
+			}else	
+				moveY = 0;
+			
+			//both targets are in view
+			int imgCenter = vision.IMG_WIDTH/2;
+			System.out.println("Center: "+centerX);
+			if(imgCenter-10 < centerX && centerX < imgCenter+10 && numRects > 1) {
+				moveX = 0;
+			}else{
+				moveX = (centerX-imgCenter)/imgCenter; //Left of screen is -1, middle is 0, right is 1
+				moveX *= 0.9;
+				if(moveX > 0.3){
+					moveX = 0.3;
+				} else if(moveX < -0.3){
+					moveX = -0.3;
+				}
+			}
+			driveBase.move(moveY, moveX, 0);
+		}
+		if(!gearLaunched && distance < 85) {
+			driveBase.move(0, 0, 0);
+			System.out.println("LAUNCH GEAR NOW");
+			gearLaunched = true;
+		}
+		return gearLaunched;
     }
     
     private double deadzone(double val) {

@@ -275,12 +275,6 @@ public class SwerveDriveBase  {
 		if(currentAngle < 0)
 			currentAngle += 360;
 		
-		//In field centric mode without zeroing the
-		if(isFieldCentric)
-			targetHeading += fieldCentricHeading;
-		if(targetHeading > 360)
-			targetHeading -= 360;
-		
 		//Reset heading when the robot is stopped or spun by the driver
 		//Driver path is straight, robot should not turn
     	if(LX == 0 && (RY != 0 || RX != 0)) {
@@ -306,7 +300,12 @@ public class SwerveDriveBase  {
 //    				currentAngle = 360 - currentAngle;
     			double theta = targetHeading - currentAngle;
     			LX = Math.sin(toRadians(theta));
-    			
+    			if(LX > RX && LX > RY) {
+    				if(RX > RY)
+    					LX = RX;
+    				else
+    					LX = RY;
+    			}
     		}
     	}else { //not drifting
     		targetHeading = currentAngle;
@@ -395,6 +394,8 @@ public class SwerveDriveBase  {
         double theta = imu.getYaw( );
         //System.out.println("Theta: " + theta);
         while ( theta < 0 ) theta += 360;
+        if(LX != 0)
+        	targetHeading = theta;
         theta = toRadians(theta);
         double temp = RY*cos(theta) + RX*sin(theta);
         RX = -RY*sin(theta) + RX*cos(theta);
@@ -638,9 +639,7 @@ public class SwerveDriveBase  {
         isFieldCentric = true;
         isHookCentric = false;
         isGearCentric = false;
-        fieldCentricHeading = imu.getYaw();
-        if(fieldCentricHeading < 0)
-        	fieldCentricHeading += 360;
+        drift = false;
     }
     
     /**

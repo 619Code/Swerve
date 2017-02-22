@@ -13,11 +13,6 @@ import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 
-import org.opencv.core.Core;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 import org.usfirst.frc.team619.hardware.AnalogUltrasonic;
 import org.usfirst.frc.team619.logic.ThreadManager;
 import org.usfirst.frc.team619.logic.mapping.AutoThread;
@@ -91,8 +86,6 @@ public class SwerveTest extends IterativeRobot {
 	CvSink cvSink;
 	CvSource outputStream;
 	GripPipeline grip;
-	
-	private final Object imgLock = new Object();
 
 	int autonomous_angle = 0;
 	int autonomous_count = 0;
@@ -134,7 +127,7 @@ public class SwerveTest extends IterativeRobot {
         driveLeftFront = new CANTalon(1);
         steerLeftFront = new CANTalon(5);
         leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
-        driveLeftRear = new CANTalon(11);
+        driveLeftRear = new CANTalon(12);
         steerLeftRear = new CANTalon(8);
         leftRear = new SwerveWheel( "leftRear", driveLeftRear, steerLeftRear, 0.0 );
         driveRightFront = new CANTalon(0);
@@ -149,7 +142,7 @@ public class SwerveTest extends IterativeRobot {
         intakeMotor = new CANTalon(9);
         outakeMotor = new CANTalon(10);
         gearOutakeMotor = new CANTalon(4);
-        //Unused = new CANTalon(12)
+        //Unused = new CANTalon(11)
 
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 17.0, 19.0 );
@@ -177,7 +170,7 @@ public class SwerveTest extends IterativeRobot {
     public void autonomousInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(cvSink, outputStream, 3, threadManager);
-    	autoThread = new AutoThread(targetThread, imgLock, driveBase, 3, threadManager, gearOutakeMotor, ultrasonic);
+    	autoThread = new AutoThread(targetThread, driveBase, 3, threadManager, gearOutakeMotor, ultrasonic);
 //    	threadManager.addThread(autoThread);
 //    	autoThread.run();
 //    	driveBase.switchToGearCentric();
@@ -350,8 +343,8 @@ public class SwerveTest extends IterativeRobot {
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(cvSink, outputStream, 3, threadManager);
-        driveThread = new SwerveDriveMappingThread(climberMotor1, climberMotor2, intakeMotor, 
-        		outakeMotor, gearOutakeMotor, driveBase, driverStation, 15, threadManager);
+        driveThread = new SwerveDriveMappingThread(ultrasonic, climberMotor1, climberMotor2, intakeMotor, 
+        		outakeMotor, gearOutakeMotor, targetThread, driveBase, driverStation, 15, threadManager);
         driveThread.start();
     }
     

@@ -10,7 +10,6 @@ import com.ctre.CANTalon;
 
 public class AutoThread extends RobotThread {
 	
-	private Object imgLock;
 	private SwerveDriveBase driveBase;
 	private TargetThread vision;
 	boolean stop = false;
@@ -51,21 +50,20 @@ public class AutoThread extends RobotThread {
 	int leastWidth = 30;
 	int greatestWidth = 40;
 
-	boolean isRunning;
+	boolean running;
 	boolean gearLaunched;
 	//Hardware
 	CANTalon gearOutake;
 	AnalogUltrasonic ultrasonic;
 	
-	public AutoThread(TargetThread vision, Object syncLock, SwerveDriveBase driveBase, int period, ThreadManager threadManager, CANTalon gearOutakeMotor, AnalogUltrasonic ultrasanic) {
+	public AutoThread(TargetThread vision, SwerveDriveBase driveBase, int period, ThreadManager threadManager, CANTalon gearOutakeMotor, AnalogUltrasonic ultrasanic) {
 		super(period, threadManager);
 		driveBase.switchToGearCentric();
-		imgLock = syncLock;
 		this.driveBase = driveBase;
 		this.vision = vision;
 		this.driveBase.switchToGearCentric();
 		gearOutake = gearOutakeMotor;
-		isRunning = false;
+		running = false;
 		gearLaunched = false;
 		ultrasonic = ultrasanic;
 		start();
@@ -80,20 +78,25 @@ public class AutoThread extends RobotThread {
 		System.out.println("AND THE DISTANCE IS: " + distance);
 		numRects = vision.getNumRects();
 		//try { Thread.sleep(5000); }catch(Exception e){}
+		
+		if(numRects < 2 && !gearLaunched){
+			driveBase.move(0.3, 0, 0);
+		}
+		
 		if(numRects > 1 && !gearLaunched) {
-			isRunning = true;
+			running = true;
 			centerX = (centangle.x + (centangle.x+centangle.width))/2;
 //			System.out.println(centangle.height);
 			//if the height and width are less than target values
 			if(centangle.height < leastHeight) {
 				//move forward
-				moveY = 0.2;
+				moveY = 0.25;
 //				System.out.println(centangle.height);
 //				System.out.println("Going forward!");
 			//if the height and width are greater than target values
 			}else if(centangle.height > greatestHeight) {
 				//move backwards
-				moveY = -0.2;
+				moveY = -0.25;
 //				System.out.println("Going backward!");
 			}else	
 				moveY = 0;
@@ -110,10 +113,10 @@ public class AutoThread extends RobotThread {
 			}else{
 				moveX = (centerX-imgCenter)/imgCenter; //Left of screen is -1, middle is 0, right is 1
 				moveX *= 0.9;
-				if(moveX > 0.3){
-					moveX = 0.3;
-				} else if(moveX < -0.3){
-					moveX = -0.3;
+				if(moveX > 0.25){
+					moveX = 0.25;
+				} else if(moveX < -0.25){
+					moveX = -0.25;
 				}
 				System.out.println("ADJUSTED VALUE: " + moveX);
 			} //Both targets are not in view, dont change position
@@ -121,20 +124,25 @@ public class AutoThread extends RobotThread {
 			System.out.println(moveY);
 			
 			driveBase.move(moveY, moveX, 0);
-		}else if(!gearLaunched) {
+		}
+		if(!gearLaunched && distance < 85) {
 			driveBase.move(0,0,0);
-			if(isRunning == true && distance < 76) {
+			if(running == true) {
 				System.out.println("LAUNCH GEAR NOW");
 				gearOutake.set(-1);
-				driveBase.move(-0.25, 0, 0);
-				try{ Thread.sleep(100); }catch(Exception e) { }
+				try{ Thread.sleep(150); }catch(Exception e) { }
 				gearLaunched = true;
 			}
-			if(gearLaunched && isRunning == true){
+			if(gearLaunched && running == true){
 				gearOutake.set(0);
-				isRunning = false;
-				try { Thread.sleep(1150); }catch(Exception e) {}
+				running = false;
+				try { Thread.sleep(500); }catch(Exception e) {}
+				driveBase.move(-0.35, 0, 0);
+				try { Thread.sleep(1000); }catch(Exception e) {}
+				gearOutake.set(1);
+				try { Thread.sleep(100); }catch(Exception e) {}
 				driveBase.move(0, 0, 0);
+				gearOutake.set(0);
 //				driveBase.move(-0.25, 0, 0);
 //				gearOutake.set(-0.2);
 			}
