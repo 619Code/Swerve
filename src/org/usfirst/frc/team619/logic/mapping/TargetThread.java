@@ -4,16 +4,19 @@ package org.usfirst.frc.team619.logic.mapping;
 import java.util.ArrayList;
 
 
+
 // robot
 import org.usfirst.frc.team619.logic.RobotThread;
 import org.usfirst.frc.team619.logic.ThreadManager;
-
 import org.usfirst.frc.team619.subsystems.GripPipeline;
+
 
 // camera
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 
+
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 // opencv
 import org.opencv.core.Rect;
@@ -29,6 +32,7 @@ import org.opencv.core.Core;
 public class TargetThread extends RobotThread {
 	
 	CvSink cvSink;
+	PowerDistributionPanel pdp;
 	CvSource outputStream;
 	GripPipeline grip;
 	
@@ -52,12 +56,13 @@ public class TargetThread extends RobotThread {
 	Mat source;
 	Mat original;
 	
-	public TargetThread(CvSink cvSink, CvSource outputStream, int period, ThreadManager threadManager) {
+	public TargetThread(PowerDistributionPanel pdp, CvSink cvSink, CvSource outputStream, int period, ThreadManager threadManager) {
 		super(period, threadManager);
 		grip  = new GripPipeline();
 		source = new Mat();
 		output = new Mat();
 		original = new Mat();
+		this.pdp = pdp;
 		this.cvSink = cvSink;
 		this.outputStream = outputStream;
 		start();
@@ -371,11 +376,11 @@ public class TargetThread extends RobotThread {
     	return numRects;
     }
     
-    public synchronized Rect getLeftangle() {
+    public Rect getLeftangle() {
     	return leftangle;
     }
     
-    public synchronized Rect getCentangle() {
+    public Rect getCentangle() {
     	return centangle;
     }
     

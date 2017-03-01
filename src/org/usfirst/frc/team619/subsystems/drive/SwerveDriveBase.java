@@ -45,12 +45,12 @@ public class SwerveDriveBase  {
     boolean isGearCentric = false;
     boolean isObjectCentric = false;
     boolean isHookCentric = false;
-    boolean drift = true;
+    boolean drift = false;
 
     double radius = 55;
     double targetHeading;
     double fieldCentricHeading;
-    int maxDrift = 2;
+    double maxDrift = 1.5;
 
     SwerveWheel[] wheelArray;
 
@@ -277,7 +277,7 @@ public class SwerveDriveBase  {
 		
 		//Reset heading when the robot is stopped or spun by the driver
 		//Driver path is straight, robot should not turn
-    	if(LX == 0 && (RY != 0 || RX != 0)) {
+    	if(LX == 0 && (RY > 0.1 || RX > 0.1)) {
     		//Maximum angle away from the target
     		double lowerLimit = targetHeading-maxDrift;
     		double upperLimit = targetHeading+maxDrift;
@@ -301,15 +301,14 @@ public class SwerveDriveBase  {
     			double theta = targetHeading - currentAngle;
     			LX = Math.sin(toRadians(theta));
     			if(LX > RX && LX > RY) {
-    				if(RX > RY)
-    					LX = RX;
-    				else
-    					LX = RY;
+    				LX = 0;
     			}
     		}
-    	}else { //not drifting
+    	}else if(!isFieldCentric) { //not drifting
     		targetHeading = currentAngle;
     	}
+    	if(LX == 0 && RX == 0 && RY == 0)
+    		LX = 0;
     	return LX;
     }
     
@@ -394,7 +393,7 @@ public class SwerveDriveBase  {
         double theta = imu.getYaw( );
         //System.out.println("Theta: " + theta);
         while ( theta < 0 ) theta += 360;
-        if(LX != 0)
+        if(LX != 0 || (RX == 0 && RY == 0))
         	targetHeading = theta;
         theta = toRadians(theta);
         double temp = RY*cos(theta) + RX*sin(theta);
@@ -686,7 +685,7 @@ public class SwerveDriveBase  {
         isGearCentric = false;
     }
     
-    public void setDriftRange(int range) {
+    public void setDriftRange(double range) {
     	maxDrift = range;
     }
     
@@ -698,7 +697,7 @@ public class SwerveDriveBase  {
     	return drift;
     }
     
-    public int getDriftRange() {
+    public double getDriftRange() {
     	return maxDrift;
     }
 
@@ -720,7 +719,7 @@ public class SwerveDriveBase  {
 
     public void zeroIMU() {
         imu.zeroYaw();
-        fieldCentricHeading = 0;
+        targetHeading = 0;
     }
 
     public void autoZeroWheels() {

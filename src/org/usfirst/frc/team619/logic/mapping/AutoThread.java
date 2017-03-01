@@ -8,10 +8,13 @@ import org.usfirst.frc.team619.subsystems.drive.SwerveDriveBase;
 
 import com.ctre.CANTalon;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+
 public class AutoThread extends RobotThread {
 	
 	private SwerveDriveBase driveBase;
 	private TargetThread vision;
+	private DigitalInput switch1, switch2;
 	boolean stop = false;
 	boolean stopMoving = false;
 	
@@ -36,6 +39,7 @@ public class AutoThread extends RobotThread {
 	double centerX;
 	int numRects;
 	double distance;
+	double speed;
 	
 	//target ranges
 	int leastX = 10;
@@ -56,16 +60,19 @@ public class AutoThread extends RobotThread {
 	CANTalon gearOutake;
 	AnalogUltrasonic ultrasonic;
 	
-	public AutoThread(TargetThread vision, SwerveDriveBase driveBase, int period, ThreadManager threadManager, CANTalon gearOutakeMotor, AnalogUltrasonic ultrasanic) {
+	public AutoThread(DigitalInput switch1, DigitalInput switch2, TargetThread vision, SwerveDriveBase driveBase, int period, ThreadManager threadManager, CANTalon gearOutakeMotor, AnalogUltrasonic ultrasanic) {
 		super(period, threadManager);
 		driveBase.switchToGearCentric();
 		this.driveBase = driveBase;
 		this.vision = vision;
+		this.switch1 = switch1;
+		this.switch2 = switch2;
 		this.driveBase.switchToGearCentric();
 		gearOutake = gearOutakeMotor;
 		running = false;
 		gearLaunched = false;
 		ultrasonic = ultrasanic;
+		speed = 0.3;
 		start();
 	}
 
@@ -80,23 +87,25 @@ public class AutoThread extends RobotThread {
 		//try { Thread.sleep(5000); }catch(Exception e){}
 		
 		if(numRects < 2 && !gearLaunched){
-			driveBase.move(0.3, 0, 0);
+			driveBase.move(speed, 0, 0);
 		}
 		
 		if(numRects > 1 && !gearLaunched) {
+			if(centangle.height > 15)
+				speed = 0.2;
 			running = true;
 			centerX = (centangle.x + (centangle.x+centangle.width))/2;
 //			System.out.println(centangle.height);
 			//if the height and width are less than target values
 			if(centangle.height < leastHeight) {
 				//move forward
-				moveY = 0.25;
+				moveY = speed;
 //				System.out.println(centangle.height);
 //				System.out.println("Going forward!");
 			//if the height and width are greater than target values
 			}else if(centangle.height > greatestHeight) {
 				//move backwards
-				moveY = -0.25;
+				moveY = -speed;
 //				System.out.println("Going backward!");
 			}else	
 				moveY = 0;
@@ -125,7 +134,10 @@ public class AutoThread extends RobotThread {
 			
 			driveBase.move(moveY, moveX, 0);
 		}
-		if(!gearLaunched && distance < 85) {
+
+		//Competition value
+		//if(!gearLaunched && distance < 85)
+		if(!gearLaunched && distance < 75) {
 			driveBase.move(0,0,0);
 			if(running == true) {
 				System.out.println("LAUNCH GEAR NOW");
@@ -147,13 +159,35 @@ public class AutoThread extends RobotThread {
 //				gearOutake.set(-0.2);
 			}
 		}
+	}
+	
+	private double turnToAngle() {
+		double currentAngle = driveBase.getYaw();
+		double speed = 0;
+		if(switch1.get() && !switch2.get()) {
+			int targetAngle = -60;
+			if(currentAngle > targetAngle) {
+				speed = Math.cos(Math.toRadians(currentAngle-targetAngle));
+			}else {
+				speed = -Math.cos(Math.toRadians(targetAngle-currentAngle));
+			}
+		}else if(switch2.get() && !switch1.get()) {
+			int targetAngle = 60;
+			if(currentAngle > targetAngle) {
+				speed = Math.cos(Math.toRadians(currentAngle-targetAngle));
+			}else {
+				speed = -Math.cos(Math.toRadians(targetAngle-currentAngle));
+			}
+		}
+		System.out.println("Turn speed " + speed);
+		return speed;
+	}
 //		}else {
 //			try { Thread.sleep(200); }catch(Exception e) {}
 //			gearOutake.set(0);
 //			try { Thread.sleep(1000); }catch(Exception e){}
 //			driveBase.move(0, 0, 0);
 //		}
-	}
 	
 //	protected void cycleOld() {
 //		double turn = 0;
