@@ -1,6 +1,7 @@
 package org.usfirst.frc.team619.subsystems.drive;
 
-import com.kauailabs.nav6.frc.IMU;
+import com.kauailabs.navx.frc.AHRS;
+import com.kauailabs.navx.frc.AHRS.SerialDataType;
 
 import edu.wpi.first.wpilibj.SerialPort;
 import static java.lang.Math.*;
@@ -11,14 +12,14 @@ public class SwerveCalc {
 	double R;       //   diagonal size
 	
 	SerialPort serial_port;
-	IMU imu;                             //NavX
+	AHRS navX;                             //NavX
 	
 	// wheelbase = 
 	//     track = distance from left wheel to right wheel
 	public SwerveCalc( double wheelbase, double trackwidth ) {
 		try {
-			serial_port = new SerialPort(57600,SerialPort.Port.kMXP);
-            imu = new IMU(serial_port);
+			byte updateRate = 100;
+            navX = new AHRS(SerialPort.Port.kMXP, SerialDataType.kProcessedData, updateRate);
             } catch(Exception ex) { }
 
 		L = wheelbase;
@@ -59,8 +60,8 @@ public class SwerveCalc {
 	}
 	// get field centric
 	public SwerveCalcValue getFieldCentric( double FWD, double STR, double RCW ) {
-		//  imu.getYaw( ) returns angle between -180 and 180
-		double theta = imu.getYaw( );
+		//  navX.getYaw( ) returns angle between -180 and 180
+		double theta = navX.getYaw( );
 		theta = toRadians(theta < 0 ? theta+360 : theta);
 		double temp = FWD*cos(theta) + STR*sin(theta);
 		STR = -FWD*sin(theta) + STR*cos(theta);

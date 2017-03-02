@@ -60,7 +60,8 @@ public class AutoThread extends RobotThread {
 	CANTalon gearOutake;
 	AnalogUltrasonic ultrasonic;
 	
-	public AutoThread(DigitalInput switch1, DigitalInput switch2, TargetThread vision, SwerveDriveBase driveBase, int period, ThreadManager threadManager, CANTalon gearOutakeMotor, AnalogUltrasonic ultrasanic) {
+	public AutoThread(DigitalInput switch1, DigitalInput switch2, TargetThread vision, SwerveDriveBase driveBase, 
+			int period, ThreadManager threadManager, CANTalon gearOutakeMotor, AnalogUltrasonic ultrasanic) {
 		super(period, threadManager);
 		driveBase.switchToGearCentric();
 		this.driveBase = driveBase;

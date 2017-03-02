@@ -1,7 +1,6 @@
 package org.usfirst.frc.team619.subsystems.drive;
 
-import com.kauailabs.nav6.frc.IMUAdvanced;
-
+import com.kauailabs.navx.frc.AHRS;
 import com.ctre.CANTalon;
 
 import edu.wpi.first.wpilibj.SerialPort;
@@ -27,7 +26,7 @@ public class SwerveDriveBaseOld  {
 
 
     //NavX
-    IMUAdvanced imu;
+    AHRS navX;
     SerialPort serial_port;
 
     int encoderUnitsPerRotation = 1660;//was 1665
@@ -122,12 +121,12 @@ public class SwerveDriveBaseOld  {
             // If you need to minimize CPU load, you can set it to a
             // lower value, as shown here, depending upon your needs.
 
-            // You can also use the IMUAdvanced class for advanced
+            // You can also use the navXAdvanced class for advanced
             // features.
 
             byte update_rate_hz = 100;
-            //imu = new IMU(serial_port,update_rate_hz);
-            imu = new IMUAdvanced(serial_port,update_rate_hz);
+            //navX = new navX(serial_port,update_rate_hz);
+            navX = new AHRS(SerialPort.Port.kMXP);
             } catch( Exception ex ) {
 
             }
@@ -155,14 +154,14 @@ public class SwerveDriveBaseOld  {
     }
 
     public void updatePIDControllers(){
-        //rotatePIDInput.setValue(imu.getYaw());
+        //rotatePIDInput.setValue(navX.getYaw());
         //SmartDashboard.putNumber("PIDInput Value: ", rotatePIDInput.pidGet());
     }
 
 
     public void relativeRotateRobot(double angle){
         SmartDashboard.putNumber("Delta Angle", angle);
-        double currentAngle = imu.getYaw();
+        double currentAngle = navX.getYaw();
         SmartDashboard.putNumber("Current Angle:", currentAngle);
         double targetAngle = currentAngle + angle;
 
@@ -175,7 +174,7 @@ public class SwerveDriveBaseOld  {
         updatePIDControllers();
         while(Math.abs(currentAngle - targetAngle) >= 2){ //waits until we are within range of the angle
             //rotationPID.setSetpoint(targetAngle); //tells PID loop to go to the targetAngle
-            currentAngle = imu.getYaw();
+            currentAngle = navX.getYaw();
             updatePIDControllers();
             //calculateSwerveControl(0,0,0.2);
             calculateSwerveControl(0, 0, 0 /*rotatePIDOutput.getPIDValue()*/); //sets the wheels to rotate based off PID loop
@@ -207,7 +206,7 @@ public class SwerveDriveBaseOld  {
      */
 
     public void absoluteRotateRobot(double targetAngle){
-        double currentAngle = imu.getYaw();
+        double currentAngle = navX.getYaw();
         if(targetAngle >= 180){
             targetAngle-=360;
         } else if(targetAngle < -180){
@@ -216,7 +215,7 @@ public class SwerveDriveBaseOld  {
         updatePIDControllers();
         while(Math.abs(currentAngle - targetAngle) >= 1){//waits until we are within range of our target angle
             //rotationPID.setSetpoint(targetAngle);//tells PID loop to go to the target angle
-            currentAngle = imu.getYaw();
+            currentAngle = navX.getYaw();
             SmartDashboard.putNumber("Absolute Current Angle", currentAngle);
             updatePIDControllers();
             calculateSwerveControl(0, 0, 0 /*rotatePIDOutput.getPIDValue()*/);//sets the wheels to rotate based off PID loop
@@ -298,7 +297,7 @@ public class SwerveDriveBaseOld  {
 
 
         if(isFieldCentric){
-            orientationOffset = imu.getYaw(); //if in field centric mode make offset equal to the current angle of the navX
+            orientationOffset = navX.getYaw(); //if in field centric mode make offset equal to the current angle of the navX
         }
 
         double rotationMagnitude = Math.abs(rAxis);
@@ -466,7 +465,7 @@ public class SwerveDriveBaseOld  {
 
         double translationalOffset = 0.0;
         if(isFieldCentric){
-            translationalOffset = imu.getYaw();
+            translationalOffset = navX.getYaw();
         } else {
             translationalOffset = 0;
         }
