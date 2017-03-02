@@ -161,27 +161,37 @@ public class AutoThread extends RobotThread {
 		}
 	}
 	
-	private double turnToAngle() {
+	private double goToAngle() {
 		double currentAngle = driveBase.getYaw();
 		double speed = 0;
 		if(switch1.get() && !switch2.get()) {
-			int targetAngle = -60;
-			if(currentAngle > targetAngle) {
-				speed = Math.cos(Math.toRadians(currentAngle-targetAngle));
-			}else {
-				speed = -Math.cos(Math.toRadians(targetAngle-currentAngle));
-			}
+			int targetAngle = -30;
+			System.out.println("Target Angle: " + targetAngle);
+			speed = sin(toRadians(targetAngle - currentAngle));
 		}else if(switch2.get() && !switch1.get()) {
-			int targetAngle = 60;
-			if(currentAngle > targetAngle) {
-				speed = Math.cos(Math.toRadians(currentAngle-targetAngle));
-			}else {
-				speed = -Math.cos(Math.toRadians(targetAngle-currentAngle));
-			}
+			int targetAngle = 30;
+			System.out.println("Target Angle: " + targetAngle);
+			speed = sin(toRadians(targetAngle - currentAngle));
+		}else if(switch1.get() && switch2.get()) {
+			int targetAngle = 0;
+			System.out.println("Target Angle: " + targetAngle);
+			speed = sin(toRadians(targetAngle - currentAngle));
 		}
-		System.out.println("Turn speed " + speed);
+		speed *= 1.3;
+		if(speed > 0.4)
+			speed = 0.4;
+		if(speed < -0.4)
+			speed = -0.4;
 		return speed;
 	}
+	
+    private double toRadians(double val) {
+    	return Math.toRadians(val);
+    }
+    
+    private double sin(double val) {
+    	return Math.sin(val);
+    }
 //		}else {
 //			try { Thread.sleep(200); }catch(Exception e) {}
 //			gearOutake.set(0);

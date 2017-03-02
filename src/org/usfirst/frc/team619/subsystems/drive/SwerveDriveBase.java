@@ -690,7 +690,7 @@ public class SwerveDriveBase  {
     }
     
     public void setDriftCompensation(boolean state) {
-    	state = drift;
+    	drift = state;
     }
     
     public boolean isDriftCompensated() {
