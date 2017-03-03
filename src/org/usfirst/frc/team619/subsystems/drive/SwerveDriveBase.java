@@ -45,7 +45,7 @@ public class SwerveDriveBase  {
     boolean isGearCentric = false;
     boolean isObjectCentric = false;
     boolean isHookCentric = false;
-    boolean drift = false;
+    boolean drift = true;
 
     double radius = 55;
     double targetHeading;
@@ -723,15 +723,28 @@ public class SwerveDriveBase  {
     }
 
     public void autoZeroWheels() {
-	    frontRight.autoZero();
-	    frontLeft.autoZero();
-	    backLeft.autoZero();
-	    backRight.autoZero();
+    	if(!frontRight.isRotateMotorZeroed()) frontRight.autoZero();
+	    if(!frontLeft.isRotateMotorZeroed()) frontLeft.autoZero();
+	    if(!backLeft.isRotateMotorZeroed()) backLeft.autoZero();
+	    if(!backRight.isRotateMotorZeroed()) backRight.autoZero();
     }
     
     public void goToZero() {
     	frontLeft.setTargetAngle(0);
     	frontLeft.goToAngle();
+    	frontRight.setTargetAngle(0);
+    	frontRight.goToAngle();
+    	backLeft.setTargetAngle(0);
+    	backLeft.goToAngle();
+    	backRight.setTargetAngle(0);
+    	backRight.goToAngle();
+    }
+    
+    public void unzeroWheels() {
+    	frontLeft.setRotateZero(false);
+    	frontRight.setRotateZero(false);
+    	backLeft.setRotateZero(false);
+    	backRight.setRotateZero(false);
     }
     
     public void zeroWheels() {

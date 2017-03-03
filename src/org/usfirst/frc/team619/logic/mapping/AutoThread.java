@@ -70,6 +70,7 @@ public class AutoThread extends RobotThread {
 		this.switch1 = switch1;
 		this.switch2 = switch2;
 		this.driveBase.switchToFieldCentric();
+		this.driveBase.setDriftCompensation(true);
 		gearOutake = gearOutakeMotor;
 		running = false;
 		gearLaunched = false;
@@ -91,13 +92,15 @@ public class AutoThread extends RobotThread {
 		//try { Thread.sleep(5000); }catch(Exception e){}
 		
 		if(autoMove) {
-			driveBase.move(speed, 0, autoTurnSpeed());
+			driveBase.move(0.30, 0, autoTurnSpeed());
+			System.out.println(autoTurnSpeed());
+			System.out.println((System.currentTimeMillis()-timeStart)/1000);
 			if(numRects > 1 && Math.abs(autoTurnSpeed()) < 0.075) {
 				autoMove = false;
 				driveBase.switchToGearCentric();
 				driveBase.move(0, 0, 0);
 			}
-			if(System.currentTimeMillis() - timeStart > 2500) {
+			if(System.currentTimeMillis() - timeStart > 3000) {
 				autoMove = false;
 				driveBase.switchToGearCentric();
 				driveBase.move(0, 0, 0);
@@ -156,7 +159,7 @@ public class AutoThread extends RobotThread {
 
 		//Competition value
 		//if(!gearLaunched && distance < 85)
-		if(!gearLaunched && distance < 75) {
+		if(!gearLaunched && distance < 77) {
 			driveBase.move(0,0,0);
 			if(running == true) {
 				System.out.println("LAUNCH GEAR NOW");
@@ -184,23 +187,23 @@ public class AutoThread extends RobotThread {
 		double currentAngle = driveBase.getYaw();
 		double speed = 0;
 		if(switch1.get() && !switch2.get()) {
-			int targetAngle = -30;
+			int targetAngle = 60;
 			System.out.println("Target Angle: " + targetAngle);
 			speed = sin(toRadians(targetAngle - currentAngle));
 		}else if(switch2.get() && !switch1.get()) {
-			int targetAngle = 30;
+			int targetAngle = 150;
 			System.out.println("Target Angle: " + targetAngle);
 			speed = sin(toRadians(targetAngle - currentAngle));
 		}else if(switch1.get() && switch2.get()) {
-			int targetAngle = 0;
+			int targetAngle = 90;
 			System.out.println("Target Angle: " + targetAngle);
 			speed = sin(toRadians(targetAngle - currentAngle));
 		}
 		speed *= 1.3;
-		if(speed > 0.4)
-			speed = 0.4;
-		if(speed < -0.4)
-			speed = -0.4;
+		if(speed > 0.6)
+			speed = 0.6;
+		if(speed < -0.6)
+			speed = -0.6;
 		return speed;
 	}
 	

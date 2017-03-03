@@ -43,7 +43,7 @@ public class SwerveTest extends IterativeRobot {
 
 	//Basics
 	ThreadManager threadManager;
-	DriverStation driverStation;
+	DriverStation  driverStation;
 	PowerDistributionPanel pdp;
 
 	//Logic
@@ -173,7 +173,7 @@ public class SwerveTest extends IterativeRobot {
         intakeMotor = new CANTalon(9);
         outakeMotor = new CANTalon(10);
         gearOutakeMotor = new CANTalon(4);
-//        //Unused = new CANTalon(11)
+        //Unused = new CANTalon(11)
 
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 17.0, 19.0 );

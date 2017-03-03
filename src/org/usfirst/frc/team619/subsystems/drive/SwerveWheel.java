@@ -16,7 +16,7 @@ public class SwerveWheel {
 	private int tempOffset;
 	private int targetAngle;
 	private int encoderUnitsPerRotation = 1660;//was 1665
-	private boolean zeroState = false;
+	private boolean isZeroed = false;
 	private boolean rolling = false;
 	
 	public static final double p=5, i=0.0001, d=0;
@@ -41,7 +41,8 @@ public class SwerveWheel {
 		rotateMotor.setPID(p,i,d);
 		
         targetAngle = 0;
-        tempOffset = -1337; 
+        tempOffset = -1337;
+        isZeroed = false;
         offset = 0;
 		rAngle = rotateAngle;
 
@@ -81,16 +82,16 @@ public class SwerveWheel {
 		} else {
 			System.out.println(getCurrentAngle());
 			
-			zeroState = true;
 			tempOffset = getCurrentAngle();
 			//Zero'd position is different for each side, front is toward the gear
-			if(label == "leftFront" || label == "leftRear")
-				tempOffset += 90;
-			else
+			if(label == "leftFront" || label == "rightFront")
 				tempOffset -= 90;
+			else
+				tempOffset += 90;
 			offset = tempOffset;
 			setTargetAngle(0);
 			goToAngle();
+			isZeroed = true;
 		}
 	}
 
@@ -232,7 +233,7 @@ public class SwerveWheel {
     }
     
     public void setRotateZero(boolean state) {
-    	zeroState = state;
+    	isZeroed = state;
     }
     
     public double getVoltage() {
@@ -259,8 +260,8 @@ public class SwerveWheel {
 		return rotateMotor.isFwdLimitSwitchClosed();
 	}
 	
-	public boolean isRotateMotorZero() {
-		return zeroState;
+	public boolean isRotateMotorZeroed() {
+		return isZeroed;
 	}
 	
 
