@@ -40,6 +40,7 @@ public class AutoThread extends RobotThread {
 	int numRects;
 	double distance;
 	double speed;
+	long timeStart;
 	
 	//target ranges
 	int leastX = 10;
@@ -54,7 +55,7 @@ public class AutoThread extends RobotThread {
 	int leastWidth = 30;
 	int greatestWidth = 40;
 
-	boolean running;
+	boolean running, autoMove;
 	boolean gearLaunched;
 	//Hardware
 	CANTalon gearOutake;
@@ -68,12 +69,14 @@ public class AutoThread extends RobotThread {
 		this.vision = vision;
 		this.switch1 = switch1;
 		this.switch2 = switch2;
-		this.driveBase.switchToGearCentric();
+		this.driveBase.switchToFieldCentric();
 		gearOutake = gearOutakeMotor;
 		running = false;
 		gearLaunched = false;
+		autoMove = true;
 		ultrasonic = ultrasanic;
 		speed = 0.3;
+		timeStart = System.currentTimeMillis();
 		start();
 	}
 
@@ -87,9 +90,24 @@ public class AutoThread extends RobotThread {
 		numRects = vision.getNumRects();
 		//try { Thread.sleep(5000); }catch(Exception e){}
 		
-		if(numRects < 2 && !gearLaunched){
-			driveBase.move(speed, 0, 0);
+		if(autoMove) {
+			driveBase.move(speed, 0, autoTurnSpeed());
+			if(numRects > 1 && Math.abs(autoTurnSpeed()) < 0.075) {
+				autoMove = false;
+				driveBase.switchToGearCentric();
+				driveBase.move(0, 0, 0);
+			}
+			if(System.currentTimeMillis() - timeStart > 2500) {
+				autoMove = false;
+				driveBase.switchToGearCentric();
+				driveBase.move(0, 0, 0);
+			}
+			return;
 		}
+		
+//		if(numRects < 2 && !gearLaunched){
+//			driveBase.move(speed, 0, 0);
+//		}
 		
 		if(numRects > 1 && !gearLaunched) {
 			if(centangle.height > 15)
@@ -162,7 +180,7 @@ public class AutoThread extends RobotThread {
 		}
 	}
 	
-	private double goToAngle() {
+	private double autoTurnSpeed() {
 		double currentAngle = driveBase.getYaw();
 		double speed = 0;
 		if(switch1.get() && !switch2.get()) {
