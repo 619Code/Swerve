@@ -201,7 +201,8 @@ public class SwerveTest extends IterativeRobot {
     public void autonomousInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
-    	autoThread = new AutoThread(switch1, switch2, targetThread, driveBase, 3, threadManager, gearOutakeMotor, ultrasonic);
+    	if(switch1.get() || switch2.get())
+    		autoThread = new AutoThread(switch1, switch2, targetThread, driveBase, 3, threadManager, gearOutakeMotor, ultrasonic);
 //    	threadManager.addThread(autoThread);
 //    	autoThread.run();
 //    	driveBase.switchToGearCentric();

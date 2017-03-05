@@ -76,7 +76,7 @@ public class SwerveWheel {
 			System.out.println(rotateMotor.isFwdLimitSwitchClosed());
 			System.out.println(tempOffset);
 			
-			tempOffset -= 2;
+			tempOffset -= 3;
 			setTargetAngle(tempOffset);
 			goToAngle();
 		} else {
@@ -89,6 +89,20 @@ public class SwerveWheel {
 			else
 				tempOffset += 90;
 			offset = tempOffset;
+//			if(label == "leftRear" || label == "rightRear") {
+//				System.out.println("-----------------------------------------------------------------------------------");
+//				setTargetAngle(0);
+//				goToAngle();
+//				try{ Thread.sleep(200); } catch(Exception e) { }
+//				setTargetAngle(35);
+//				goToAngle();
+//				try { Thread.sleep(200); } catch(Exception e) { }
+//				setTargetAngle(65);
+//				goToAngle();
+//				try { Thread.sleep(200); } catch(Exception e) { }
+//				setTargetAngle(90);
+//				goToAngle();
+//			}
 			setTargetAngle(0);
 			goToAngle();
 			isZeroed = true;

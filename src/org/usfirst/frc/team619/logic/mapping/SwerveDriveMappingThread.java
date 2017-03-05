@@ -63,7 +63,6 @@ public class SwerveDriveMappingThread extends RobotThread {
 		jiggledBack = false;
 		speedToggle = false;
 		gearCentric = false;
-		driveBase.zeroIMU();
 		scalePercent = 0.6;
 		autoSpeed = 0.35;
     }
@@ -114,6 +113,7 @@ public class SwerveDriveMappingThread extends RobotThread {
         }else if (driverStation.getLeftController().getBackButton()) {
             driveBase.switchToFieldCentric();
         } else if(driverStation.getLeftController().getAButton()) {
+        	driveBase.switchToRobotCentric();
         	driveBase.switchToGearCentric();
         } else if(driverStation.getLeftController().getBumper(Hand.kLeft)) {
         	//Set drive values to 60%
@@ -126,10 +126,10 @@ public class SwerveDriveMappingThread extends RobotThread {
         } else if(leftTrigger > 0.05){
         	RY *= 1-leftTrigger;
         	RX *= 1-leftTrigger;
-        }else if(driverStation.getLeftController().getStickButton(Hand.kLeft)) {
+        }else if(driverStation.getLeftController().getStickButton(Hand.kRight)) {
         	driveBase.setDriftCompensation(!driveBase.isDriftCompensated());
         	System.out.println("Drift Compensation is now " + driveBase.isDriftCompensated());
-        }else if(driverStation.getLeftController().getStickButton(Hand.kRight)) {
+        }else if(driverStation.getLeftController().getStickButton(Hand.kLeft)) {
             driveBase.zeroIMU();
         }
         
@@ -138,6 +138,7 @@ public class SwerveDriveMappingThread extends RobotThread {
         } else if(driverStation.getLeftController().getYButton()) {
         	driveBase.autoZeroWheels();
         }else if(driverStation.getLeftController().getXButton()) {
+        	System.out.println("WTF MAN");
         	if(gearCentric == false) {
         		gearCentric = true;
         		driveBase.switchToGearCentric();
@@ -154,12 +155,11 @@ public class SwerveDriveMappingThread extends RobotThread {
             System.out.println("Turn amount: " +autoTurnSpeed());
         }else {
         	gearLaunched = false;
-        	if(gearCentric = true) {
+        	if(gearCentric) {
         		driveBase.switchToFieldCentric();
         		gearCentric = false;
         	}
             driveBase.move(RY, RX, LX);
-            autoSpeed = 0.35;
         }
     	
         //right controller (manipulators)
@@ -184,15 +184,22 @@ public class SwerveDriveMappingThread extends RobotThread {
         if(driverStation.getRightController().getBackButton()) {
         	driveBase.setDriftCompensation(true);
         	System.out.println("Drift Compensation is now " + driveBase.isDriftCompensated());
+        //intake motor
         }else if(driverStation.getRightController().getBumper(Hand.kRight)) {
-        	intakeMotor.set(-1);
-        }else if(driverStation.getRightController().getBumper(Hand.kLeft)) {
+            intakeMotor.set(-1);
+        }else if(driverStation.getRightController().getTriggerAxis(Hand.kRight) > 0.1) {
         	intakeMotor.set(1);
-        }else if(driverStation.getRightController().getAButton()){
-        	pdp.getCurrent(8);
+        //outake motor
+        }else if(driverStation.getRightController().getBumper(Hand.kLeft)){
+        	outakeMotor.set(1);
+        }else if(driverStation.getRightController().getTriggerAxis(Hand.kLeft) > 0.1){
+        	outakeMotor.set(-0.5);
+        //gear motor
+        }else if(driverStation.getRightController().getBButton()){
         	gearMotor.set(-1);
         }else if(driverStation.getRightController().getYButton()) {
         	gearMotor.set(0.5);
+        //jiggle (not sure if works)
         }else if(driverStation.getRightController().getXButton()) {
         	if(jiggled == false) {
         		jiggled = true;
@@ -203,8 +210,6 @@ public class SwerveDriveMappingThread extends RobotThread {
         	}else {
         		gearMotor.set(0);
         	}
-        }else if(driverStation.getRightController().getBButton()){
-        	outakeMotor.set(-1);
         }else {
         	jiggled = false;
         	jiggledBack = false;
@@ -258,7 +263,7 @@ public class SwerveDriveMappingThread extends RobotThread {
 			}
 			driveBase.move(moveY, moveX, 0);
 		}
-		if(!gearLaunched && distance < 90) {
+		if(!gearLaunched && distance < 80) {
 			if(rightangle == null && leftangle != null) {
 				System.out.println("Correcting angle.........");
 				if(center < 80)
@@ -299,11 +304,11 @@ public class SwerveDriveMappingThread extends RobotThread {
 			System.out.println("Target Angle: " + targetAngle);
 			speed = sin(toRadians(targetAngle - currentAngle));
 		}
-		speed *= 1.5;
-		if(speed > 0.6)
-			speed = 0.6;
-		if(speed < -0.6)
-			speed = -0.6;
+		speed *= 1.3;
+		if(speed > 0.45)
+			speed = 0.45;
+		if(speed < -0.45)
+			speed = -0.45;
 		return speed;
 	}
     

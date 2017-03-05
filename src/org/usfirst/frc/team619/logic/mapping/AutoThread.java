@@ -76,7 +76,7 @@ public class AutoThread extends RobotThread {
 		gearLaunched = false;
 		autoMove = true;
 		ultrasonic = ultrasanic;
-		speed = 0.3;
+		speed = 0.325;
 		timeStart = System.currentTimeMillis();
 		start();
 	}
@@ -92,7 +92,7 @@ public class AutoThread extends RobotThread {
 		//try { Thread.sleep(5000); }catch(Exception e){}
 		
 		if(autoMove) {
-			driveBase.move(0.30, 0, autoTurnSpeed());
+			driveBase.move(0.275, 0, autoTurnSpeed());
 			System.out.println(autoTurnSpeed());
 			System.out.println((System.currentTimeMillis()-timeStart)/1000);
 			if(numRects > 1 && Math.abs(autoTurnSpeed()) < 0.075) {
@@ -100,7 +100,7 @@ public class AutoThread extends RobotThread {
 				driveBase.switchToGearCentric();
 				driveBase.move(0, 0, 0);
 			}
-			if(System.currentTimeMillis() - timeStart > 3000) {
+			if(System.currentTimeMillis() - timeStart > 8000) {
 				autoMove = false;
 				driveBase.switchToGearCentric();
 				driveBase.move(0, 0, 0);
@@ -114,7 +114,7 @@ public class AutoThread extends RobotThread {
 		
 		if(numRects > 1 && !gearLaunched) {
 			if(centangle.height > 15)
-				speed = 0.2;
+				speed = 0.25;
 			running = true;
 			centerX = (centangle.x + (centangle.x+centangle.width))/2;
 //			System.out.println(centangle.height);
@@ -153,7 +153,9 @@ public class AutoThread extends RobotThread {
 			} //Both targets are not in view, dont change position
 				//moveX = 0;
 			System.out.println(moveY);
-			
+//			if(autoTurnSpeed() > 0.1)
+//				driveBase.move(moveY, moveX, autoTurnSpeed());
+//			else
 			driveBase.move(moveY, moveX, 0);
 		}
 
@@ -172,7 +174,7 @@ public class AutoThread extends RobotThread {
 				running = false;
 				try { Thread.sleep(500); }catch(Exception e) {}
 				driveBase.move(-0.35, 0, 0);
-				try { Thread.sleep(1000); }catch(Exception e) {}
+				try { Thread.sleep(650); }catch(Exception e) {}
 				gearOutake.set(1);
 				try { Thread.sleep(100); }catch(Exception e) {}
 				driveBase.move(0, 0, 0);
@@ -187,7 +189,7 @@ public class AutoThread extends RobotThread {
 		double currentAngle = driveBase.getYaw();
 		double speed = 0;
 		if(switch1.get() && !switch2.get()) {
-			int targetAngle = 60;
+			int targetAngle = 30;
 			System.out.println("Target Angle: " + targetAngle);
 			speed = sin(toRadians(targetAngle - currentAngle));
 		}else if(switch2.get() && !switch1.get()) {
@@ -199,11 +201,11 @@ public class AutoThread extends RobotThread {
 			System.out.println("Target Angle: " + targetAngle);
 			speed = sin(toRadians(targetAngle - currentAngle));
 		}
-		speed *= 1.3;
-		if(speed > 0.6)
-			speed = 0.6;
-		if(speed < -0.6)
-			speed = -0.6;
+		speed *= 1.1;
+		if(speed > 0.4)
+			speed = 0.4;
+		if(speed < -0.4)
+			speed = -0.4;
 		return speed;
 	}
 	
