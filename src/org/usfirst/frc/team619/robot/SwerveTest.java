@@ -87,6 +87,7 @@ public class SwerveTest extends IterativeRobot {
 	public final int IMG_HEIGHT = 120;
 	
 	UsbCamera camera;
+	UsbCamera topCamera;
 	CvSink cvSink;
 	CvSource outputStream;
 	GripPipeline grip;
@@ -132,67 +133,74 @@ public class SwerveTest extends IterativeRobot {
         switch2 = new DigitalInput(1);
         
         //Practice Bot
-//        driveLeftFront = new CANTalon(7);
-//        steerLeftFront = new CANTalon(5);
-//        leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
-//        driveLeftRear = new CANTalon(6);
-//        steerLeftRear = new CANTalon(4);
-//        leftRear = new SwerveWheel( "leftRear", driveLeftRear, steerLeftRear, 0.0 );
-//        driveRightFront = new CANTalon(0);
-//        steerRightFront = new CANTalon(2);
-//        rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
-//        driveRightRear = new CANTalon(1);
-//        steerRightRear = new CANTalon(3);
-//        rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
-//        
-//        climberMotor1 = new CANTalon(9);
-//        climberMotor2 = new CANTalon(10);
-//        intakeMotor = new CANTalon(8);
-//        outakeMotor = new CANTalon(11);
-//        gearOutakeMotor = new CANTalon(12);
-        //Unused = new CANTalon(11)
-        
-        
-        //Real robot
-        //CanTalons
-        driveLeftFront = new CANTalon(1);
+        driveLeftFront = new CANTalon(7);
         steerLeftFront = new CANTalon(5);
         leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
-        driveLeftRear = new CANTalon(12);
-        steerLeftRear = new CANTalon(8);
+        driveLeftRear = new CANTalon(6);
+        steerLeftRear = new CANTalon(4);
         leftRear = new SwerveWheel( "leftRear", driveLeftRear, steerLeftRear, 0.0 );
         driveRightFront = new CANTalon(0);
-        steerRightFront = new CANTalon(6);
+        steerRightFront = new CANTalon(2);
         rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
-        driveRightRear = new CANTalon(13);
-        steerRightRear = new CANTalon(7);
+        driveRightRear = new CANTalon(1);
+        steerRightRear = new CANTalon(3);
         rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
         
-        climberMotor1 = new CANTalon(2);
-        climberMotor2 = new CANTalon(3);
-        intakeMotor = new CANTalon(9);
-        outakeMotor = new CANTalon(10);
-        gearOutakeMotor = new CANTalon(4);
-        //Unused = new CANTalon(11)
+        climberMotor1 = new CANTalon(9);
+        climberMotor2 = new CANTalon(10);
+        intakeMotor = new CANTalon(8);
+        outakeMotor = new CANTalon(11);
+        gearOutakeMotor = new CANTalon(12);
+//        Unused = new CANTalon(11)
+        
+        
+//        //Real robot
+//        //CanTalons
+//        driveLeftFront = new CANTalon(1);
+//        steerLeftFront = new CANTalon(5);
+//        leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
+//        driveLeftRear = new CANTalon(12);
+//        steerLeftRear = new CANTalon(8);
+//        leftRear = new SwerveWheel( "leftRear", driveLeftRear, steerLeftRear, 0.0 );
+//        driveRightFront = new CANTalon(0);
+//        steerRightFront = new CANTalon(6);
+//        rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
+//        driveRightRear = new CANTalon(13);
+//        steerRightRear = new CANTalon(7);
+//        rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
+//        
+//        climberMotor1 = new CANTalon(2);
+//        climberMotor2 = new CANTalon(3);
+//        intakeMotor = new CANTalon(9);
+//        outakeMotor = new CANTalon(10);
+//        gearOutakeMotor = new CANTalon(4);
+//        //Unused = new CANTalon(11)
 
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 17.0, 19.0 );
         wheelCalculator = new SwerveCalc(19.0, 17.0);
         
         //vision
-        camera = CameraServer.getInstance().startAutomaticCapture();
-		camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
-		camera.setBrightness(0);
-		camera.setExposureManual(0);
-		
+        setUpCamera(camera, 0, true);
 		cvSink = CameraServer.getInstance().getVideo();
 		outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
-
+		
+        setUpCamera(topCamera, 1, false);	
+		
         //basicThread();
         //startCamera();
         //CameraServer.getInstance().startAutomaticCapture();
 		
 		//Vision thread
+    }
+    
+    public void setUpCamera(UsbCamera camera, int index, boolean visionCamera){
+        camera = CameraServer.getInstance().startAutomaticCapture(index);
+		camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
+		if(visionCamera){
+			camera.setBrightness(0);
+			camera.setExposureManual(0);
+		}
     }
     
     /**
@@ -634,5 +642,6 @@ public class SwerveTest extends IterativeRobot {
     		wheels[i].goToAngle();
     	}
     }
+    
     
 }

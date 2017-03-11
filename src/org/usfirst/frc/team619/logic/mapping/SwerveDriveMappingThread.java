@@ -29,19 +29,25 @@ public class SwerveDriveMappingThread extends RobotThread {
     protected CANTalon climberMotor1, climberMotor2;
     protected CANTalon intakeMotor, outakeMotor;
     protected CANTalon gearMotor;
+    
     private boolean releasedSpeed;
     private double scalePercent;
     private double autoSpeed;
     boolean gearLaunched;
     boolean speedToggle, gearCentric;
     boolean jiggled, jiggledBack;
+    boolean intaking, releasedIntake;
+    int previousCentric; //0 is fieldCentric, 1 is robotCentric, 2 is GearCentric
+    
+    final int GEAR_CENTRIC = 0;
+    final int FIELD_CENTRIC = 1;
+    final int ROBOT_CENTRIC = 2;
     
     public SwerveDriveMappingThread(DigitalInput switch1, DigitalInput switch2, AnalogUltrasonic ultrasonic, 
     		CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
     		CANTalon gearMotor, TargetThread targetThread, PowerDistributionPanel pdp, SwerveDriveBase driveBase, 
     		DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
-        
         this.pdp = pdp;
         this.switch1 = switch1;
         this.switch2 = switch2;
@@ -57,12 +63,15 @@ public class SwerveDriveMappingThread extends RobotThread {
         
         driveBase.setDriftCompensation(true);
         driveBase.setDriftRange(1.5);
+        driveBase.switchToFieldCentric();
+        previousCentric = 0;
 		releasedSpeed = true;
-		gearLaunched = false;
 		jiggled = false;
 		jiggledBack = false;
 		speedToggle = false;
 		gearCentric = false;
+		intaking = false;
+		releasedIntake = true;
 		scalePercent = 0.6;
 		autoSpeed = 0.35;
     }
@@ -110,19 +119,21 @@ public class SwerveDriveMappingThread extends RobotThread {
         //left controller (drive)
         if (driverStation.getLeftController().getStartButton()) {
             driveBase.switchToRobotCentric();
+            previousCentric = ROBOT_CENTRIC;
         }else if (driverStation.getLeftController().getBackButton()) {
             driveBase.switchToFieldCentric();
+            previousCentric = FIELD_CENTRIC;
         } else if(driverStation.getLeftController().getAButton()) {
-        	driveBase.switchToRobotCentric();
         	driveBase.switchToGearCentric();
+        	previousCentric = GEAR_CENTRIC;
         } else if(driverStation.getLeftController().getBumper(Hand.kLeft)) {
-        	//Set drive values to 60%
-        	RY *= (0.4/scalePercent);
-        	RX *= (0.4/scalePercent);
-        	LX *= (0.3/scalePercent);
+        	//Set drive values to 20%
+        	RY *= (0.2/scalePercent);
+        	RX *= (0.2/scalePercent);
+        	LX *= (0.2/scalePercent);
         } else if(rightTrigger > 0.05){
         	RY *= rightTrigger+1;
-        	RX *= rightTrigger+1;
+        	RX *= rightTrigger+1; 
         } else if(leftTrigger > 0.05){
         	RY *= 1-leftTrigger;
         	RX *= 1-leftTrigger;
@@ -138,13 +149,10 @@ public class SwerveDriveMappingThread extends RobotThread {
         } else if(driverStation.getLeftController().getYButton()) {
         	driveBase.autoZeroWheels();
         }else if(driverStation.getLeftController().getXButton()) {
-        	System.out.println("WTF MAN");
-        	if(gearCentric == false) {
-        		gearCentric = true;
-        		driveBase.switchToGearCentric();
-        	}
-        	boolean delivered = autoGear();
-        	if(delivered)
+        	//start gear semi-auto
+        	driveBase.switchToGearCentric();
+        	gearLaunched = autoGear();
+        	if(gearLaunched)
         		System.out.println("LAUNCH GEAR NOW");
         	else
         		System.out.println("ALIGNING ROBOT......");
@@ -154,11 +162,18 @@ public class SwerveDriveMappingThread extends RobotThread {
             System.out.println("CurrentAngle: " +driveBase.getYaw());
             System.out.println("Turn amount: " +autoTurnSpeed());
         }else {
-        	gearLaunched = false;
-        	if(gearCentric) {
+        	switch(previousCentric) {
+        	case ROBOT_CENTRIC:
+        		driveBase.switchToRobotCentric();
+        		break;
+        	case FIELD_CENTRIC:
         		driveBase.switchToFieldCentric();
-        		gearCentric = false;
+        		break;
+        	case GEAR_CENTRIC:
+        		driveBase.switchToGearCentric();
         	}
+        	
+        	gearLaunched = false;
             driveBase.move(RY, RX, LX);
         }
     	
@@ -186,7 +201,15 @@ public class SwerveDriveMappingThread extends RobotThread {
         	System.out.println("Drift Compensation is now " + driveBase.isDriftCompensated());
         //intake motor
         }else if(driverStation.getRightController().getBumper(Hand.kRight)) {
-            intakeMotor.set(-1);
+        	if(!intaking && releasedIntake){
+        		intaking = true;
+        		intakeMotor.set(-1);
+        	}
+        	else if(releasedIntake){
+        		intaking = false;
+        		intakeMotor.set(0);
+        	}
+    		releasedIntake = false;
         }else if(driverStation.getRightController().getTriggerAxis(Hand.kRight) > 0.1) {
         	intakeMotor.set(1);
         //outake motor
@@ -216,6 +239,7 @@ public class SwerveDriveMappingThread extends RobotThread {
         	intakeMotor.set(0);
         	outakeMotor.set(0);
         	gearMotor.set(0);
+        	releasedIntake = true;
         }
     }
     
