@@ -40,6 +40,8 @@ public class SwerveWheel {
         rotateMotor.reverseOutput(true);
 		rotateMotor.setPID(p,i,d);
 		
+		//driveMotor.setPID(5, 0.0, 0.0);
+		
         targetAngle = 0;
         tempOffset = -1337;
         isZeroed = false;

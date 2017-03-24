@@ -1,7 +1,6 @@
 package org.usfirst.frc.team619.subsystems;
 
 import org.usfirst.frc.team619.hardware.Gamepad;
-import org.usfirst.frc.team619.hardware.Joystick;
 import org.usfirst.frc.team619.hardware.XboxController;
 
 /**

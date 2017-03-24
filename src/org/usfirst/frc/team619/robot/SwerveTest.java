@@ -30,6 +30,8 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.CANTalon;
+import com.ctre.CANTalon.FeedbackDevice;
+import com.ctre.CANTalon.TalonControlMode;
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the IterativeRobot
@@ -74,7 +76,7 @@ public class SwerveTest extends IterativeRobot {
     CANTalon outakeMotor;
     CANTalon gearOutakeMotor;
     
-    AnalogUltrasonic ultrasonic;
+    AnalogUltrasonic leftUltrasonic, rightUltrasonic;
     DigitalInput switch1, switch2, switch3;
     
 	//Control
@@ -88,10 +90,11 @@ public class SwerveTest extends IterativeRobot {
 	
 	UsbCamera camera;
 	UsbCamera topCamera;
+	UsbCamera gearCamera;
 	CvSink cvSink;
 	CvSource outputStream;
 	GripPipeline grip;
-
+// pie
 	int autonomous_angle = 0;
 	int autonomous_count = 0;
 	double autonomous_position = 0;
@@ -126,55 +129,60 @@ public class SwerveTest extends IterativeRobot {
         driverStation = new DriverStation();
         
         //Hardware
-        ultrasonic = new AnalogUltrasonic(0);
+        rightUltrasonic = new AnalogUltrasonic(0);
+//        leftUltrasonic = new AnalogUltrasonic(1);
         pdp = new PowerDistributionPanel(62);
         
         switch1 = new DigitalInput(0);
         switch2 = new DigitalInput(1);
         
-        //Practice Bot
-        driveLeftFront = new CANTalon(7);
-        steerLeftFront = new CANTalon(5);
-        leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
-        driveLeftRear = new CANTalon(6);
-        steerLeftRear = new CANTalon(4);
-        leftRear = new SwerveWheel( "leftRear", driveLeftRear, steerLeftRear, 0.0 );
-        driveRightFront = new CANTalon(0);
-        steerRightFront = new CANTalon(2);
-        rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
-        driveRightRear = new CANTalon(1);
-        steerRightRear = new CANTalon(3);
-        rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
-        
-        climberMotor1 = new CANTalon(9);
-        climberMotor2 = new CANTalon(10);
-        intakeMotor = new CANTalon(8);
-        outakeMotor = new CANTalon(11);
-        gearOutakeMotor = new CANTalon(12);
-//        Unused = new CANTalon(11)
-        
-        
-//        //Real robot
-//        //CanTalons
-//        driveLeftFront = new CANTalon(1);
+//        //Practice Bot
+//        driveLeftFront = new CANTalon(7);
+//    	driveLeftFront.changeControlMode(TalonControlMode.Position);
+//    	driveLeftFront.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+//    	driveLeftFront.enableControl();
 //        steerLeftFront = new CANTalon(5);
 //        leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
-//        driveLeftRear = new CANTalon(12);
-//        steerLeftRear = new CANTalon(8);
+//        driveLeftRear = new CANTalon(6);
+//        steerLeftRear = new CANTalon(4);
 //        leftRear = new SwerveWheel( "leftRear", driveLeftRear, steerLeftRear, 0.0 );
 //        driveRightFront = new CANTalon(0);
-//        steerRightFront = new CANTalon(6);
+//        //driveRightFront.changeControlMode(TalonControlMode.Position);
+//        steerRightFront = new CANTalon(2);
 //        rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
-//        driveRightRear = new CANTalon(13);
-//        steerRightRear = new CANTalon(7);
+//        driveRightRear = new CANTalon(1);
+//        steerRightRear = new CANTalon(3);
 //        rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
 //        
-//        climberMotor1 = new CANTalon(2);
-//        climberMotor2 = new CANTalon(3);
-//        intakeMotor = new CANTalon(9);
-//        outakeMotor = new CANTalon(10);
-//        gearOutakeMotor = new CANTalon(4);
+//        climberMotor1 = new CANTalon(9);
+//        climberMotor2 = new CANTalon(10);
+//        intakeMotor = new CANTalon(8);
+//        outakeMotor = new CANTalon(11);
+//        gearOutakeMotor = new CANTalon(12);
 //        //Unused = new CANTalon(11)
+        
+        
+        //Real robot
+        //CanTalons
+        driveLeftFront = new CANTalon(1);
+        steerLeftFront = new CANTalon(5);
+        leftFront = new SwerveWheel( "leftFront", driveLeftFront, steerLeftFront, 0.0 );
+        driveLeftRear = new CANTalon(12);
+        steerLeftRear = new CANTalon(8);
+        leftRear = new SwerveWheel( "leftRear", driveLeftRear, steerLeftRear, 0.0 );
+        driveRightFront = new CANTalon(0);
+        steerRightFront = new CANTalon(6);
+        rightFront = new SwerveWheel( "rightFront", driveRightFront, steerRightFront, 0.0 );
+        driveRightRear = new CANTalon(13);
+        steerRightRear = new CANTalon(7);
+        rightRear = new SwerveWheel( "rightRear", driveRightRear, steerRightRear, 0.0 );
+        
+        climberMotor1 = new CANTalon(2);
+        climberMotor2 = new CANTalon(3);
+        intakeMotor = new CANTalon(9);
+        outakeMotor = new CANTalon(10);
+        gearOutakeMotor = new CANTalon(4);
+        //Unused = new CANTalon(11)
 
         //subsystems
         driveBase = new SwerveDriveBase( leftFront, rightFront, leftRear, rightRear, 17.0, 19.0 );
@@ -185,7 +193,8 @@ public class SwerveTest extends IterativeRobot {
 		cvSink = CameraServer.getInstance().getVideo();
 		outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
 		
-        setUpCamera(topCamera, 1, false);	
+        setUpCamera(topCamera, 1, false);
+        //setUpCamera(gearCamera, 3, false);
 		
         //basicThread();
         //startCamera();
@@ -210,7 +219,7 @@ public class SwerveTest extends IterativeRobot {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
     	if(switch1.get() || switch2.get())
-    		autoThread = new AutoThread(switch1, switch2, targetThread, driveBase, 3, threadManager, gearOutakeMotor, ultrasonic);
+    		autoThread = new AutoThread(switch1, switch2, targetThread, driveBase, 3, threadManager, gearOutakeMotor, rightUltrasonic);
 //    	threadManager.addThread(autoThread);
 //    	autoThread.run();
 //    	driveBase.switchToGearCentric();
@@ -383,9 +392,10 @@ public class SwerveTest extends IterativeRobot {
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
-        driveThread = new SwerveDriveMappingThread(switch1, switch2, ultrasonic, climberMotor1, climberMotor2, intakeMotor, 
+        driveThread = new SwerveDriveMappingThread(switch1, switch2, leftUltrasonic, rightUltrasonic, climberMotor1, climberMotor2, intakeMotor, 
         		outakeMotor, gearOutakeMotor, targetThread, pdp, driveBase, driverStation, 15, threadManager);
         driveThread.start();
+        
     }
     
     /**
@@ -476,25 +486,43 @@ public class SwerveTest extends IterativeRobot {
         SmartDashboard.putNumber("BL: ", driveBase.getLeftTalon2().getSpeed());
         SmartDashboard.putNumber("BR: ", driveBase.getRightTalon2().getSpeed());
 */
+    	System.out.println((driveRightFront.getPosition()));
     }
     
     
 
     public void testInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-    	
+//    	driveRightFront.reverseOutput(true);
     	testPeriodicSpeed = 0.1;
     	testPeriodicForward = true;
     	testPeriodicCount = 0;
-    	
-    	testDrive(rightFront, "right Front");
-    	testRotate(rightFront, "right Steer", 90.0);
-    	testDrive(leftFront, "left Front");
-    	testRotate(leftFront, "left Steer", 90.0);
-    	testDrive(leftRear, "left Rear");
-    	testRotate(leftRear, "left Rear", 90.0);
-    	testDrive(rightRear, "right Rear");
-    	testRotate(rightRear, "right Rear", 90.0);
+//    	while(this.isEnabled()) {
+    	driveLeftFront.set(0);
+    	delay(1000);
+    	System.out.println("\n    0");
+    	System.out.println("Get pos     " + driveLeftFront.getPosition());
+    	System.out.println("Get Enc pos " +driveLeftFront.getEncPosition());
+    	driveLeftFront.set(90);
+    	delay(1000);
+    	System.out.println("\n  90");
+    	System.out.println("Get pos     " + driveLeftFront.getPosition());
+    	System.out.println("Get Enc pos " +driveLeftFront.getEncPosition());
+//    	}
+//    	
+//    	while(!Thread.interrupted()) {
+//    		testPeriodicCount += 2;
+//    		driveRightFront.set(testPeriodicCount);
+//        	System.out.println("Enc Position = " + driveRightFront.getEncPosition());
+//    		delay(150);
+//    	}
+//    	testRotate(rightFront, "right Steer", 90.0);
+//    	testDrive(leftFront, "left Front");
+//    	testRotate(leftFront, "left Steer", 90.0);
+//    	testDrive(leftRear, "left Rear");
+//    	testRotate(leftRear, "left Rear", 90.0);
+//    	testDrive(rightRear, "right Rear");
+//    	testRotate(rightRear, "right Rear", 90.0);
     	
 //    	testPeriodicSpeed = 0.1;
 //    	testPeriodicForward = true;
@@ -513,6 +541,13 @@ public class SwerveTest extends IterativeRobot {
     /**
      * This function is called periodically during test mode
      */
+      public void testPeriodic() {
+//      	if(Math.abs(driveRightFront.getEncPosition()) > 10){
+//      		System.out.println("ZEROING Current encoder position is "+driveRightFront.getEncPosition());
+//      		driveRightFront.set(0);
+//      		delay(1000);
+//      	}
+      }
 //    public void testPeriodic() {
 //    	testPeriodicCount += 1;
 //    	//leftFront.autoZero();
@@ -575,6 +610,7 @@ public class SwerveTest extends IterativeRobot {
 
     public void disabledContinuous(){}
 
+    
     public void testRotate(SwerveWheel wheel, String name, double angle){
     	//wheel.zero();
     	wheel.setTargetAngle(angle);
@@ -590,6 +626,18 @@ public class SwerveTest extends IterativeRobot {
     
     public void testSteer(CANTalon steer, String name, double position){
     	steer.set(position);
+    }
+    
+    public void testEncoder(CANTalon wheel, String name, Double location){
+    	//System.out.println("Encoder for " + name + " is at "+wheel.driveMotor.getEncPosition());
+    	wheel.set(0);
+    	//System.out.println("Encoder for " + name + " is at "+wheel.driveMotor.getEncPosition());
+    	delay(500);
+    	wheel.set(location);
+    	System.out.println("Enc Position = " + wheel.getEncPosition());
+    	//System.out.println("Encoder for " + name + " is at "+wheel.driveMotor.getEncPosition());
+    	delay(500);
+    	wheel.set(0);
     }
     
     public void testDrive(SwerveWheel wheel, String name){

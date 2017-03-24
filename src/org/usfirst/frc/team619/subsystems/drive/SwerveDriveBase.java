@@ -161,14 +161,14 @@ public class SwerveDriveBase  {
     }
 
     public void updatePIDControllers(){
-        //rotatePIDInput.setValue(imu.getYaw());
+        //rotatePIDInput.setValue(getYaw());
         //SmartDashboard.putNumber("PIDInput Value: ", rotatePIDInput.pidGet());
     }
 
 
     public void relativeRotateRobot(double angle){
         SmartDashboard.putNumber("Delta Angle", angle);
-        double currentAngle = imu.getYaw();
+        double currentAngle = getYaw();
         SmartDashboard.putNumber("Current Angle:", currentAngle);
         double targetAngle = currentAngle + angle;
 
@@ -181,7 +181,7 @@ public class SwerveDriveBase  {
         updatePIDControllers();
         while(Math.abs(currentAngle - targetAngle) >= 2){ //waits until we are within range of the angle
             //rotationPID.setSetpoint(targetAngle); //tells PID loop to go to the targetAngle
-            currentAngle = imu.getYaw();
+            currentAngle = getYaw();
             updatePIDControllers();
             //calculateSwerveControl(0,0,0.2);
             calculateSwerveControl(0, 0, 0 /*rotatePIDOutput.getPIDValue()*/); //sets the wheels to rotate based off PID loop
@@ -213,7 +213,7 @@ public class SwerveDriveBase  {
      */
 
     public void absoluteRotateRobot(double targetAngle){
-        double currentAngle = imu.getYaw();
+        double currentAngle = getYaw();
         if(targetAngle >= 180){
             targetAngle-=360;
         } else if(targetAngle < -180){
@@ -222,7 +222,7 @@ public class SwerveDriveBase  {
         updatePIDControllers();
         while(Math.abs(currentAngle - targetAngle) >= 1){//waits until we are within range of our target angle
             //rotationPID.setSetpoint(targetAngle);//tells PID loop to go to the target angle
-            currentAngle = imu.getYaw();
+            currentAngle = getYaw();
             SmartDashboard.putNumber("Absolute Current Angle", currentAngle);
             updatePIDControllers();
             calculateSwerveControl(0, 0, 0 /*rotatePIDOutput.getPIDValue()*/);//sets the wheels to rotate based off PID loop
@@ -271,7 +271,7 @@ public class SwerveDriveBase  {
     }
     
     protected double compensateDrift(double RY, double RX, double LX) {
-		double currentAngle = imu.getYaw();
+		double currentAngle = getYaw();
 		if(currentAngle < 0)
 			currentAngle += 360;
 		
@@ -310,6 +310,11 @@ public class SwerveDriveBase  {
     	if(LX == 0 && RX == 0 && RY == 0)
     		LX = 0;
     	return LX;
+    }
+    
+    public void rotateWheel() {
+    	driveRFMotor.set(20);
+    	System.out.println(driveRFMotor.getEncPosition());
     }
     
     /**
@@ -506,7 +511,7 @@ public class SwerveDriveBase  {
 
         double translationalOffset = 0.0;
         if(isFieldCentric){
-            translationalOffset = imu.getYaw();
+            translationalOffset = getYaw();
         } else {
             translationalOffset = 0;
         }
@@ -638,7 +643,6 @@ public class SwerveDriveBase  {
         isFieldCentric = true;
         isHookCentric = false;
         isGearCentric = false;
-        drift = false;
     }
     
     /**
@@ -713,12 +717,18 @@ public class SwerveDriveBase  {
     	return isGearCentric;
     }
 
-    public float getYaw() {
-        return imu.getYaw();
+    public double getYaw() {
+    	double angle = imu.getAngle();
+    	while(angle > 180)
+    		angle -= 360;
+    	while(angle < -180)
+    		angle += 360;
+        return angle;
     }
 
     public void zeroIMU() {
         imu.zeroYaw();
+        imu.setAngleAdjustment(-90);
         targetHeading = 0;
     }
 
