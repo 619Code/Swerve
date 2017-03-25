@@ -368,7 +368,7 @@ public class TargetThread extends RobotThread {
 				Core.FONT_ITALIC, 0.4, 
 				new Scalar(255,255,255), 1);
 
-		outputStream.putFrame(source);
+		//outputStream.putFrame(source);
 	}
     
     //return number of rectangles in an image

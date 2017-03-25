@@ -189,12 +189,12 @@ public class SwerveTest extends IterativeRobot {
         wheelCalculator = new SwerveCalc(19.0, 17.0);
         
         //vision
-        setUpCamera(camera, 0, true);
+        setUpCamera(camera, 1, true);
 		cvSink = CameraServer.getInstance().getVideo();
-		outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
+		//outputStream = CameraServer.getInstance().putVideo("v1.4", IMG_WIDTH, IMG_HEIGHT);
 		
-        setUpCamera(topCamera, 1, false);
-        //setUpCamera(gearCamera, 3, false);
+        setUpCamera(topCamera, 2, false);
+        setUpCamera(gearCamera, 0, false);
 		
         //basicThread();
         //startCamera();
@@ -391,9 +391,9 @@ public class SwerveTest extends IterativeRobot {
      */
     public void teleopInit(){
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
-    	TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
+    	//TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
         driveThread = new SwerveDriveMappingThread(switch1, switch2, leftUltrasonic, rightUltrasonic, climberMotor1, climberMotor2, intakeMotor, 
-        		outakeMotor, gearOutakeMotor, targetThread, pdp, driveBase, driverStation, 15, threadManager);
+        		outakeMotor, gearOutakeMotor, pdp, driveBase, driverStation, 15, threadManager);
         driveThread.start();
         
     }
@@ -486,28 +486,31 @@ public class SwerveTest extends IterativeRobot {
         SmartDashboard.putNumber("BL: ", driveBase.getLeftTalon2().getSpeed());
         SmartDashboard.putNumber("BR: ", driveBase.getRightTalon2().getSpeed());
 */
-    	System.out.println((driveRightFront.getPosition()));
     }
     
     
 
     public void testInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
+    	TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
+    	if(switch1.get() || switch2.get())
+    		autoThread = new AutoThread(switch1, switch2, targetThread, driveBase, 3, threadManager, gearOutakeMotor, rightUltrasonic);
 //    	driveRightFront.reverseOutput(true);
-    	testPeriodicSpeed = 0.1;
-    	testPeriodicForward = true;
-    	testPeriodicCount = 0;
-//    	while(this.isEnabled()) {
-    	driveLeftFront.set(0);
-    	delay(1000);
-    	System.out.println("\n    0");
-    	System.out.println("Get pos     " + driveLeftFront.getPosition());
-    	System.out.println("Get Enc pos " +driveLeftFront.getEncPosition());
-    	driveLeftFront.set(90);
-    	delay(1000);
-    	System.out.println("\n  90");
-    	System.out.println("Get pos     " + driveLeftFront.getPosition());
-    	System.out.println("Get Enc pos " +driveLeftFront.getEncPosition());
+//    	testPeriodicSpeed = 0.1;
+//    	testPeriodicForward = true;
+//    	testPeriodicCount = 0;
+////    	while(this.isEnabled()) {
+//    	driveLeftFront.set(0);
+//    	delay(1000);
+//    	System.out.println("\n    0");
+//    	System.out.println("Get pos     " + driveLeftFront.getPosition());
+//    	System.out.println("Get Enc pos " +driveLeftFront.getEncPosition());
+//    	driveLeftFront.set(90);
+//    	delay(1000);
+//    	System.out.println("\n  90");
+//    	System.out.println("Get pos     " + driveLeftFront.getPosition());
+//    	System.out.println("Get Enc pos " +driveLeftFront.getEncPosition());
+    	
 //    	}
 //    	
 //    	while(!Thread.interrupted()) {

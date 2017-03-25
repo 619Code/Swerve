@@ -50,6 +50,7 @@ public class SwerveDriveBase  {
     double radius = 55;
     double targetHeading;
     double fieldCentricHeading;
+    double gyroOffset = 90;
     double maxDrift = 1.5;
 
     SwerveWheel[] wheelArray;
@@ -260,11 +261,11 @@ public class SwerveDriveBase  {
 
     public void move(double RY, double RX, double LX){
         if(isRobotCentric){
-        	calculateSwerveControl(RY, RX, LX);
+        	calculateSwerveControl(RX, -RY, LX);
         } else if(isFieldCentric){
             getFieldCentric(RY, RX, LX);
         }else if(isGearCentric){
-            calculateSwerveControl(RX, -RY, LX);
+            calculateSwerveControl(RY, RX, LX);
         }else {
         	calculateSwerveControl(RY, RX, LX);
         }
@@ -717,18 +718,12 @@ public class SwerveDriveBase  {
     	return isGearCentric;
     }
 
-    public double getYaw() {
-    	double angle = imu.getAngle();
-    	while(angle > 180)
-    		angle -= 360;
-    	while(angle < -180)
-    		angle += 360;
-        return angle;
+    public float getYaw() {
+        return imu.getYaw();
     }
 
     public void zeroIMU() {
         imu.zeroYaw();
-        imu.setAngleAdjustment(-90);
         targetHeading = 0;
     }
 

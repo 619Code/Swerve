@@ -23,7 +23,6 @@ public class SwerveDriveMappingThread extends RobotThread {
     protected PowerDistributionPanel pdp;
     protected DigitalInput switch1;
     protected DigitalInput switch2;
-    protected TargetThread vision;
     protected DriverStation driverStation;
     protected AnalogUltrasonic leftUltrasonic, rightUltrasonic;
     protected CANTalon climberMotor1, climberMotor2;
@@ -45,13 +44,12 @@ public class SwerveDriveMappingThread extends RobotThread {
     
     public SwerveDriveMappingThread(DigitalInput switch1, DigitalInput switch2, AnalogUltrasonic leftUltrasonic, AnalogUltrasonic rightUltrasonic, 
     		CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
-    		CANTalon gearMotor, TargetThread targetThread, PowerDistributionPanel pdp, SwerveDriveBase driveBase, 
+    		CANTalon gearMotor, PowerDistributionPanel pdp, SwerveDriveBase driveBase, 
     		DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
         this.pdp = pdp;
         this.switch1 = switch1;
         this.switch2 = switch2;
-        this.vision = targetThread;
         this.driveBase = driveBase;
         this.driverStation = driverStation;
         this.climberMotor1 = climberMotor1;
@@ -109,15 +107,15 @@ public class SwerveDriveMappingThread extends RobotThread {
 //		System.out.println("-------------\n" + tryThis + "-------" + speed);
 		
 		int pov = driverStation.getRightController().getPOV();
-        double xAxis = driverStation.getLeftController().getX(Hand.kRight);
-        double yAxis = driverStation.getLeftController().getY(Hand.kRight);
+        double xAxis = driverStation.getLeftController().getY(Hand.kRight);
+        double yAxis = driverStation.getLeftController().getX(Hand.kRight);
         double zTurn = driverStation.getLeftController().getX(Hand.kLeft);
 
         double leftTrigger = driverStation.getLeftController().getTriggerAxis(Hand.kLeft);
         double rightTrigger = driverStation.getRightController().getTriggerAxis(Hand.kRight);
         
         //gets percentages (numbers from -1 to 1) from the joystick's axes used for driving
-        double RY = -yAxis * scalePercent;
+        double RY = yAxis * scalePercent;
         double RX = xAxis * scalePercent;
         double LX = (zTurn * scalePercent)*0.75;
         
@@ -197,6 +195,10 @@ public class SwerveDriveMappingThread extends RobotThread {
     	
         //right controller (manipulators)
         switch(pov) {
+        case -1:
+        	climberMotor1.set(0);
+        	climberMotor2.set(0);
+        	break;
         case 315:
         case 0:
         case 45:
@@ -283,6 +285,7 @@ public class SwerveDriveMappingThread extends RobotThread {
     }
     
     private boolean autoGear() {
+    	/*
 		Rect centangle = vision.getCentangle();
 		Rect leftangle = vision.getLeftangle();
 		Rect rightangle = vision.getRightangle();
@@ -348,6 +351,8 @@ public class SwerveDriveMappingThread extends RobotThread {
 			driveBase.move(autoSpeed, moveX, 0);
 		}
 		return gearLaunched;
+		*/
+    	return true;
     }
     
 
