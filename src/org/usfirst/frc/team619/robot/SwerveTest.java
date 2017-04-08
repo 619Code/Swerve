@@ -75,6 +75,7 @@ public class SwerveTest extends IterativeRobot {
     CANTalon intakeMotor;
     CANTalon outakeMotor;
     CANTalon gearOutakeMotor;
+    CANTalon gGearMotor;
     
     AnalogUltrasonic leftUltrasonic, rightUltrasonic;
     DigitalInput switch1, switch2, switch3;
@@ -135,6 +136,7 @@ public class SwerveTest extends IterativeRobot {
         
         switch1 = new DigitalInput(0);
         switch2 = new DigitalInput(1);
+        switch3 = new DigitalInput(2);
         
 //        //Practice Bot
 //        driveLeftFront = new CANTalon(7);
@@ -182,6 +184,7 @@ public class SwerveTest extends IterativeRobot {
         intakeMotor = new CANTalon(9);
         outakeMotor = new CANTalon(10);
         gearOutakeMotor = new CANTalon(4);
+        gGearMotor = new CANTalon(11);
         //Unused = new CANTalon(11)
 
         //subsystems
@@ -218,8 +221,9 @@ public class SwerveTest extends IterativeRobot {
     public void autonomousInit() {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
+    	
     	if(switch1.get() || switch2.get())
-    		autoThread = new AutoThread(switch1, switch2, targetThread, driveBase, 3, threadManager, gearOutakeMotor, rightUltrasonic);
+    		autoThread = new AutoThread(switch1, switch2, switch3, targetThread, driveBase, 3, threadManager, gearOutakeMotor, outakeMotor, rightUltrasonic);
 //    	threadManager.addThread(autoThread);
 //    	autoThread.run();
 //    	driveBase.switchToGearCentric();
@@ -393,7 +397,7 @@ public class SwerveTest extends IterativeRobot {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	//TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
         driveThread = new SwerveDriveMappingThread(switch1, switch2, leftUltrasonic, rightUltrasonic, climberMotor1, climberMotor2, intakeMotor, 
-        		outakeMotor, gearOutakeMotor, pdp, driveBase, driverStation, 15, threadManager);
+        		outakeMotor, gearOutakeMotor, gGearMotor, pdp, driveBase, driverStation, 15, threadManager);
         driveThread.start();
         
     }
@@ -494,7 +498,7 @@ public class SwerveTest extends IterativeRobot {
     	threadManager.killAllThreads(); // DO NOT EVER REMOVE!!!
     	TargetThread targetThread = new TargetThread(pdp, cvSink, outputStream, 3, threadManager);
     	if(switch1.get() || switch2.get())
-    		autoThread = new AutoThread(switch1, switch2, targetThread, driveBase, 3, threadManager, gearOutakeMotor, rightUltrasonic);
+    		autoThread = new AutoThread(switch1, switch2, switch3, targetThread, driveBase, 3, threadManager, gearOutakeMotor, outakeMotor, rightUltrasonic);
 //    	driveRightFront.reverseOutput(true);
 //    	testPeriodicSpeed = 0.1;
 //    	testPeriodicForward = true;

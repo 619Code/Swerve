@@ -45,6 +45,7 @@ public class SwerveDriveBase  {
     boolean isGearCentric = false;
     boolean isObjectCentric = false;
     boolean isHookCentric = false;
+    boolean isGroundGearCentric = false;
     boolean drift = true;
 
     double radius = 55;
@@ -261,7 +262,7 @@ public class SwerveDriveBase  {
 
     public void move(double RY, double RX, double LX){
         if(isRobotCentric){
-        	calculateSwerveControl(RX, -RY, LX);
+        	calculateSwerveControl(-RY, -RX, LX);
         } else if(isFieldCentric){
             getFieldCentric(RY, RX, LX);
         }else if(isGearCentric){
@@ -644,6 +645,7 @@ public class SwerveDriveBase  {
         isFieldCentric = true;
         isHookCentric = false;
         isGearCentric = false;
+        isGroundGearCentric = false;
     }
     
     /**
@@ -655,6 +657,7 @@ public class SwerveDriveBase  {
         isFieldCentric = false;
         isHookCentric = false;
         isGearCentric = true;
+        isGroundGearCentric = false;
     }
 
     /**
@@ -666,6 +669,7 @@ public class SwerveDriveBase  {
         isRobotCentric = false;
         isHookCentric = false;
         isGearCentric = false;
+        isGroundGearCentric = false;
     }
    /**
     * Called to switch to HookCentric
@@ -676,6 +680,7 @@ public class SwerveDriveBase  {
         isRobotCentric = false;
         isHookCentric = true;
         isGearCentric = false;
+        isGroundGearCentric = false;
     }
 
     /**
@@ -688,8 +693,17 @@ public class SwerveDriveBase  {
         isRobotCentric = true;
         isHookCentric = false;
         isGearCentric = false;
+        isGroundGearCentric = false;
     }
     
+    public void switchToGroundGearCentric(){
+    	isObjectCentric = false;
+        isFieldCentric = false;
+        isRobotCentric = false;
+        isHookCentric = false;
+        isGearCentric = false;
+        isGroundGearCentric = true;
+    }
     public void setDriftRange(double range) {
     	maxDrift = range;
     }

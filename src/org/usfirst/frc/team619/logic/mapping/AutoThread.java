@@ -14,9 +14,10 @@ public class AutoThread extends RobotThread {
 	
 	private SwerveDriveBase driveBase;
 	private TargetThread vision;
-	private DigitalInput switch1, switch2;
+	private DigitalInput switch1, switch2, switch3;
 	boolean stop = false;
 	boolean stopMoving = false;
+	boolean done = false;
 	
 	//movement vars
 	double turn = 0;
@@ -58,25 +59,27 @@ public class AutoThread extends RobotThread {
 	boolean running, autoMove;
 	boolean gearLaunched;
 	//Hardware
-	CANTalon gearOutake;
+	CANTalon gearOutake, outakeMotor;
 	AnalogUltrasonic ultrasonic;
 	
-	public AutoThread(DigitalInput switch1, DigitalInput switch2, TargetThread vision, SwerveDriveBase driveBase, 
-			int period, ThreadManager threadManager, CANTalon gearOutakeMotor, AnalogUltrasonic ultrasanic) {
+	public AutoThread(DigitalInput switch1, DigitalInput switch2, DigitalInput switch3, TargetThread vision, SwerveDriveBase driveBase, 
+			int period, ThreadManager threadManager, CANTalon gearOutakeMotor, CANTalon outakeMotor, AnalogUltrasonic ultrasanic) {
 		super(period, threadManager);
-		driveBase.switchToGearCentric();
 		this.driveBase = driveBase;
 		this.vision = vision;
 		this.switch1 = switch1;
 		this.switch2 = switch2;
+		this.switch3 = switch3;
 		this.driveBase.switchToFieldCentric();
 		this.driveBase.setDriftCompensation(true);
 		gearOutake = gearOutakeMotor;
+		this.outakeMotor = outakeMotor;
+		done = false;
 		running = false;
 		gearLaunched = false;
 		autoMove = true;
 		ultrasonic = ultrasanic;
-		speed = 0.275;
+		speed = -0.275;
 		timeStart = System.currentTimeMillis();
 		start();
 	}
@@ -92,7 +95,7 @@ public class AutoThread extends RobotThread {
 		//try { Thread.sleep(5000); }catch(Exception e){}
 		
 		if(autoMove) {
-			driveBase.move(0, 0.3, autoTurnSpeed());
+			driveBase.move(0, -0.3, autoTurnSpeed());
 			System.out.println(autoTurnSpeed());
 			System.out.println((System.currentTimeMillis()-timeStart)/1000);
 			if(numRects > 1 && Math.abs(autoTurnSpeed()) < 0.075) {
@@ -100,7 +103,7 @@ public class AutoThread extends RobotThread {
 				driveBase.switchToGearCentric();
 				driveBase.move(0, 0, 0);
 			}
-			if(System.currentTimeMillis() - timeStart > 8000) {
+			if(System.currentTimeMillis() - timeStart > 6000) {
 				autoMove = false;
 				driveBase.switchToGearCentric();
 				driveBase.move(0, 0, 0);
@@ -112,9 +115,9 @@ public class AutoThread extends RobotThread {
 //			driveBase.move(speed, 0, 0);
 //		}
 		
-		if(numRects > 1 && !gearLaunched) {
+		if(numRects > 1 && !gearLaunched) {   
 			if(centangle.height > 12)
-				speed = 0.25;
+				speed = -0.25;
 			running = true;
 			centerX = (centangle.x + (centangle.x+centangle.width))/2;
 //			System.out.println(centangle.height);
@@ -134,7 +137,7 @@ public class AutoThread extends RobotThread {
 			//both targets are in view
 			int imgCenter = vision.IMG_WIDTH/2;
 			System.out.println("Center: "+centerX);
-			if(imgCenter-7 < centerX && centerX < imgCenter+7 && numRects > 1) {
+			if(imgCenter-6 < centerX && centerX < imgCenter+6 && numRects > 1) {
 				moveX = 0;
 //				if(centerX > imgCenter+10)
 //					System.out.println("MOVE TO THE RIGHT " + centerX);
@@ -143,7 +146,7 @@ public class AutoThread extends RobotThread {
 				//moveX *= -0.8; //speed multiplier. Speed changes linearly but may need adjusting
 			}else{
 				moveX = (centerX-imgCenter)/imgCenter; //Left of screen is -1, middle is 0, right is 1
-				moveX *= 0.7;
+				moveX *= 0.5;
 				if(moveX > 0.25){
 					moveX = 0.25;
 				} else if(moveX < -0.25){
@@ -169,14 +172,29 @@ public class AutoThread extends RobotThread {
 			}
 			if(gearLaunched && running == true){
 				gearOutake.set(0);
-				running = false;
 				try { Thread.sleep(500); }catch(Exception e) {}
-				driveBase.move(0, -0.35, 0);
+				driveBase.move(0, 0.35, 0);
 				try { Thread.sleep(650); }catch(Exception e) {}
 				gearOutake.set(1);
 				try { Thread.sleep(100); }catch(Exception e) {}
 				driveBase.move(0, 0, 0);
 				gearOutake.set(0);
+				if(switch3.get() && !done) {
+					if(Math.abs(autoTurnGoalSpeed()) > 0.075){
+						driveBase.move(0, 0, autoTurnGoalSpeed());
+					} else {
+						driveBase.move(0.4, 0, 0);
+						try{ Thread.sleep(3000); }catch(Exception e) { }
+						driveBase.move(0, 0, 0);
+						outakeMotor.set(1);
+						try{ Thread.sleep(2000); }catch(Exception e) { }
+						outakeMotor.set(0);     
+						done = true;
+						running = false;
+					}
+				}else {
+					running = false;
+				}
 				driveBase.switchToFieldCentric();
 //				driveBase.move(-0.25, 0, 0);
 //				gearOutake.set(-0.2);
@@ -203,7 +221,30 @@ public class AutoThread extends RobotThread {
 			System.out.println("Target Angle: " + targetAngle);
 			speed = sin(toRadians(targetAngle - currentAngle));
 		}
-		speed *= 1.05;
+		speed *= 0.90;
+		if(speed > 0.35)
+			speed = 0.35;
+		if(speed < -0.35)
+			speed = -0.35;
+		return speed;
+	}
+	
+	private double autoTurnGoalSpeed() {
+		
+		//Try the function 2/3x^(2/3)
+		
+		double currentAngle = driveBase.getYaw();
+		double speed = 0;
+		if(switch1.get() && !switch2.get()) {
+			int targetAngle = -120;
+			System.out.println("Target Angle: " + targetAngle);
+			speed = sin(toRadians(targetAngle - currentAngle));
+		}else if(switch2.get() && !switch1.get()) {
+			int targetAngle = 120;
+			System.out.println("Target Angle: " + targetAngle);
+			speed = sin(toRadians(targetAngle - currentAngle));
+		}
+		speed *= 0.8;
 		if(speed > 0.35)
 			speed = 0.35;
 		if(speed < -0.35)

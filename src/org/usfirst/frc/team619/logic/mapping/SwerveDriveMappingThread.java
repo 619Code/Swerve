@@ -28,6 +28,7 @@ public class SwerveDriveMappingThread extends RobotThread {
     protected CANTalon climberMotor1, climberMotor2;
     protected CANTalon intakeMotor, outakeMotor;
     protected CANTalon gearMotor;
+    protected CANTalon gGearMotor;
     
     private boolean releasedSpeed;
     private double scalePercent;
@@ -44,7 +45,7 @@ public class SwerveDriveMappingThread extends RobotThread {
     
     public SwerveDriveMappingThread(DigitalInput switch1, DigitalInput switch2, AnalogUltrasonic leftUltrasonic, AnalogUltrasonic rightUltrasonic, 
     		CANTalon climberMotor1, CANTalon climberMotor2, CANTalon intakeMotor, CANTalon outakeMotor, 
-    		CANTalon gearMotor, PowerDistributionPanel pdp, SwerveDriveBase driveBase, 
+    		CANTalon gearMotor, CANTalon gGearMotor, PowerDistributionPanel pdp, SwerveDriveBase driveBase, 
     		DriverStation driverStation, int period, ThreadManager threadManager) {
         super(period, threadManager);
         this.pdp = pdp;
@@ -59,6 +60,7 @@ public class SwerveDriveMappingThread extends RobotThread {
         this.leftUltrasonic = leftUltrasonic;
         this.rightUltrasonic = rightUltrasonic;
         this.gearMotor = gearMotor;
+        this.gGearMotor = gGearMotor;
         
         driveBase.setDriftCompensation(true);
         driveBase.setDriftRange(1.5);
@@ -106,7 +108,6 @@ public class SwerveDriveMappingThread extends RobotThread {
 //		double tryThis=(2/3)*Math.pow(targetAngle-currentAngle, 2/3);
 //		System.out.println("-------------\n" + tryThis + "-------" + speed);
 		
-		int pov = driverStation.getRightController().getPOV();
         double xAxis = driverStation.getLeftController().getY(Hand.kRight);
         double yAxis = driverStation.getLeftController().getX(Hand.kRight);
         double zTurn = driverStation.getLeftController().getX(Hand.kLeft);
@@ -163,20 +164,13 @@ public class SwerveDriveMappingThread extends RobotThread {
         }
         
         //Robot movement
-        if(driverStation.getLeftController().getPOV() == 90) {
-        	ultraTurn();
-        }else if(driverStation.getLeftController().getBButton()) {
+        if(driverStation.getLeftController().getBButton()) {
         	driveBase.rotateWheel();
         } else if(driverStation.getLeftController().getYButton()) {
         	driveBase.autoZeroWheels();
         }else if(driverStation.getLeftController().getXButton()) {
-        	//start gear semi-auto
-        	driveBase.switchToGearCentric();
-        	gearLaunched = autoGear();
-        	if(gearLaunched)
-        		System.out.println("LAUNCH GEAR NOW");
-        	else
-        		System.out.println("ALIGNING ROBOT......");
+        	driveBase.switchToRobotCentric();
+        	previousCentric = ROBOT_CENTRIC;
         }else {
         	switch(previousCentric) {
         	case ROBOT_CENTRIC:
@@ -187,6 +181,7 @@ public class SwerveDriveMappingThread extends RobotThread {
         		break;
         	case GEAR_CENTRIC:
         		driveBase.switchToGearCentric();
+        		break;
         	}
         	
         	gearLaunched = false;
@@ -194,11 +189,8 @@ public class SwerveDriveMappingThread extends RobotThread {
         }
     	
         //right controller (manipulators)
+		int pov = driverStation.getRightController().getPOV();
         switch(pov) {
-        case -1:
-        	climberMotor1.set(0);
-        	climberMotor2.set(0);
-        	break;
         case 315:
         case 0:
         case 45:
@@ -260,11 +252,26 @@ public class SwerveDriveMappingThread extends RobotThread {
         	}else {
         		gearMotor.set(0);
         	}
+        }else if(driverStation.getRightController().getY(Hand.kRight) > 0.5){
+        	if(driverStation.getRightController().getStickButton(Hand.kRight)){
+        		gGearMotor.set(-0.3);
+        	}
+        	else{
+        		gGearMotor.set(-1);
+        	}
+        }else if(driverStation.getRightController().getY(Hand.kRight) < -0.5){
+        	if(driverStation.getRightController().getStickButton(Hand.kRight)){
+        		gGearMotor.set(0.3);  
+        	}
+        	else{
+        		gGearMotor.set(1);
+        	}
         }else {
         	jiggled = false;
         	jiggledBack = false;
         	outakeMotor.set(0);
         	gearMotor.set(0);
+        	gGearMotor.set(0);
         }
     }
     
